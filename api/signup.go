@@ -1,12 +1,13 @@
 package api
 
 import (
-	"2024_2_kotyari/custom_errors"
-	"2024_2_kotyari/db"
 	"encoding/json"
 	"errors"
 	"net/http"
 	"net/mail"
+
+	"2024_2_kotyari/custom_errors"
+	"2024_2_kotyari/db"
 )
 
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
@@ -18,8 +19,8 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var user db.User
-	err := json.NewDecoder(r.Body).Decode(&user)
+	var signupRequest signupApiRequest
+	err := json.NewDecoder(r.Body).Decode(&signupRequest)
 
 	if err != nil {
 		writeJSON(w, custom_errors.ErrorResponse{
@@ -29,7 +30,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = sanitizeParams(user)
+	err = sanitizeParams(signupRequest)
 	if err != nil {
 		writeJSON(w, custom_errors.ErrorResponse{
 			ErrorCode:    400,
@@ -38,7 +39,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = db.CreateUser(user)
+	err = db.CreateUser(signupRequest.Email, signupRequest.User)
 	if err != nil {
 		writeJSON(w, custom_errors.ErrorResponse{
 			ErrorCode:    500,
@@ -58,21 +59,21 @@ func writeJSON(w http.ResponseWriter, data any) {
 	}
 }
 
-func sanitizeParams(user db.User) error {
-	if len(user.Username) == 0 || len(user.Email) == 0 || len(user.Password) == 0 {
+func sanitizeParams(signupRequest signupApiRequest) error {
+	if len(signupRequest.Username) == 0 || len(signupRequest.Email) == 0 || len(signupRequest.Password) == 0 {
 		return errors.New("empty params")
 	}
 
-	if len(user.Username) < 3 || len(user.Username) > 20 {
+	if len(signupRequest.Username) < 3 || len(signupRequest.Username) > 20 {
 		return errors.New("wrong username format")
 	}
 
-	_, err := mail.ParseAddress(user.Email)
+	_, err := mail.ParseAddress(signupRequest.Email)
 	if err != nil {
 		return errors.New("wrong email format")
 	}
 
-	if len(user.Password) < 5 {
+	if len(signupRequest.Password) < 5 {
 		return errors.New("wrong password format")
 	}
 

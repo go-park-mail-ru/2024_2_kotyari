@@ -1,20 +1,18 @@
 package db
 
-import "errors"
-
-var (
-	users         = make(map[UserID]User)
-	userID UserID = 0
+import (
+	"errors"
 )
 
-func CreateUser(user User) error {
-	for _, u := range users {
-		if u.Username == user.Username {
-			return errors.New("user already exists")
-		}
+var (
+	users = make(map[string]User)
+)
+
+func CreateUser(email string, user User) error {
+	if _, ok := users[email]; ok {
+		return errors.New("user already exists")
 	}
 
-	users[userID] = user
-	userID++
+	users[email] = user
 	return nil
 }
