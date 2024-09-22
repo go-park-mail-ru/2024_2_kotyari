@@ -10,8 +10,8 @@ import (
 
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	var signupRequest signupApiRequest
-	err := json.NewDecoder(r.Body).Decode(&signupRequest)
 
+	err := json.NewDecoder(r.Body).Decode(&signupRequest)
 	if err != nil {
 		writeJSON(w, HTTPErrorResponse{
 			ErrorCode:    http.StatusBadRequest,
@@ -20,7 +20,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = sanitizeParams(signupRequest)
+	err = validateParams(signupRequest)
 	if err != nil {
 		writeJSON(w, HTTPErrorResponse{
 			ErrorCode:    http.StatusBadRequest,
@@ -49,7 +49,7 @@ func writeJSON(w http.ResponseWriter, data any) {
 	}
 }
 
-func sanitizeParams(signupRequest signupApiRequest) error {
+func validateParams(signupRequest signupApiRequest) error {
 	if len(signupRequest.Username) == 0 || len(signupRequest.Email) == 0 || len(signupRequest.Password) == 0 {
 		return ErrEmptyRequestParams
 	}

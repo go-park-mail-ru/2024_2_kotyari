@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
 )
 
@@ -112,5 +113,28 @@ func TestSignupHandler(t *testing.T) {
 		if rr.Code != http.StatusOK {
 			t.Errorf("Expexted status code: %v, got: %v", http.StatusOK, rr.Code)
 		}
+	})
+
+	t.Run("Test concurrent signups", func(t *testing.T) {
+		var wg sync.WaitGroup
+		requestStrings := []string{
+			`{"username":"testing","email":"test@test.com", "password":"testtest"}`,
+			`{"username":"testing","email":"test1@test.com", "password":"testtest"}`,
+			`{"username":"testing","email":"test2@test.com", "password":"testtest"}`,
+		}
+		for _, requestString := range requestStrings {
+			wg.Add(1)
+			go func(requestString string) {
+				defer wg.Done()
+				req := httptest.NewRequest("POST", "/signup", strings.NewReader(requestString))
+				rr := httptest.NewRecorder()
+				SignupHandler(rr, req)
+
+				if rr.Code != http.StatusOK {
+					t.Errorf("Expexted status code: %v, got: %v", http.StatusOK, rr.Code)
+				}
+			}(requestString)
+		}
+		wg.Wait()
 	})
 }
