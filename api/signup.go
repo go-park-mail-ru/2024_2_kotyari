@@ -6,13 +6,12 @@ import (
 	"net/http"
 	"net/mail"
 
-	"2024_2_kotyari/custom_errors"
 	"2024_2_kotyari/db"
 )
 
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		writeJSON(w, custom_errors.ErrorResponse{
+		writeJSON(w, HTTPErrorResponse{
 			ErrorCode:    405,
 			ErrorMessage: "method not allowed",
 		})
@@ -23,7 +22,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&signupRequest)
 
 	if err != nil {
-		writeJSON(w, custom_errors.ErrorResponse{
+		writeJSON(w, HTTPErrorResponse{
 			ErrorCode:    400,
 			ErrorMessage: "Invalid JSON format",
 		})
@@ -32,7 +31,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = sanitizeParams(signupRequest)
 	if err != nil {
-		writeJSON(w, custom_errors.ErrorResponse{
+		writeJSON(w, HTTPErrorResponse{
 			ErrorCode:    400,
 			ErrorMessage: err.Error(),
 		})
@@ -41,8 +40,8 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = db.CreateUser(signupRequest.Email, signupRequest.User)
 	if err != nil {
-		writeJSON(w, custom_errors.ErrorResponse{
-			ErrorCode:    500,
+		writeJSON(w, HTTPErrorResponse{
+			ErrorCode:    409,
 			ErrorMessage: err.Error(),
 		})
 		return
