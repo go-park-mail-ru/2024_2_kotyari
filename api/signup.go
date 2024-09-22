@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"net/mail"
 
@@ -10,21 +9,13 @@ import (
 )
 
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		writeJSON(w, HTTPErrorResponse{
-			ErrorCode:    405,
-			ErrorMessage: "method not allowed",
-		})
-		return
-	}
-
 	var signupRequest signupApiRequest
 	err := json.NewDecoder(r.Body).Decode(&signupRequest)
 
 	if err != nil {
 		writeJSON(w, HTTPErrorResponse{
-			ErrorCode:    400,
-			ErrorMessage: "Invalid JSON format",
+			ErrorCode:    http.StatusBadRequest,
+			ErrorMessage: ErrInvalidJSONFormat.Error(),
 		})
 		return
 	}
@@ -32,7 +23,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	err = sanitizeParams(signupRequest)
 	if err != nil {
 		writeJSON(w, HTTPErrorResponse{
-			ErrorCode:    400,
+			ErrorCode:    http.StatusBadRequest,
 			ErrorMessage: err.Error(),
 		})
 		return
@@ -41,7 +32,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	err = db.CreateUser(signupRequest.Email, signupRequest.User)
 	if err != nil {
 		writeJSON(w, HTTPErrorResponse{
-			ErrorCode:    409,
+			ErrorCode:    http.StatusConflict,
 			ErrorMessage: err.Error(),
 		})
 		return
@@ -60,20 +51,20 @@ func writeJSON(w http.ResponseWriter, data any) {
 
 func sanitizeParams(signupRequest signupApiRequest) error {
 	if len(signupRequest.Username) == 0 || len(signupRequest.Email) == 0 || len(signupRequest.Password) == 0 {
-		return errors.New("empty params")
+		return ErrEmptyRequestParams
 	}
 
 	if len(signupRequest.Username) < 3 || len(signupRequest.Username) > 20 {
-		return errors.New("wrong username format")
+		return ErrWrongUsernameFormat
 	}
 
 	_, err := mail.ParseAddress(signupRequest.Email)
 	if err != nil {
-		return errors.New("wrong email format")
+		return ErrWrongEmailFormat
 	}
 
 	if len(signupRequest.Password) < 5 {
-		return errors.New("wrong password format")
+		return ErrWrongPasswordFormat
 	}
 
 	return nil
