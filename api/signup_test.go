@@ -84,7 +84,7 @@ func TestSignupHandler(t *testing.T) {
 		}
 	})
 
-	t.Run("Test for empty params password format", func(t *testing.T) {
+	t.Run("Test for empty params", func(t *testing.T) {
 		req := httptest.NewRequest("POST", "/signup",
 			strings.NewReader(`{"username":"","email":"test@test.com", "password":"testtest"}`))
 		rr := httptest.NewRecorder()
