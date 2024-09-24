@@ -8,11 +8,15 @@ type HTTPErrorResponse struct {
 }
 
 var (
-	InvalidJSONFormat   = errors.New("invalid JSON format")
-	EmptyRequestParams  = errors.New("empty request params")
-	WrongUsernameFormat = errors.New("wrong username format")
-	WrongEmailFormat    = errors.New("wrong email format")
-	WrongPasswordFormat = errors.New("wrong password format")
-	UserAlreadyExists   = errors.New("user already exists")
-	InternalServerError = errors.New("internal server error")
+	InvalidJSONFormat       = errors.New("invalid JSON format")
+	InvalidUsernameFormat   = errors.New("wrong username format")
+	InvalidEmailFormat      = errors.New("wrong email format")
+	InvalidPasswordFormat   = errors.New("wrong password format")
+	UserAlreadyExists       = errors.New("user already exists")
+	InternalServerError     = errors.New("internal server error")
+	SessionCreationError    = errors.New("error creating session")
+	UnauthorizedCredentials = errors.New("wrong email or password")
+	SessionSaveError        = errors.New("error when saving session")
+	LogoutError             = errors.New("error when terminating session")
+	UnauthorizedMessage     = errors.New("not authorized")
 )
