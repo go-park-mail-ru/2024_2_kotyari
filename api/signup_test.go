@@ -7,6 +7,8 @@ import (
 	"strings"
 	"sync"
 	"testing"
+
+	"2024_2_kotyari/errs"
 )
 
 func TestSignupHandler(t *testing.T) {
@@ -16,15 +18,15 @@ func TestSignupHandler(t *testing.T) {
 		SignupHandler(rr, req)
 
 		res := rr.Result()
-		var httpError HTTPErrorResponse
+		var httpError errs.HTTPErrorResponse
 		err := json.NewDecoder(res.Body).Decode(&httpError)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if httpError.ErrorCode != http.StatusBadRequest || httpError.ErrorMessage != ErrInvalidJSONFormat.Error() {
+		if httpError.ErrorCode != http.StatusBadRequest || httpError.ErrorMessage != errs.InvalidJSONFormat.Error() {
 			t.Errorf("Expected error code %v , error message: %s, got error code: %v, error message: %s",
-				http.StatusBadRequest, ErrInvalidJSONFormat.Error(), httpError.ErrorCode, httpError.ErrorMessage)
+				http.StatusBadRequest, errs.InvalidJSONFormat.Error(), httpError.ErrorCode, httpError.ErrorMessage)
 		}
 	})
 
@@ -35,15 +37,15 @@ func TestSignupHandler(t *testing.T) {
 		SignupHandler(rr, req)
 
 		res := rr.Result()
-		var httpError HTTPErrorResponse
+		var httpError errs.HTTPErrorResponse
 		err := json.NewDecoder(res.Body).Decode(&httpError)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if httpError.ErrorCode != http.StatusBadRequest || httpError.ErrorMessage != ErrWrongUsernameFormat.Error() {
+		if httpError.ErrorCode != http.StatusBadRequest || httpError.ErrorMessage != errs.WrongUsernameFormat.Error() {
 			t.Errorf("Expected error code %v , error message: %s, got error code: %v, error message: %s",
-				http.StatusBadRequest, ErrWrongUsernameFormat.Error(), httpError.ErrorCode, httpError.ErrorMessage)
+				http.StatusBadRequest, errs.WrongUsernameFormat.Error(), httpError.ErrorCode, httpError.ErrorMessage)
 		}
 	})
 
@@ -54,15 +56,15 @@ func TestSignupHandler(t *testing.T) {
 		SignupHandler(rr, req)
 
 		res := rr.Result()
-		var httpError HTTPErrorResponse
+		var httpError errs.HTTPErrorResponse
 		err := json.NewDecoder(res.Body).Decode(&httpError)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if httpError.ErrorCode != http.StatusBadRequest || httpError.ErrorMessage != ErrWrongEmailFormat.Error() {
+		if httpError.ErrorCode != http.StatusBadRequest || httpError.ErrorMessage != errs.WrongEmailFormat.Error() {
 			t.Errorf("Expected error code %v , error message: %s, got error code: %v, error message: %s",
-				http.StatusBadRequest, ErrWrongEmailFormat.Error(), httpError.ErrorCode, httpError.ErrorMessage)
+				http.StatusBadRequest, errs.WrongEmailFormat.Error(), httpError.ErrorCode, httpError.ErrorMessage)
 		}
 	})
 
@@ -73,15 +75,15 @@ func TestSignupHandler(t *testing.T) {
 		SignupHandler(rr, req)
 
 		res := rr.Result()
-		var httpError HTTPErrorResponse
+		var httpError errs.HTTPErrorResponse
 		err := json.NewDecoder(res.Body).Decode(&httpError)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if httpError.ErrorCode != http.StatusBadRequest || httpError.ErrorMessage != ErrWrongPasswordFormat.Error() {
+		if httpError.ErrorCode != http.StatusBadRequest || httpError.ErrorMessage != errs.WrongPasswordFormat.Error() {
 			t.Errorf("Expected error code %v , error message: %s, got error code: %v, error message: %s",
-				http.StatusBadRequest, ErrWrongPasswordFormat.Error(), httpError.ErrorCode, httpError.ErrorMessage)
+				http.StatusBadRequest, errs.WrongPasswordFormat.Error(), httpError.ErrorCode, httpError.ErrorMessage)
 		}
 	})
 
@@ -92,15 +94,15 @@ func TestSignupHandler(t *testing.T) {
 		SignupHandler(rr, req)
 
 		res := rr.Result()
-		var httpError HTTPErrorResponse
+		var httpError errs.HTTPErrorResponse
 		err := json.NewDecoder(res.Body).Decode(&httpError)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if httpError.ErrorCode != http.StatusBadRequest || httpError.ErrorMessage != ErrEmptyRequestParams.Error() {
+		if httpError.ErrorCode != http.StatusBadRequest || httpError.ErrorMessage != errs.EmptyRequestParams.Error() {
 			t.Errorf("Expected error code %v , error message: %s, got error code: %v, error message: %s",
-				http.StatusBadRequest, ErrEmptyRequestParams.Error(), httpError.ErrorCode, httpError.ErrorMessage)
+				http.StatusBadRequest, errs.EmptyRequestParams.Error(), httpError.ErrorCode, httpError.ErrorMessage)
 		}
 	})
 

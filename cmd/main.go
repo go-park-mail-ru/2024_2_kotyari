@@ -13,7 +13,7 @@ import (
 )
 
 // @title Swagger Oxic API
-// @description This is a sample oxic server
+// @description This is simple oxic server
 
 // @host oxic.swagger.io
 // @BasePath /

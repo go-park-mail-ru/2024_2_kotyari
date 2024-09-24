@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+
+	"2024_2_kotyari/errs"
 )
 
 func TestCreateUser(t *testing.T) {
@@ -26,7 +28,7 @@ func TestCreateUser(t *testing.T) {
 				Username: "user1",
 				Password: "pass1",
 			},
-			ErrUserAlreadyExists,
+			errs.UserAlreadyExists,
 		},
 		{
 			"test1@test.com",
@@ -50,7 +52,7 @@ func TestCreateUser(t *testing.T) {
 				Username: "user1",
 				Password: "pass1",
 			},
-			ErrUserAlreadyExists,
+			errs.UserAlreadyExists,
 		},
 	}
 
