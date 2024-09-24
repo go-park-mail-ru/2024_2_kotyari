@@ -10,16 +10,16 @@ import (
 )
 
 // respondWithError отправляет JSON ответ с ошибкой и устанавливает код статуса HTTP
-func respondWithError(w http.ResponseWriter, code int, message string) {
-	w.WriteHeader(code) // Устанавливаем HTTP статус-код
-	writeJSON(w, HTTPErrorResponse{
+func respondWithError(w *http.ResponseWriter, code int, message string) {
+	(*w).WriteHeader(code) // Устанавливаем HTTP статус-код
+	writeJSON(*w, HTTPErrorResponse{
 		ErrorCode:    code,
 		ErrorMessage: message,
 	})
 }
 
 // validateCredentials проверяет учетные данные пользователя
-func validateCredentials(w http.ResponseWriter, creds db.User) bool {
+func validateCredentials(w *http.ResponseWriter, creds db.User) bool {
 	if !isValidEmail(creds.Email) {
 		respondWithError(w, http.StatusBadRequest, ErrInvalidEmailFormat.Error())
 		return false
@@ -35,37 +35,37 @@ func validateCredentials(w http.ResponseWriter, creds db.User) bool {
 // LoginHandler обрабатывает запросы на вход
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		respondWithError(w, http.StatusMethodNotAllowed, ErrMethodNotAllowed.Error())
+		respondWithError(&w, http.StatusMethodNotAllowed, ErrMethodNotAllowed.Error())
 		return
 	}
 
 	var creds db.User
 	err := json.NewDecoder(r.Body).Decode(&creds)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, ErrInvalidJSONFormat.Error())
+		respondWithError(&w, http.StatusBadRequest, ErrInvalidJSONFormat.Error())
 		return
 	}
 
-	if !validateCredentials(w, creds) {
+	if !validateCredentials(&w, creds) {
 		return
 	}
 
 	user, exists := db.GetUserByEmail(creds.Email)
 	if !exists || user.Password != creds.Password {
-		respondWithError(w, http.StatusUnauthorized, ErrUnauthorizedCredentials.Error())
+		respondWithError(&w, http.StatusUnauthorized, ErrUnauthorizedCredentials.Error())
 		return
 	}
 
 	session, err := sessions.GetSession(r, config.SessionName)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, ErrSessionCreationError.Error())
+		respondWithError(&w, http.StatusInternalServerError, ErrSessionCreationError.Error())
 		return
 	}
 
 	session.Values["user_id"] = creds.Email
 	err = sessions.SaveSession(r, w, session)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, ErrSessionSaveError.Error())
+		respondWithError(&w, http.StatusInternalServerError, ErrSessionSaveError.Error())
 		return
 	}
 
