@@ -1,0 +1,73 @@
+basePath: /
+definitions:
+  db.User:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+host: oxic.swagger.io
+info:
+  contact: {}
+  description: This is a sample oxic server
+  title: Swagger Oxic API
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Проверяет учетные данные пользователя и создает сессию при успешной
+        аутентификации
+      parameters:
+      - description: Данные пользователя
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/db.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный вход
+          schema:
+            type: string
+        "400":
+          description: Неправильный запрос
+          schema:
+            type: string
+        "401":
+          description: Неправильные учетные данные
+          schema:
+            type: string
+        "500":
+          description: Ошибка при создании сессии
+          schema:
+            type: string
+      summary: Логин пользователя
+      tags:
+      - auth
+  /logout:
+    post:
+      description: Завершает сессию пользователя, очищая куки и удаляя все значения
+        из сессии
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Вы успешно вышли
+          schema:
+            type: string
+        "401":
+          description: Пользователь не авторизован
+          schema:
+            type: string
+        "500":
+          description: Ошибка при завершении сессии
+          schema:
+            type: string
+      summary: Логаут пользователя
+      tags:
+      - auth
+swagger: "2.0"
