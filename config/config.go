@@ -1,24 +1,33 @@
 package config
 
 import (
-	"github.com/joho/godotenv"
-	"log"
-	"os"
+	"fmt"
+
+	"github.com/caarlos0/env"
 )
 
-var (
-	ServerAddress string // Адрес сервера из переменной окружения
-	SessionKey    string // Ключ сессии из переменной окружения
-	SessionName   string // Имя сессии из переменной окружения
-)
+type Config struct {
+	SessionKey    string `env:"SESSION_KEY"`    // Ключ сессии из переменной окружения
+	SessionName   string `env:"SESSION_NAME"`   // Имя сессии из переменной окружения
+	ServerAddress string `env:"SERVER_ADDRESS"` // Адрес сервера из переменной окружения
+}
 
-func init() {
-	// Загружаем переменные окружения из файла .env
-	err := godotenv.Load()
+var Cfg Config
+
+func Init() error {
+	err := env.Parse(&Cfg)
 	if err != nil {
-		log.Println("Ошибка загрузки файла .env:", err)
+		return fmt.Errorf("error parsing environment variables: %w", err)
 	}
-	ServerAddress = os.Getenv("SERVER_ADDRESS") // Адрес сервера из переменной окружения
-	SessionKey = os.Getenv("SESSION_KEY")       // Ключ сессии из переменной окружения
-	SessionName = os.Getenv("SESSION_NAME")
+
+	fmt.Printf("ServerAddress: %s\n", Cfg.ServerAddress)
+	return nil
+}
+
+func GetServerAddress() string {
+	return Cfg.ServerAddress
+}
+
+func GetSessionName() string {
+	return Cfg.SessionName
 }

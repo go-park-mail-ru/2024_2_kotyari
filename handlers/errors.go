@@ -8,15 +8,12 @@ type HTTPErrorResponse struct {
 }
 
 var (
-	ErrInvalidJSONFormat       = errors.New("неверный формат JSON")
-	ErrMethodNotAllowed        = errors.New("метод не разрешен")
-	ErrInvalidEmailFormat      = errors.New("неверный формат email")
-	ErrInvalidPasswordFormat   = errors.New("пароль должен содержать минимум 8 символов, одну цифру и одну заглавную букву")
-	ErrUnauthorizedCredentials = errors.New("неправильная почта или пароль")
-	ErrSessionCreationError    = errors.New("ошибка при создании сессии")
-	ErrSessionSaveError        = errors.New("ошибка при сохранении сессии")
-	ErrSessionRetrievalError   = errors.New("ошибка при получении сессии")
-	ErrLogoutError             = errors.New("ошибка при завершении сессии")
-	ErrInternalServerError     = errors.New("внутренняя ошибка сервера")
-	ErrUnauthorizedMessage     = "Не авторизован"
+	ErrInvalidEmailFormat      = errors.New("Incorrect format of email")
+	ErrInvalidPasswordFormat   = errors.New("Password must include uppercase, lowercase, number, and special character @$%*?&#.")
+	ErrUnauthorizedCredentials = errors.New("Wrong email or password")
+	ErrSessionCreationError    = errors.New("Error creating session")
+	ErrSessionSaveError        = errors.New("Error when saving session")
+	ErrLogoutError             = errors.New("Error when terminating session")
+	ErrInternalServerError     = errors.New("Internal Server Error")
+	ErrUnauthorizedMessage     = errors.New("Not authorized")
 )

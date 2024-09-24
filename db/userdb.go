@@ -4,7 +4,7 @@ import "sync"
 
 // User представляет пользователя в системе
 type User struct {
-	Email    string `json:"email"`
+	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
@@ -15,8 +15,8 @@ type UserDB struct {
 
 var userDB = UserDB{
 	users: map[string]User{
-		"user@example.com":  {Email: "user@example.com", Password: "Password123"},
-		"user1@example.com": {Email: "user1@example.com", Password: "Password124"},
+		"user@example.com":  {Username: "Gosha", Password: "Password123@"},
+		"user1@example.com": {Username: "Igor", Password: "Password124@"},
 	},
 }
 
