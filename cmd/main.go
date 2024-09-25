@@ -30,8 +30,9 @@ func main() {
 
 	r := mux.NewRouter()
 
-	r.HandleFunc("/login", server.LoginHandler).Methods("POST")
-	r.HandleFunc("/logout", server.LogoutHandler).Methods("POST")
+	r.HandleFunc("/login", server.LoginHandler).Methods(http.MethodPost)
+	r.HandleFunc("/logout", server.LogoutHandler).Methods(http.MethodPost)
+	r.HandleFunc("/signup", server.SignupHandler).Methods(http.MethodPost)
 
 	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 

@@ -1,10 +1,12 @@
 package handlers
 
 import (
-	"2024_2_kotyari/db"
-	"2024_2_kotyari/errs"
 	"encoding/json"
 	"net/http"
+
+	"2024_2_kotyari/config"
+	"2024_2_kotyari/db"
+	"2024_2_kotyari/errs"
 )
 
 // SignupHandler handles user signup requests
@@ -19,37 +21,61 @@ import (
 // @Failure      409   {object}  errs.HTTPErrorResponse "User already exists"
 // @Failure      500   {object}  errs.HTTPErrorResponse "Internal server error"
 // @Router       /signup [post]
-func SignupHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	var signupRequest credsApiRequest
 
 	err := json.NewDecoder(r.Body).Decode(&signupRequest)
 	if err != nil {
-		writeJSON(w, errs.HTTPErrorResponse{
+		writeJSON(w, http.StatusBadRequest, errs.HTTPErrorResponse{
 			ErrorCode:    http.StatusBadRequest,
 			ErrorMessage: errs.InvalidJSONFormat.Error(),
 		})
 		return
 	}
-	if !validateCredentials(&w, signupRequest) {
+	if !validateCredentials(&w, signupRequest, true) {
 		return
 	}
 
 	err = db.CreateUser(signupRequest.Email, signupRequest.User)
 	if err != nil {
-		writeJSON(w, errs.HTTPErrorResponse{
+		writeJSON(w, http.StatusConflict, errs.HTTPErrorResponse{
 			ErrorCode:    http.StatusConflict,
 			ErrorMessage: err.Error(),
 		})
 		return
 	}
 
-	writeJSON(w, http.StatusOK)
+	session, err := s.sessions.Get(r, config.GetSessionName())
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
+			ErrorCode:    http.StatusInternalServerError,
+			ErrorMessage: errs.SessionCreationError.Error(),
+		})
+		return
+	}
+	session.Values["user_id"] = signupRequest.Email
+	session.Options.MaxAge = 3600 * 10
+	session.Options.HttpOnly = true
+
+	err = s.sessions.Save(r, w, session)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
+			ErrorCode:    http.StatusInternalServerError,
+			ErrorMessage: errs.SessionSaveError.Error(),
+		})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, nil)
 }
 
-func writeJSON(w http.ResponseWriter, data any) {
+func writeJSON(w http.ResponseWriter, headerStatusCode int, data any) {
 	w.Header().Set("Content-Type", "application/json")
-	err := json.NewEncoder(w).Encode(data)
-	if err != nil {
-		http.Error(w, errs.InternalServerError.Error(), http.StatusInternalServerError)
+	w.WriteHeader(headerStatusCode)
+	if data != nil {
+		err := json.NewEncoder(w).Encode(data)
+		if err != nil {
+			http.Error(w, errs.InternalServerError.Error(), http.StatusInternalServerError)
+		}
 	}
 }
