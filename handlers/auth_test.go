@@ -3,7 +3,6 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
-	"io"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -14,34 +13,34 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var testUser = loginApiRequest{
+var testUser = credsApiRequest{
 	Email: "user@example.com",
 	User: db.User{
-		Username: "Gosha",
+		Username: "Goshanchik",
 		Password: "Password123@",
 	},
 }
 
-var testUserIncorrectEmail = loginApiRequest{
+var testUserIncorrectEmail = credsApiRequest{
 	Email: "user1example.ru",
 	User: db.User{
-		Username: "Gosha",
+		Username: "Goshanchik",
 		Password: "Password123@",
 	},
 }
 
-var testUserIncorrectPass = loginApiRequest{
+var testUserIncorrectPass = credsApiRequest{
 	Email: "user1@example.ru",
 	User: db.User{
-		Username: "Gosha",
+		Username: "Goshanchik",
 		Password: "password123",
 	},
 }
 
-var testUserNotFound = loginApiRequest{
+var testUserNotFound = credsApiRequest{
 	Email: "notfound@example.com",
 	User: db.User{
-		Username: "Goshan",
+		Username: "Goshanchik",
 		Password: "Password123@",
 	},
 }
@@ -58,7 +57,7 @@ func TestLoginHandler(t *testing.T) {
 	tests := []struct {
 		name       string
 		method     string
-		body       loginApiRequest
+		body       credsApiRequest
 		wantStatus int
 	}{
 		{
@@ -97,15 +96,9 @@ func TestLoginHandler(t *testing.T) {
 			server.LoginHandler(w, req)
 
 			res := w.Result()
-			defer res.Body.Close()
 
-			// для дальнейшей отладки
-			bodyBytes, _ := io.ReadAll(res.Body)
-			bodyString := string(bodyBytes)
-
-			// Проверка кода ответа
 			if res.StatusCode != tt.wantStatus {
-				t.Errorf("Ожидалось %v, получено %v. Ответ сервера: %v", tt.wantStatus, res.StatusCode, bodyString)
+				t.Errorf("Expected status %v, got %v", tt.wantStatus, res.StatusCode)
 			}
 		})
 	}
@@ -120,7 +113,7 @@ func TestLogoutHandler(t *testing.T) {
 	server.LogoutHandler(w, req)
 
 	res := w.Result()
-	if res.StatusCode != http.StatusOK {
+	if res.StatusCode != http.StatusNoContent {
 		t.Errorf("Ожидалось 200, имеем %v", res.StatusCode)
 	}
 }

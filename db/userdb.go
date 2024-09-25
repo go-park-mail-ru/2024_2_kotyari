@@ -14,10 +14,8 @@ type UserDB struct {
 }
 
 var userDB = UserDB{
-	users: map[string]User{
-		"user@example.com":  {Username: "Gosha", Password: "Password123@"},
-		"user1@example.com": {Username: "Igor", Password: "Password124@"},
-	},
+	users: map[string]User{"user@example.com": {Username: "Goshanchik", Password: "Password123@"},
+		"user1@example.com": {Username: "Igorechik", Password: "Password124@"}},
 }
 
 // GetUserByEmail возвращает пользователя по email

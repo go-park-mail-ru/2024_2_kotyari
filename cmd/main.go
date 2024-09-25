@@ -13,13 +13,13 @@ import (
 )
 
 // @title Swagger Oxic API
-// @description This is a sample oxic server
+// @description This is simple oxic server
 
 // @host oxic.swagger.io
 // @BasePath /
 func main() {
 
-	err := godotenv.Load("../.env")
+	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal("Error loading .env file", err.Error())
 		return
@@ -30,8 +30,9 @@ func main() {
 
 	r := mux.NewRouter()
 
-	r.HandleFunc("/login", server.LoginHandler).Methods("POST")
-	r.HandleFunc("/logout", server.LogoutHandler).Methods("POST")
+	r.HandleFunc("/login", server.LoginHandler).Methods(http.MethodPost)
+	r.HandleFunc("/logout", server.LogoutHandler).Methods(http.MethodPost)
+	r.HandleFunc("/signup", server.SignupHandler).Methods(http.MethodPost)
 
 	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 

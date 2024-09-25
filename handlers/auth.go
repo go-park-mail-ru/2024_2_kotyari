@@ -2,33 +2,41 @@ package handlers
 
 import (
 	"encoding/json"
-	"log"
+	"github.com/gorilla/sessions"
 	"net/http"
 
 	"2024_2_kotyari/config"
 	"2024_2_kotyari/db"
-	"github.com/gorilla/sessions"
+	"2024_2_kotyari/errs"
 )
 
-// respondWithError отправляет JSON ответ с ошибкой и устанавливает код статуса HTTP
-func respondWithError(w *http.ResponseWriter, code int, message string) {
-	(*w).WriteHeader(code) // Устанавливаем HTTP статус-код
-	writeJSON(*w, HTTPErrorResponse{
-		ErrorCode:    code,
-		ErrorMessage: message,
-	})
-}
-
 // validateCredentials проверяет учетные данные пользователя
-func validateCredentials(w *http.ResponseWriter, creds loginApiRequest) bool {
+func validateCredentials(w *http.ResponseWriter, creds credsApiRequest, requireUsername bool) bool {
 	switch {
 	case !isValidEmail(creds.Email):
-		respondWithError(w, http.StatusBadRequest, ErrInvalidEmailFormat.Error())
+		writeJSON(*w, http.StatusBadRequest, errs.HTTPErrorResponse{
+			ErrorCode:    http.StatusBadRequest,
+			ErrorMessage: errs.InvalidEmailFormat.Error(),
+		})
 		return false
 	case !isValidPassword(creds.Password):
-		respondWithError(w, http.StatusBadRequest, ErrInvalidPasswordFormat.Error())
+		writeJSON(*w, http.StatusBadRequest, errs.HTTPErrorResponse{
+			ErrorCode:    http.StatusBadRequest,
+			ErrorMessage: errs.InvalidPasswordFormat.Error(),
+		})
 		return false
 	}
+
+	if requireUsername {
+		if !isValidUsername(creds.Username) {
+			writeJSON(*w, http.StatusBadRequest, errs.HTTPErrorResponse{
+				ErrorCode:    http.StatusBadRequest,
+				ErrorMessage: errs.InvalidUsernameFormat.Error(),
+			})
+			return false
+		}
+	}
+
 	return true
 }
 
@@ -55,39 +63,56 @@ func NewServer(cfg *config.Config) *Server {
 // @Failure 500 {string} string "Ошибка при создании сессии"
 // @Router /login [post]
 func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) {
-	var creds loginApiRequest
-	err := json.NewDecoder(r.Body).Decode(&creds)
+	var creds credsApiRequest
+	session, err := s.sessions.Get(r, config.GetSessionName())
 	if err != nil {
-		respondWithError(&w, http.StatusInternalServerError, ErrInternalServerError.Error())
+		writeJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
+			ErrorCode:    http.StatusInternalServerError,
+			ErrorMessage: errs.SessionCreationError.Error(),
+		})
+		return
+	}
+	if email, isAuthenticated := session.Values["user_id"].(string); isAuthenticated {
+		user, _ := db.GetUserByEmail(email)
+		writeJSON(w, http.StatusOK, struct {
+			Code     int
+			Username string
+		}{
+			Code:     http.StatusOK,
+			Username: user.Username,
+		})
 		return
 	}
 
-	if !validateCredentials(&w, creds) {
+	err = json.NewDecoder(r.Body).Decode(&creds)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
+			ErrorCode:    http.StatusInternalServerError,
+			ErrorMessage: errs.InternalServerError.Error(),
+		})
+		return
+	}
+
+	if !validateCredentials(&w, creds, false) {
 		return
 	}
 
 	user, exists := db.GetUserByEmail(creds.Email)
 	if !exists || user.Password != creds.Password {
-		respondWithError(&w, http.StatusUnauthorized, ErrUnauthorizedCredentials.Error())
+		writeJSON(w, http.StatusUnauthorized, errs.HTTPErrorResponse{
+			ErrorCode:    http.StatusUnauthorized,
+			ErrorMessage: errs.UnauthorizedCredentials.Error(),
+		})
 		return
 	}
 
-	session, err := s.sessions.Get(r, config.GetSessionName())
-	if err != nil {
-		respondWithError(&w, http.StatusInternalServerError, ErrSessionCreationError.Error())
-		return
-	}
-
-	session.Values["user_id"] = creds.Email
-	err = s.sessions.Save(r, w, session)
-	if err != nil {
-		log.Printf("error saving session: %v", err)
-		log.Println("sessions: ", session)
-		respondWithError(&w, http.StatusInternalServerError, ErrSessionSaveError.Error())
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
+	writeJSON(w, http.StatusOK, struct {
+		Code     int
+		Username string
+	}{
+		Code:     http.StatusOK,
+		Username: user.Username,
+	})
 }
 
 // LogoutHandler очищает куки и завершает сессию
@@ -103,7 +128,7 @@ func (s *Server) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	// Получаем сессию из запроса
 	session, err := s.sessions.Get(r, config.GetSessionName())
 	if err != nil {
-		http.Error(w, ErrUnauthorizedMessage.Error(), http.StatusUnauthorized)
+		http.Error(w, errs.UnauthorizedMessage.Error(), http.StatusUnauthorized)
 		return
 	}
 	// Очищаем значения сессии, создавая новую пустую мапу
@@ -115,17 +140,8 @@ func (s *Server) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	// Сохраняем изменения сессии
 	err = s.sessions.Save(r, w, session)
 	if err != nil {
-		http.Error(w, ErrLogoutError.Error(), http.StatusInternalServerError)
+		http.Error(w, errs.LogoutError.Error(), http.StatusInternalServerError)
 		return
 	}
-}
-
-// writeJSON отправляет JSON ответ
-func writeJSON(w http.ResponseWriter, data interface{}) {
-	w.Header().Set("Content-Type", "application/json")
-	err := json.NewEncoder(w).Encode(data)
-	if err != nil {
-		http.Error(w, ErrInternalServerError.Error(), http.StatusInternalServerError)
-	}
-
+	writeJSON(w, http.StatusNoContent, nil)
 }

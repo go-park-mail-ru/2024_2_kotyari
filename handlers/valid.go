@@ -13,6 +13,10 @@ func isValidEmail(email string) bool {
 	return re.MatchString(email)
 }
 
+func isValidUsername(username string) bool {
+	return len(username) > 5 && len(username) < 20
+}
+
 func isInGroup(char rune, group string) bool {
 	return strings.ContainsRune(group, char)
 }
