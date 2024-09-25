@@ -1,36 +1,42 @@
 package handlers
 
 import (
+	"encoding/json"
+	"github.com/gorilla/sessions"
+	"net/http"
+
 	"2024_2_kotyari/config"
 	"2024_2_kotyari/db"
 	"2024_2_kotyari/errs"
-	"encoding/json"
-	"github.com/gorilla/sessions"
-	"log"
-	"net/http"
 )
 
 // validateCredentials проверяет учетные данные пользователя
-func validateCredentials(w *http.ResponseWriter, creds credsApiRequest) bool {
+func validateCredentials(w *http.ResponseWriter, creds credsApiRequest, requireUsername bool) bool {
 	switch {
 	case !isValidEmail(creds.Email):
-		writeJSON(*w, errs.HTTPErrorResponse{
+		writeJSON(*w, http.StatusBadRequest, errs.HTTPErrorResponse{
 			ErrorCode:    http.StatusBadRequest,
 			ErrorMessage: errs.InvalidEmailFormat.Error(),
 		})
 		return false
 	case !isValidPassword(creds.Password):
-		writeJSON(*w, errs.HTTPErrorResponse{
+		writeJSON(*w, http.StatusBadRequest, errs.HTTPErrorResponse{
 			ErrorCode:    http.StatusBadRequest,
 			ErrorMessage: errs.InvalidPasswordFormat.Error(),
 		})
 		return false
-	case !isValidUsername(creds.Username):
-		writeJSON(*w, errs.HTTPErrorResponse{
-			ErrorCode:    http.StatusBadRequest,
-			ErrorMessage: errs.InvalidUsernameFormat.Error(),
-		})
 	}
+
+	if requireUsername {
+		if !isValidUsername(creds.Username) {
+			writeJSON(*w, http.StatusBadRequest, errs.HTTPErrorResponse{
+				ErrorCode:    http.StatusBadRequest,
+				ErrorMessage: errs.InvalidUsernameFormat.Error(),
+			})
+			return false
+		}
+	}
+
 	return true
 }
 
@@ -58,52 +64,55 @@ func NewServer(cfg *config.Config) *Server {
 // @Router /login [post]
 func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var creds credsApiRequest
-	err := json.NewDecoder(r.Body).Decode(&creds)
+	session, err := s.sessions.Get(r, config.GetSessionName())
 	if err != nil {
-		writeJSON(w, errs.HTTPErrorResponse{
+		writeJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
+			ErrorCode:    http.StatusInternalServerError,
+			ErrorMessage: errs.SessionCreationError.Error(),
+		})
+		return
+	}
+	if email, isAuthenticated := session.Values["user_id"].(string); isAuthenticated {
+		user, _ := db.GetUserByEmail(email)
+		writeJSON(w, http.StatusOK, struct {
+			Code     int
+			Username string
+		}{
+			Code:     http.StatusOK,
+			Username: user.Username,
+		})
+		return
+	}
+
+	err = json.NewDecoder(r.Body).Decode(&creds)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
 			ErrorCode:    http.StatusInternalServerError,
 			ErrorMessage: errs.InternalServerError.Error(),
 		})
 		return
 	}
 
-	if !validateCredentials(&w, creds) {
+	if !validateCredentials(&w, creds, false) {
 		return
 	}
 
 	user, exists := db.GetUserByEmail(creds.Email)
 	if !exists || user.Password != creds.Password {
-		writeJSON(w, errs.HTTPErrorResponse{
+		writeJSON(w, http.StatusUnauthorized, errs.HTTPErrorResponse{
 			ErrorCode:    http.StatusUnauthorized,
 			ErrorMessage: errs.UnauthorizedCredentials.Error(),
 		})
 		return
 	}
 
-	session, err := s.sessions.Get(r, config.GetSessionName())
-	if err != nil {
-		writeJSON(w, errs.HTTPErrorResponse{
-			ErrorCode:    http.StatusInternalServerError,
-			ErrorMessage: errs.SessionCreationError.Error(),
-		})
-		return
-	}
-
-	session.Values["user_id"] = creds.Email
-	err = s.sessions.Save(r, w, session)
-	if err != nil {
-		log.Printf("error saving session: %v", err)
-		log.Println("sessions: ", session)
-		writeJSON(w, errs.HTTPErrorResponse{
-			ErrorCode:    http.StatusInternalServerError,
-			ErrorMessage: errs.SessionSaveError.Error(),
-		})
-		return
-	}
-
-	/// TODO: Исправить логику writeJSON
-	writeJSON(w, http.StatusOK)
-	w.WriteHeader(http.StatusOK)
+	writeJSON(w, http.StatusOK, struct {
+		Code     int
+		Username string
+	}{
+		Code:     http.StatusOK,
+		Username: user.Username,
+	})
 }
 
 // LogoutHandler очищает куки и завершает сессию
@@ -134,4 +143,5 @@ func (s *Server) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, errs.LogoutError.Error(), http.StatusInternalServerError)
 		return
 	}
+	writeJSON(w, http.StatusNoContent, nil)
 }

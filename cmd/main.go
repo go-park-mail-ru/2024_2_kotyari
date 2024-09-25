@@ -2,23 +2,25 @@ package main
 
 import (
 	"fmt"
-	httpSwagger "github.com/swaggo/http-swagger"
 	"log"
 	"net/http"
 
+	httpSwagger "github.com/swaggo/http-swagger"
+
 	"2024_2_kotyari/config"
 	"2024_2_kotyari/handlers"
+
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
 
 // @title Swagger Oxic API
+// @version 1.0
 // @description This is simple oxic server
 
 // @host oxic.swagger.io
 // @BasePath /
 func main() {
-
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal("Error loading .env file", err.Error())
@@ -30,8 +32,11 @@ func main() {
 
 	r := mux.NewRouter()
 
-	r.HandleFunc("/login", server.LoginHandler).Methods("POST")
-	r.HandleFunc("/logout", server.LogoutHandler).Methods("POST")
+	r.HandleFunc("/login", server.LoginHandler).Methods(http.MethodPost)
+	r.HandleFunc("/logout", server.LogoutHandler).Methods(http.MethodPost)
+	r.HandleFunc("/signup", server.SignupHandler).Methods(http.MethodPost)
+	r.HandleFunc("/catalog/products", handlers.ProductsHandler).Methods("GET")
+	r.HandleFunc("/catalog/product/{id}", handlers.ProductByIDHandler).Methods("GET")
 
 	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 

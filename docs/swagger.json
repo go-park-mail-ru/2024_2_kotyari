@@ -3,11 +3,82 @@
     "info": {
         "description": "This is simple oxic server",
         "title": "Swagger Oxic API",
-        "contact": {}
+        "contact": {},
+        "version": "1.0"
     },
     "host": "oxic.swagger.io",
     "basePath": "/",
     "paths": {
+        "/catalog/product/{id}": {
+            "get": {
+                "description": "Возвращает продукт по его ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Get Product by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/db.Product"
+                        }
+                    },
+                    "404": {
+                        "description": "Продукт не найден",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка при кодировании JSON",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/catalog/products": {
+            "get": {
+                "description": "Возвращает список всех продуктов",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Get Products",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "$ref": "#/definitions/db.Product"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка при кодировании JSON",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/login": {
             "post": {
                 "description": "Проверяет учетные данные пользователя и создает сессию при успешной аутентификации",
@@ -146,6 +217,38 @@
         }
     },
     "definitions": {
+        "db.Product": {
+            "type": "object",
+            "properties": {
+                "currency": {
+                    "description": "Поле не обязательно",
+                    "type": "string"
+                },
+                "currentPrice": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "discount": {
+                    "description": "Поле не обязательно",
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "oldPrice": {
+                    "description": "Поле не обязательно",
+                    "type": "string"
+                },
+                "shortDescription": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "db.User": {
             "type": "object",
             "properties": {

@@ -20,7 +20,6 @@ func Init() error {
 		return fmt.Errorf("error parsing environment variables: %w", err)
 	}
 
-	fmt.Printf("ServerAddress: %s\n", Cfg.ServerAddress)
 	return nil
 }
 

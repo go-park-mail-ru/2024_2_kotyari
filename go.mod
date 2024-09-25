@@ -1,8 +1,6 @@
 module 2024_2_kotyari
 
-go 1.23
-
-toolchain go1.23.1
+go 1.23.1
 
 require (
 	github.com/caarlos0/env v3.5.0+incompatible

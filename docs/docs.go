@@ -15,6 +15,76 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/catalog/product/{id}": {
+            "get": {
+                "description": "Возвращает продукт по его ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Get Product by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/db.Product"
+                        }
+                    },
+                    "404": {
+                        "description": "Продукт не найден",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка при кодировании JSON",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/catalog/products": {
+            "get": {
+                "description": "Возвращает список всех продуктов",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Get Products",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "$ref": "#/definitions/db.Product"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка при кодировании JSON",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/login": {
             "post": {
                 "description": "Проверяет учетные данные пользователя и создает сессию при успешной аутентификации",
@@ -153,6 +223,38 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "db.Product": {
+            "type": "object",
+            "properties": {
+                "currency": {
+                    "description": "Поле не обязательно",
+                    "type": "string"
+                },
+                "currentPrice": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "discount": {
+                    "description": "Поле не обязательно",
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "oldPrice": {
+                    "description": "Поле не обязательно",
+                    "type": "string"
+                },
+                "shortDescription": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "db.User": {
             "type": "object",
             "properties": {
@@ -194,7 +296,7 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
+	Version:          "1.0",
 	Host:             "oxic.swagger.io",
 	BasePath:         "/",
 	Schemes:          []string{},

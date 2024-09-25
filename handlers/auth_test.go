@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"2024_2_kotyari/errs"
 	"bytes"
 	"encoding/json"
 	"log"
@@ -98,25 +97,8 @@ func TestLoginHandler(t *testing.T) {
 
 			res := w.Result()
 
-			/// TODO: Поменять логику writeJSON
-			if res.StatusCode == http.StatusOK && tt.wantStatus == http.StatusOK {
-				t.Skip("200")
-			}
-
-			var httpError errs.HTTPErrorResponse
-			err = json.NewDecoder(res.Body).Decode(&httpError)
-			if err != nil {
-				t.Fatal(err)
-			}
-			defer res.Body.Close()
-
-			//// для дальнейшей отладки
-			//bodyBytes, _ := io.ReadAll(res.Body)
-			//bodyString := string(bodyBytes)
-
-			//Проверка кода ответа
-			if httpError.ErrorCode != tt.wantStatus {
-				t.Errorf("Ожидалось %v, получено %v. Ответ сервера: %v", tt.wantStatus, httpError.ErrorCode, httpError.ErrorMessage)
+			if res.StatusCode != tt.wantStatus {
+				t.Errorf("Expected status %v, got %v", tt.wantStatus, res.StatusCode)
 			}
 		})
 	}
@@ -131,7 +113,7 @@ func TestLogoutHandler(t *testing.T) {
 	server.LogoutHandler(w, req)
 
 	res := w.Result()
-	if res.StatusCode != http.StatusOK {
+	if res.StatusCode != http.StatusNoContent {
 		t.Errorf("Ожидалось 200, имеем %v", res.StatusCode)
 	}
 }
