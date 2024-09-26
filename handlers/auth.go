@@ -1,13 +1,16 @@
 package handlers
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"encoding/json"
-	"github.com/gorilla/sessions"
 	"net/http"
 
 	"2024_2_kotyari/config"
 	"2024_2_kotyari/db"
 	"2024_2_kotyari/errs"
+	"github.com/gorilla/sessions"
+	"golang.org/x/crypto/argon2"
 )
 
 // validateCredentials проверяет учетные данные пользователя
@@ -98,7 +101,7 @@ func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, exists := db.GetUserByEmail(creds.Email)
-	if !exists || user.Password != creds.Password {
+	if !exists || !verifyPassword(user.PasswordHash, creds.Password) {
 		writeJSON(w, http.StatusUnauthorized, errs.HTTPErrorResponse{
 			ErrorCode:    http.StatusUnauthorized,
 			ErrorMessage: errs.UnauthorizedCredentials.Error(),
@@ -113,6 +116,45 @@ func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		Code:     http.StatusOK,
 		Username: user.Username,
 	})
+}
+
+const saltLength = 16
+
+func generateSalt() ([]byte, error) {
+	salt := make([]byte, saltLength)
+	_, err := rand.Read(salt)
+	if err != nil {
+		return nil, err
+	}
+	return salt, nil
+}
+
+func hashPassword(password string, salt []byte) string {
+	hash := argon2.IDKey([]byte(password), salt, 1, 64*1024, 4, 32)
+	fullHash := append(salt, hash...)
+	return base64.RawStdEncoding.EncodeToString(fullHash)
+}
+
+// Разделение соли и хеша
+func splitSaltAndHash(saltHashBase64 string) ([]byte, []byte, error) {
+	saltHash, err := base64.RawStdEncoding.DecodeString(saltHashBase64)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	salt := saltHash[:saltLength] // Первые saltLength байт — это соль
+	hash := saltHash[saltLength:] // Остальное — это хеш
+	return salt, hash, nil
+}
+
+func verifyPassword(storedSaltHashBase64, password string) bool {
+	salt, storedHash, err := splitSaltAndHash(storedSaltHashBase64)
+	if err != nil {
+		return false
+	}
+	computedHash := argon2.IDKey([]byte(password), salt, 1, 64*1024, 4, 32)
+
+	return string(storedHash) == string(computedHash)
 }
 
 // LogoutHandler очищает куки и завершает сессию

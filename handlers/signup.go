@@ -36,14 +36,32 @@ func (s *Server) SignupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = db.CreateUser(signupRequest.Email, signupRequest.User)
-	if err != nil {
+	_, exists := db.GetUserByEmail(signupRequest.Email)
+	if exists {
 		writeJSON(w, http.StatusConflict, errs.HTTPErrorResponse{
 			ErrorCode:    http.StatusConflict,
-			ErrorMessage: err.Error(),
+			ErrorMessage: errs.UserAlreadyExists.Error(),
 		})
 		return
 	}
+
+	// Генерация соли и хеширование пароля
+	salt, err := generateSalt()
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
+			ErrorCode:    http.StatusInternalServerError,
+			ErrorMessage: errs.InternalServerError.Error(),
+		})
+		return
+	}
+	hashedPassword := hashPassword(signupRequest.Password, salt)
+
+	// Сохраняем нового пользователя
+	user := db.User{
+		Username:     signupRequest.Username,
+		PasswordHash: hashedPassword,
+	}
+	db.CreateUser(signupRequest.Email, user)
 
 	session, err := s.sessions.Get(r, config.GetSessionName())
 	if err != nil {

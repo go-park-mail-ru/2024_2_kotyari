@@ -4,8 +4,8 @@ import "sync"
 
 // User представляет пользователя в системе
 type User struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username     string `json:"username"`
+	PasswordHash string `json:"password_hash"`
 }
 
 type UserDB struct {
@@ -14,8 +14,8 @@ type UserDB struct {
 }
 
 var userDB = UserDB{
-	users: map[string]User{"user@example.com": {Username: "Goshanchik", Password: "Password123@"},
-		"user1@example.com": {Username: "Igorechik", Password: "Password124@"}},
+	users: map[string]User{"user@example.com": {Username: "Goshanchik", PasswordHash: "Password123@"},
+		"user1@example.com": {Username: "Igorechik", PasswordHash: "Password124@"}},
 }
 
 // GetUserByEmail возвращает пользователя по email
