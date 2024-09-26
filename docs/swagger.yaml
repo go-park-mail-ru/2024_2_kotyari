@@ -45,7 +45,7 @@ definitions:
       username:
         type: string
     type: object
-host: oxic.swagger.io
+host: localhost:8000
 info:
   contact: {}
   description: This is simple oxic server

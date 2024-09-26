@@ -18,7 +18,7 @@ import (
 // @version 1.0
 // @description This is simple oxic server
 
-// @host oxic.swagger.io
+// @host localhost:8000
 // @BasePath /
 func main() {
 	err := godotenv.Load(".env")
@@ -28,6 +28,7 @@ func main() {
 	}
 
 	config.Init()
+
 	server := handlers.NewServer(&config.Cfg)
 
 	r := mux.NewRouter()
