@@ -118,7 +118,13 @@ func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-const saltLength = 16
+const (
+	timeCost    uint32 = 1         // Время обработки (количество итераций)
+	memoryCost  uint32 = 64 * 1024 // Память, используемая Argon2 (в KB)
+	parallelism uint8  = 4         // Количество параллельных потоков
+	keyLength   uint32 = 32        // Длина генерируемого ключа
+	saltLength  int    = 16        // Длина соли в байтах
+)
 
 func generateSalt() ([]byte, error) {
 	salt := make([]byte, saltLength)
@@ -130,7 +136,7 @@ func generateSalt() ([]byte, error) {
 }
 
 func hashPassword(password string, salt []byte) string {
-	hash := argon2.IDKey([]byte(password), salt, 1, 64*1024, 4, 32)
+	hash := argon2.IDKey([]byte(password), salt, timeCost, memoryCost, parallelism, keyLength)
 	fullHash := append(salt, hash...)
 	return base64.RawStdEncoding.EncodeToString(fullHash)
 }
@@ -152,7 +158,7 @@ func verifyPassword(storedSaltHashBase64, password string) bool {
 	if err != nil {
 		return false
 	}
-	computedHash := argon2.IDKey([]byte(password), salt, 1, 64*1024, 4, 32)
+	computedHash := argon2.IDKey([]byte(password), salt, timeCost, memoryCost, parallelism, keyLength)
 
 	return string(storedHash) == string(computedHash)
 }
