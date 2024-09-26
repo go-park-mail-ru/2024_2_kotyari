@@ -1,0 +1,78 @@
+basePath: /catalog
+definitions:
+  db.Product:
+    properties:
+      currency:
+        description: Поле не обязательно
+        type: string
+      currentPrice:
+        type: string
+      description:
+        type: string
+      discount:
+        description: Поле не обязательно
+        type: string
+      image:
+        type: string
+      oldPrice:
+        description: Поле не обязательно
+        type: string
+      shortDescription:
+        type: string
+      url:
+        type: string
+    type: object
+host: localhost:8000
+info:
+  contact: {}
+  description: API для получения продуктов из каталога.
+  title: Product Catalog API
+  version: "1.0"
+paths:
+  /catalog/product/{id}:
+    get:
+      description: Возвращает продукт по его ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/db.Product'
+        "404":
+          description: Продукт не найден
+          schema:
+            type: string
+        "500":
+          description: Ошибка при кодировании JSON
+          schema:
+            type: string
+      summary: Get Product by ID
+      tags:
+      - Products
+  /catalog/products:
+    get:
+      description: Возвращает список всех продуктов
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              $ref: '#/definitions/db.Product'
+            type: object
+        "500":
+          description: Ошибка при кодировании JSON
+          schema:
+            type: string
+      summary: Get Products
+      tags:
+      - Products
+swagger: "2.0"
