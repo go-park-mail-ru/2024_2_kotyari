@@ -14,11 +14,12 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// @title Product Catalog API
+// @title Swagger Oxic API
 // @version 1.0
-// @description API для получения продуктов из каталога.
+// @description This is simple oxic server
+
 // @host localhost:8000
-// @BasePath /catalog
+// @BasePath /
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -27,12 +28,18 @@ func main() {
 	}
 
 	config.Init()
+
+	server := handlers.NewServer(&config.Cfg)
+
 	r := mux.NewRouter()
 
-	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
-
+	r.HandleFunc("/login", server.LoginHandler).Methods(http.MethodPost)
+	r.HandleFunc("/logout", server.LogoutHandler).Methods(http.MethodPost)
+	r.HandleFunc("/signup", server.SignupHandler).Methods(http.MethodPost)
 	r.HandleFunc("/catalog/products", handlers.ProductsHandler).Methods("GET")
 	r.HandleFunc("/catalog/product/{id}", handlers.ProductByIDHandler).Methods("GET")
+
+	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	fmt.Println("Сервер запущен на", config.GetServerAddress())
 	log.Fatal(http.ListenAndServe(config.GetServerAddress(), r))

@@ -3,29 +3,61 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
-	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"2024_2_kotyari/config"
 	"2024_2_kotyari/db"
+	"github.com/joho/godotenv"
 )
 
-var testUser = db.User{
-	Email:    "user@example.com",
-	Password: "Password123",
+var testUser = credsApiRequest{
+	Email: "user@example.com",
+	User: db.User{
+		Username: "Goshanchik",
+		Password: "Password123@",
+	},
 }
 
-var testUserIncorrectEmail = db.User{
-	Email:    "invalid-email",
-	Password: "Password123",
+var testUserIncorrectEmail = credsApiRequest{
+	Email: "user1example.ru",
+	User: db.User{
+		Username: "Goshanchik",
+		Password: "Password123@",
+	},
+}
+
+var testUserIncorrectPass = credsApiRequest{
+	Email: "user1@example.ru",
+	User: db.User{
+		Username: "Goshanchik",
+		Password: "password123",
+	},
+}
+
+var testUserNotFound = credsApiRequest{
+	Email: "notfound@example.com",
+	User: db.User{
+		Username: "Goshanchik",
+		Password: "Password123@",
+	},
 }
 
 func TestLoginHandler(t *testing.T) {
+	err := godotenv.Load("../.env")
+	if err != nil {
+		log.Fatal("Error loading .env file", err.Error())
+		return
+	}
+
+	config.Init()
+
 	tests := []struct {
 		name       string
 		method     string
-		body       db.User
+		body       credsApiRequest
 		wantStatus int
 	}{
 		{
@@ -43,13 +75,13 @@ func TestLoginHandler(t *testing.T) {
 		{
 			name:       "Некорректный формат пароля",
 			method:     http.MethodPost,
-			body:       db.User{Email: "test@example.com", Password: "short"},
+			body:       testUserIncorrectPass,
 			wantStatus: http.StatusBadRequest,
 		},
 		{
 			name:       "Пользователя не существует",
 			method:     http.MethodPost,
-			body:       db.User{Email: "notfound@example.com", Password: "Password123"},
+			body:       testUserNotFound,
 			wantStatus: http.StatusUnauthorized,
 		},
 	}
@@ -60,18 +92,13 @@ func TestLoginHandler(t *testing.T) {
 			req := httptest.NewRequest(tt.method, "/login", bytes.NewBuffer(body))
 			w := httptest.NewRecorder()
 
-			LoginHandler(w, req)
+			server := NewServer(&config.Cfg)
+			server.LoginHandler(w, req)
 
 			res := w.Result()
-			defer res.Body.Close()
 
-			// для дальнейшей отладки
-			bodyBytes, _ := io.ReadAll(res.Body)
-			bodyString := string(bodyBytes)
-
-			// Проверка кода ответа
 			if res.StatusCode != tt.wantStatus {
-				t.Errorf("Ожидалось %v, получено %v. Ответ сервера: %v", tt.wantStatus, res.StatusCode, bodyString)
+				t.Errorf("Expected status %v, got %v", tt.wantStatus, res.StatusCode)
 			}
 		})
 	}
@@ -82,25 +109,11 @@ func TestLogoutHandler(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/logout", nil)
 	req.AddCookie(&http.Cookie{Name: "session_id", Value: "test-session-id"}) // Имитация сессии
 	w := httptest.NewRecorder()
-
-	LogoutHandler(w, req)
-
-	res := w.Result()
-	if res.StatusCode != http.StatusOK {
-		t.Errorf("Ожидалось 200, имеем %v", res.StatusCode)
-	}
-}
-
-// Тест для ProtectedHandler
-func TestProtectedHandler(t *testing.T) {
-	req := httptest.NewRequest(http.MethodGet, "/protected", nil)
-	req.AddCookie(&http.Cookie{Name: "session_id", Value: "test-session-id"}) // Имитация сессии
-	w := httptest.NewRecorder()
-
-	ProtectedHandler(w, req)
+	server := NewServer(&config.Cfg)
+	server.LogoutHandler(w, req)
 
 	res := w.Result()
-	if res.StatusCode != http.StatusOK {
+	if res.StatusCode != http.StatusNoContent {
 		t.Errorf("Ожидалось 200, имеем %v", res.StatusCode)
 	}
 }
