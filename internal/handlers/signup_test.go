@@ -9,21 +9,10 @@ import (
 	"sync"
 	"testing"
 
-	"2024_2_kotyari/config"
-	"2024_2_kotyari/errs"
-	"github.com/joho/godotenv"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 )
 
-func TestSignup(t *testing.T) {
-	err := godotenv.Load("../.env")
-	if err != nil {
-		log.Fatal("Error loading .env file", err.Error())
-		return
-	}
-
-	config.Init()
-	server := NewServer(&config.Cfg)
-
+func TestSignupHandler(t *testing.T) {
 	tests := []struct {
 		name             string
 		requestBody      string
@@ -68,10 +57,12 @@ func TestSignup(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		a := newAppForTests()
+
 		t.Run(tt.name, func(t *testing.T) {
 			req := httptest.NewRequest("POST", "/signup", strings.NewReader(tt.requestBody))
 			rr := httptest.NewRecorder()
-			server.Signup(rr, req)
+			server.SignupHandler(rr, req)
 
 			if rr.Code != tt.wantStatus {
 				t.Errorf("Expected status code: %v, got: %v", tt.wantStatus, rr.Code)
@@ -92,6 +83,8 @@ func TestSignup(t *testing.T) {
 
 	t.Run("Concurrent Signups", func(t *testing.T) {
 		var wg sync.WaitGroup
+		a := newAppForTests()
+
 		requestStrings := []string{
 			`{"username":"abcdefghij","email":"test@test.com", "password":"abcdefG@23", "repeat_password":"abcdefG@23"}`,
 			`{"username":"abcdefghij","email":"test1@test.com", "password":"abcdefG@23", "repeat_password":"abcdefG@23"}`,
@@ -104,7 +97,7 @@ func TestSignup(t *testing.T) {
 				req := httptest.NewRequest("POST", "/signup", strings.NewReader(requestString))
 				rr := httptest.NewRecorder()
 
-				server.Signup(rr, req)
+				a.SignUp(rr, req)
 
 				if rr.Code != http.StatusOK {
 					t.Errorf("Expected status code: %v, got: %v", http.StatusOK, rr.Code)

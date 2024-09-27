@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"testing"
 
-	"2024_2_kotyari/errs"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 )
 
 func TestCreateUser(t *testing.T) {
+	var usersDB Users
+
 	tests := []struct {
 		email string
 		User
@@ -58,7 +60,7 @@ func TestCreateUser(t *testing.T) {
 
 	for i, testUser := range tests {
 		t.Run(fmt.Sprintf("Test %v: ", i), func(t *testing.T) {
-			err := CreateUser(testUser.email, testUser.User)
+			err := usersDB.CreateUser(testUser.email, testUser.User)
 
 			if !errors.Is(err, testUser.expectedError) {
 				t.Errorf("Test %v failed, ecpexted error: %v, got: %v", i, testUser.expectedError, err.Error())

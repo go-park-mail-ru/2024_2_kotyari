@@ -8,8 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"2024_2_kotyari/config"
-	"github.com/joho/godotenv"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/db"
 )
 
 var testUser = credsApiRequest{
@@ -36,14 +35,8 @@ var testUserNotFound = credsApiRequest{
 	Password: "Password123@",
 }
 
-func TestLogin(t *testing.T) {
-	err := godotenv.Load("../.env")
-	if err != nil {
-		log.Fatal("Error loading .env file", err.Error())
-		return
-	}
-
-	config.Init()
+func TestLoginHandler(t *testing.T) {
+	server := newAppForTests()
 
 	tests := []struct {
 		name       string
@@ -83,7 +76,6 @@ func TestLogin(t *testing.T) {
 			req := httptest.NewRequest(tt.method, "/login", bytes.NewBuffer(body))
 			w := httptest.NewRecorder()
 
-			server := NewServer(&config.Cfg)
 			server.Login(w, req)
 
 			if w.Code != tt.wantStatus {
@@ -94,11 +86,12 @@ func TestLogin(t *testing.T) {
 }
 
 // Тест для LogoutHandler
-func TestLogout(t *testing.T) {
+func TestLogoutHandler(t *testing.T) {
+	server := newAppForTests()
+
 	req := httptest.NewRequest(http.MethodGet, "/logout", nil)
 	req.AddCookie(&http.Cookie{Name: "session_id", Value: "test-session-id"}) // Имитация сессии
 	w := httptest.NewRecorder()
-	server := NewServer(&config.Cfg)
 	server.Logout(w, req)
 
 	if w.Code != http.StatusNoContent {

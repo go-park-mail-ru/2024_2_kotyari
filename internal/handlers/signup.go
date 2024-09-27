@@ -4,9 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"2024_2_kotyari/config"
-	"2024_2_kotyari/db"
-	"2024_2_kotyari/errs"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/db"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 )
 
 // Signup handles user signup requests
@@ -21,7 +20,7 @@ import (
 // @Failure      409   {object}  errs.HTTPErrorResponse "User already exists"
 // @Failure      500   {object}  errs.HTTPErrorResponse "Internal server error"
 // @Router       /signup [post]
-func (s *Server) Signup(w http.ResponseWriter, r *http.Request) {
+func (a *AuthApp) SignUp(w http.ResponseWriter, r *http.Request) {
 	var signupRequest credsApiRequest
 
 	err := json.NewDecoder(r.Body).Decode(&signupRequest)
@@ -35,7 +34,7 @@ func (s *Server) Signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, exists := db.GetUserByEmail(signupRequest.Email)
+	_, exists := a.db.GetUserByEmail(signupRequest.Email)
 	if exists {
 		writeJSON(w, http.StatusConflict, errs.HTTPErrorResponse{
 			ErrorMessage: errs.UserAlreadyExists.Error(),
@@ -58,9 +57,9 @@ func (s *Server) Signup(w http.ResponseWriter, r *http.Request) {
 		Username: signupRequest.Username,
 		Password: hashedPassword,
 	}
-	db.CreateUser(signupRequest.Email, user)
 
-	session, err := s.sessions.Get(r, config.GetSessionName())
+	err = a.db.CreateUser(signupRequest.Email, user)
+	session, err := a.sessions.Get(r)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
 			ErrorMessage: errs.SessionCreationError.Error(),
@@ -71,7 +70,7 @@ func (s *Server) Signup(w http.ResponseWriter, r *http.Request) {
 	session.Options.MaxAge = 3600 * 10
 	session.Options.HttpOnly = true
 
-	err = s.sessions.Save(r, w, session)
+	err = a.sessions.Save(w, r, session)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
 			ErrorMessage: errs.SessionSaveError.Error(),
