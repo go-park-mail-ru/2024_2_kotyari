@@ -9,43 +9,34 @@ import (
 	"testing"
 
 	"2024_2_kotyari/config"
-	"2024_2_kotyari/db"
 	"github.com/joho/godotenv"
 )
 
 var testUser = credsApiRequest{
-	Email: "user@example.com",
-	User: db.User{
-		Username: "Goshanchik",
-		Password: "Password123@",
-	},
+	Email:    "user@example.com",
+	Username: "Goshanchik",
+	Password: "Password123@",
 }
 
 var testUserIncorrectEmail = credsApiRequest{
-	Email: "user1example.ru",
-	User: db.User{
-		Username: "Goshanchik",
-		Password: "Password123@",
-	},
+	Email:    "user1example.ru",
+	Username: "Goshanchik",
+	Password: "Password123@",
 }
 
 var testUserIncorrectPass = credsApiRequest{
-	Email: "user1@example.ru",
-	User: db.User{
-		Username: "Goshanchik",
-		Password: "password123",
-	},
+	Email:    "user1@example.ru",
+	Username: "Goshanchik",
+	Password: "password123",
 }
 
 var testUserNotFound = credsApiRequest{
-	Email: "notfound@example.com",
-	User: db.User{
-		Username: "Goshanchik",
-		Password: "Password123@",
-	},
+	Email:    "notfound@example.com",
+	Username: "Goshanchik",
+	Password: "Password123@",
 }
 
-func TestLoginHandler(t *testing.T) {
+func TestLogin(t *testing.T) {
 	err := godotenv.Load("../.env")
 	if err != nil {
 		log.Fatal("Error loading .env file", err.Error())
@@ -93,27 +84,24 @@ func TestLoginHandler(t *testing.T) {
 			w := httptest.NewRecorder()
 
 			server := NewServer(&config.Cfg)
-			server.LoginHandler(w, req)
+			server.Login(w, req)
 
-			res := w.Result()
-
-			if res.StatusCode != tt.wantStatus {
-				t.Errorf("Expected status %v, got %v", tt.wantStatus, res.StatusCode)
+			if w.Code != tt.wantStatus {
+				t.Errorf("Expected status %v, got %v", tt.wantStatus, w.Code)
 			}
 		})
 	}
 }
 
 // Тест для LogoutHandler
-func TestLogoutHandler(t *testing.T) {
+func TestLogout(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/logout", nil)
 	req.AddCookie(&http.Cookie{Name: "session_id", Value: "test-session-id"}) // Имитация сессии
 	w := httptest.NewRecorder()
 	server := NewServer(&config.Cfg)
-	server.LogoutHandler(w, req)
+	server.Logout(w, req)
 
-	res := w.Result()
-	if res.StatusCode != http.StatusNoContent {
-		t.Errorf("Ожидалось 200, имеем %v", res.StatusCode)
+	if w.Code != http.StatusNoContent {
+		t.Errorf("Ожидалось 200, имеем %v", w.Code)
 	}
 }

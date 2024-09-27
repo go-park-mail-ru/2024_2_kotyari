@@ -16,7 +16,7 @@ import (
 // @Success 200 {object} map[string]db.Product
 // @Failure 500 {string} string "Ошибка при кодировании JSON"
 // @Router /catalog/products [get]
-func ProductsHandler(w http.ResponseWriter, r *http.Request) {
+func Products(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	products := db.GetAllProducts()
@@ -39,7 +39,7 @@ func ProductsHandler(w http.ResponseWriter, r *http.Request) {
 // @Failure 404 {string} string "Продукт не найден"
 // @Failure 500 {string} string "Ошибка при кодировании JSON"
 // @Router /catalog/product/{id} [get]
-func ProductByIDHandler(w http.ResponseWriter, r *http.Request) {
+func ProductByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	productID := vars["id"]
 

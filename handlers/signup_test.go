@@ -14,7 +14,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func TestSignupHandler(t *testing.T) {
+func TestSignup(t *testing.T) {
 	err := godotenv.Load("../.env")
 	if err != nil {
 		log.Fatal("Error loading .env file", err.Error())
@@ -38,25 +38,31 @@ func TestSignupHandler(t *testing.T) {
 		},
 		{
 			name:             "Invalid Username Format",
-			requestBody:      `{"username":"t","email":"test@test.com", "password":"test@Password1"}`,
+			requestBody:      `{"username":"t","email":"test@test.com", "password":"test@Password1", "repeat_password":"test@Password1"}`,
 			wantStatus:       http.StatusBadRequest,
 			wantErrorMessage: errs.InvalidUsernameFormat.Error(),
 		},
 		{
 			name:             "Invalid Email Format",
-			requestBody:      `{"username":"testing","email":"test@", "password":"testPassword"}`,
+			requestBody:      `{"username":"testing","email":"test@", "password":"testPassword", "repeat_password":"testPassword"}`,
 			wantStatus:       http.StatusBadRequest,
 			wantErrorMessage: errs.InvalidEmailFormat.Error(),
 		},
 		{
 			name:             "Invalid Password Format",
-			requestBody:      `{"username":"testing","email":"test@test.com", "password":"te"}`,
+			requestBody:      `{"username":"testing","email":"test@test.com", "password":"te", "repeat_password":"te"}`,
 			wantStatus:       http.StatusBadRequest,
 			wantErrorMessage: errs.InvalidPasswordFormat.Error(),
 		},
 		{
+			name:             "Passwords Do Not Match",
+			requestBody:      `{"username":"testing","email":"test@test.com", "password":"Password1@","repeat_password":"Password2@"}`,
+			wantStatus:       http.StatusBadRequest,
+			wantErrorMessage: errs.PasswordsDoNotMatch.Error(),
+		},
+		{
 			name:        "Valid Signup",
-			requestBody: `{"username":"PROSADIK","email":"testwewew@test.com", "password":"abcdefG@23"}`,
+			requestBody: `{"username":"PROSADIK","email":"testwewew@test.com", "password":"abcdefG@23", "repeat_password":"abcdefG@23"}`,
 			wantStatus:  http.StatusOK,
 		},
 	}
@@ -65,24 +71,20 @@ func TestSignupHandler(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			req := httptest.NewRequest("POST", "/signup", strings.NewReader(tt.requestBody))
 			rr := httptest.NewRecorder()
-			server.SignupHandler(rr, req)
+			server.Signup(rr, req)
 
-			res := rr.Result()
-			defer res.Body.Close()
-
-			if res.StatusCode != tt.wantStatus {
-				t.Errorf("Expected status code: %v, got: %v", tt.wantStatus, res.StatusCode)
+			if rr.Code != tt.wantStatus {
+				t.Errorf("Expected status code: %v, got: %v", tt.wantStatus, rr.Code)
 			}
 
 			if tt.wantStatus >= 400 {
 				var httpError errs.HTTPErrorResponse
-				err = json.NewDecoder(res.Body).Decode(&httpError)
+				err := json.NewDecoder(rr.Body).Decode(&httpError)
 				if err != nil {
 					t.Fatal(err)
 				}
-				if httpError.ErrorCode != tt.wantStatus || httpError.ErrorMessage != tt.wantErrorMessage {
-					t.Errorf("Expected error code %v, error message: %s, got error code: %v, error message: %s",
-						tt.wantStatus, tt.wantErrorMessage, httpError.ErrorCode, httpError.ErrorMessage)
+				if httpError.ErrorMessage != tt.wantErrorMessage {
+					t.Errorf("Expected error message: %s, got: %s", tt.wantErrorMessage, httpError.ErrorMessage)
 				}
 			}
 		})
@@ -91,9 +93,9 @@ func TestSignupHandler(t *testing.T) {
 	t.Run("Concurrent Signups", func(t *testing.T) {
 		var wg sync.WaitGroup
 		requestStrings := []string{
-			`{"username":"abcdefghij","email":"test@test.com", "password":"abcdefG@23"}`,
-			`{"username":"abcdefghij","email":"test1@test.com", "password":"abcdefG@23"}`,
-			`{"username":"abcdefghij","email":"test2@test.com", "password":"abcdefG@23"}`,
+			`{"username":"abcdefghij","email":"test@test.com", "password":"abcdefG@23", "repeat_password":"abcdefG@23"}`,
+			`{"username":"abcdefghij","email":"test1@test.com", "password":"abcdefG@23", "repeat_password":"abcdefG@23"}`,
+			`{"username":"abcdefghij","email":"test2@test.com", "password":"abcdefG@23", "repeat_password":"abcdefG@23"}`,
 		}
 		for _, requestString := range requestStrings {
 			wg.Add(1)
@@ -102,13 +104,10 @@ func TestSignupHandler(t *testing.T) {
 				req := httptest.NewRequest("POST", "/signup", strings.NewReader(requestString))
 				rr := httptest.NewRecorder()
 
-				server.SignupHandler(rr, req)
+				server.Signup(rr, req)
 
-				res := rr.Result()
-				defer res.Body.Close()
-
-				if res.StatusCode != http.StatusOK {
-					t.Errorf("Expected status code: %v, got: %v", http.StatusOK, res.StatusCode)
+				if rr.Code != http.StatusOK {
+					t.Errorf("Expected status code: %v, got: %v", http.StatusOK, rr.Code)
 				}
 			}(requestString)
 		}

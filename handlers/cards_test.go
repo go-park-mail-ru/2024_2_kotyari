@@ -10,15 +10,15 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// Тест для ProductsHandler
-func TestProductsHandler(t *testing.T) {
+// Тест для Products
+func TestProducts(t *testing.T) {
 	req, err := http.NewRequest("GET", "/products", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(handlers.ProductsHandler)
+	handler := http.HandlerFunc(handlers.Products)
 
 	handler.ServeHTTP(rr, req)
 
@@ -34,8 +34,8 @@ func TestProductsHandler(t *testing.T) {
 	}
 }
 
-// Тест на наличие ProductByIDHandler с действительным идентификатором продукта
-func TestProductByIDHandler(t *testing.T) {
+// Тест на наличие ProductByID с действительным идентификатором продукта
+func TestProductByID(t *testing.T) {
 	req, err := http.NewRequest("GET", "/product/1", nil)
 	if err != nil {
 		t.Fatal(err)
@@ -44,7 +44,7 @@ func TestProductByIDHandler(t *testing.T) {
 	rr := httptest.NewRecorder()
 
 	router := mux.NewRouter()
-	router.HandleFunc("/product/{id}", handlers.ProductByIDHandler)
+	router.HandleFunc("/product/{id}", handlers.ProductByID)
 	router.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
@@ -59,8 +59,8 @@ func TestProductByIDHandler(t *testing.T) {
 	}
 }
 
-// Тест для ProductByIDHandler с несуществующим идентификатором продукта
-func TestProductByIDHandler_NotFound(t *testing.T) {
+// Тест для ProductByID с несуществующим идентификатором продукта
+func TestProductByID_NotFound(t *testing.T) {
 	req, err := http.NewRequest("GET", "/product/999", nil)
 	if err != nil {
 		t.Fatal(err)
@@ -69,7 +69,7 @@ func TestProductByIDHandler_NotFound(t *testing.T) {
 	rr := httptest.NewRecorder()
 
 	router := mux.NewRouter()
-	router.HandleFunc("/product/{id}", handlers.ProductByIDHandler)
+	router.HandleFunc("/product/{id}", handlers.ProductByID)
 	router.ServeHTTP(rr, req)
 
 	// Проверяет, что код состояния соответствует ожиданиям.

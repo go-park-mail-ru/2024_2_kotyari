@@ -32,11 +32,11 @@ func main() {
 
 	r := mux.NewRouter()
 
-	r.HandleFunc("/login", server.LoginHandler).Methods(http.MethodPost)
-	r.HandleFunc("/logout", server.LogoutHandler).Methods(http.MethodPost)
-	r.HandleFunc("/signup", server.SignupHandler).Methods(http.MethodPost)
-	r.HandleFunc("/catalog/products", handlers.ProductsHandler).Methods("GET")
-	r.HandleFunc("/catalog/product/{id}", handlers.ProductByIDHandler).Methods("GET")
+	r.HandleFunc("/login", server.Login).Methods(http.MethodPost)
+	r.HandleFunc("/logout", server.Logout).Methods(http.MethodPost)
+	r.HandleFunc("/signup", server.Signup).Methods(http.MethodPost)
+	r.HandleFunc("/catalog/products", handlers.Products).Methods("GET")
+	r.HandleFunc("/catalog/product/{id}", handlers.ProductByID).Methods("GET")
 
 	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 

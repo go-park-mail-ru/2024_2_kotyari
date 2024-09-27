@@ -13,31 +13,43 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-// validateCredentials проверяет учетные данные пользователя
-func validateCredentials(w *http.ResponseWriter, creds credsApiRequest, requireUsername bool) bool {
+func validateLogin(w *http.ResponseWriter, creds credsApiRequest) bool {
+	return validateEmailAndPassword(w, creds)
+}
+
+func validateRegistration(w *http.ResponseWriter, creds credsApiRequest) bool {
+	if !validateEmailAndPassword(w, creds) {
+		return false
+	}
+
+	switch {
+	case creds.Password != creds.RepeatPassword:
+		writeJSON(*w, http.StatusBadRequest, errs.HTTPErrorResponse{
+			ErrorMessage: errs.PasswordsDoNotMatch.Error(),
+		})
+		return false
+	case !isValidUsername(creds.Username):
+		writeJSON(*w, http.StatusBadRequest, errs.HTTPErrorResponse{
+			ErrorMessage: errs.InvalidUsernameFormat.Error(),
+		})
+		return false
+	}
+
+	return true
+}
+
+func validateEmailAndPassword(w *http.ResponseWriter, creds credsApiRequest) bool {
 	switch {
 	case !isValidEmail(creds.Email):
 		writeJSON(*w, http.StatusBadRequest, errs.HTTPErrorResponse{
-			ErrorCode:    http.StatusBadRequest,
 			ErrorMessage: errs.InvalidEmailFormat.Error(),
 		})
 		return false
 	case !isValidPassword(creds.Password):
 		writeJSON(*w, http.StatusBadRequest, errs.HTTPErrorResponse{
-			ErrorCode:    http.StatusBadRequest,
 			ErrorMessage: errs.InvalidPasswordFormat.Error(),
 		})
 		return false
-	}
-
-	if requireUsername {
-		if !isValidUsername(creds.Username) {
-			writeJSON(*w, http.StatusBadRequest, errs.HTTPErrorResponse{
-				ErrorCode:    http.StatusBadRequest,
-				ErrorMessage: errs.InvalidUsernameFormat.Error(),
-			})
-			return false
-		}
 	}
 
 	return true
@@ -53,7 +65,11 @@ func NewServer(cfg *config.Config) *Server {
 	}
 }
 
-// LoginHandler обрабатывает вход пользователя и создает сессию
+type UsernameResponse struct {
+	Username string `json:"username"`
+}
+
+// Login обрабатывает вход пользователя и создает сессию
 // @Summary Логин пользователя
 // @Description Проверяет учетные данные пользователя и создает сессию при успешной аутентификации
 // @Tags auth
@@ -65,57 +81,42 @@ func NewServer(cfg *config.Config) *Server {
 // @Failure 401 {string} string "Неправильные учетные данные"
 // @Failure 500 {string} string "Ошибка при создании сессии"
 // @Router /login [post]
-func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 	var creds credsApiRequest
 	session, err := s.sessions.Get(r, config.GetSessionName())
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
-			ErrorCode:    http.StatusInternalServerError,
 			ErrorMessage: errs.SessionCreationError.Error(),
 		})
 		return
 	}
 	if email, isAuthenticated := session.Values["user_id"].(string); isAuthenticated {
 		user, _ := db.GetUserByEmail(email)
-		writeJSON(w, http.StatusOK, struct {
-			Code     int
-			Username string
-		}{
-			Code:     http.StatusOK,
-			Username: user.Username,
-		})
+		writeJSON(w, http.StatusOK, UsernameResponse{Username: user.Username})
 		return
 	}
 
 	err = json.NewDecoder(r.Body).Decode(&creds)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
-			ErrorCode:    http.StatusInternalServerError,
 			ErrorMessage: errs.InternalServerError.Error(),
 		})
 		return
 	}
 
-	if !validateCredentials(&w, creds, false) {
+	if !validateLogin(&w, creds) {
 		return
 	}
 
 	user, exists := db.GetUserByEmail(creds.Email)
 	if !exists || !verifyPassword(user.PasswordHash, creds.Password) {
 		writeJSON(w, http.StatusUnauthorized, errs.HTTPErrorResponse{
-			ErrorCode:    http.StatusUnauthorized,
 			ErrorMessage: errs.UnauthorizedCredentials.Error(),
 		})
 		return
 	}
 
-	writeJSON(w, http.StatusOK, struct {
-		Code     int
-		Username string
-	}{
-		Code:     http.StatusOK,
-		Username: user.Username,
-	})
+	writeJSON(w, http.StatusOK, UsernameResponse{Username: user.Username})
 }
 
 const (
@@ -163,7 +164,7 @@ func verifyPassword(storedSaltHashBase64, password string) bool {
 	return string(storedHash) == string(computedHash)
 }
 
-// LogoutHandler очищает куки и завершает сессию
+// Logout очищает куки и завершает сессию
 // @Summary Логаут пользователя
 // @Description Завершает сессию пользователя, очищая куки и удаляя все значения из сессии
 // @Tags auth
@@ -172,7 +173,7 @@ func verifyPassword(storedSaltHashBase64, password string) bool {
 // @Failure 401 {string} string "Пользователь не авторизован"
 // @Failure 500 {string} string "Ошибка при завершении сессии"
 // @Router /logout [post]
-func (s *Server) LogoutHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) Logout(w http.ResponseWriter, r *http.Request) {
 	// Получаем сессию из запроса
 	session, err := s.sessions.Get(r, config.GetSessionName())
 	if err != nil {
