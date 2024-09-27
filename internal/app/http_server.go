@@ -50,8 +50,8 @@ func (s *Server) Run() {
 	s.r.HandleFunc("/login", s.a.Login).Methods(http.MethodPost)
 	s.r.HandleFunc("/logout", s.a.Logout).Methods(http.MethodPost)
 	s.r.HandleFunc("/signup", s.a.SignUp).Methods(http.MethodPost)
-	s.r.HandleFunc("/catalog/products", s.c.Products).Methods("GET")
-	s.r.HandleFunc("/catalog/product/{id}", s.c.ProductByID).Methods("GET")
+	s.r.HandleFunc("/catalog/products", s.c.Products).Methods(http.MethodGet)
+	s.r.HandleFunc("/catalog/product/{id}", s.c.ProductByID).Methods(http.MethodGet)
 	s.r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	handler := s.CORS.Handler(s.r)
