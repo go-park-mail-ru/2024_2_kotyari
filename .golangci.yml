@@ -1,0 +1,10 @@
+linters:
+  enable:
+    - staticcheck
+    - revive
+run:
+  timeout: 5m
+
+linters-settings:
+  revive:
+    enable-all-rules: true
