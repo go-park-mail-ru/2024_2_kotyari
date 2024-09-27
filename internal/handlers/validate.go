@@ -1,42 +1,10 @@
 package handlers
 
 import (
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
-	"net/http"
 	"regexp"
 	"strings"
 	"unicode"
 )
-
-// validateCredentials проверяет учетные данные пользователя
-func validateCredentials(w *http.ResponseWriter, creds credsApiRequest, requireUsername bool) bool {
-	switch {
-	case !isValidEmail(creds.Email):
-		writeJSON(*w, http.StatusBadRequest, errs.HTTPErrorResponse{
-			ErrorCode:    http.StatusBadRequest,
-			ErrorMessage: errs.InvalidEmailFormat.Error(),
-		})
-		return false
-	case !isValidPassword(creds.Password):
-		writeJSON(*w, http.StatusBadRequest, errs.HTTPErrorResponse{
-			ErrorCode:    http.StatusBadRequest,
-			ErrorMessage: errs.InvalidPasswordFormat.Error(),
-		})
-		return false
-	}
-
-	if requireUsername {
-		if !isValidUsername(creds.Username) {
-			writeJSON(*w, http.StatusBadRequest, errs.HTTPErrorResponse{
-				ErrorCode:    http.StatusBadRequest,
-				ErrorMessage: errs.InvalidUsernameFormat.Error(),
-			})
-			return false
-		}
-	}
-
-	return true
-}
 
 // isValidEmail проверяет, является ли email действительным
 func isValidEmail(email string) bool {

@@ -18,6 +18,9 @@ func InitUsersWithData() *Users {
 
 // GetUserByEmail возвращает пользователя по email
 func (u *Users) GetUserByEmail(email string) (User, bool) {
+	u.mu.Lock()
+	defer u.mu.Unlock()
+
 	user, exists := u.users[email]
 
 	return user, exists

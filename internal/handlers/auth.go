@@ -20,6 +20,7 @@ type AuthApp struct {
 func NewApp() *AuthApp {
 	return &AuthApp{
 		sessions: newSessions(),
+		db:       db.InitUsersWithData(),
 	}
 }
 

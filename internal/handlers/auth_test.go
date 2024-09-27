@@ -3,12 +3,9 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/db"
 )
 
 var testUser = credsApiRequest{

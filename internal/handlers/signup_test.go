@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -62,7 +61,7 @@ func TestSignupHandler(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			req := httptest.NewRequest("POST", "/signup", strings.NewReader(tt.requestBody))
 			rr := httptest.NewRecorder()
-			server.SignupHandler(rr, req)
+			a.SignUp(rr, req)
 
 			if rr.Code != tt.wantStatus {
 				t.Errorf("Expected status code: %v, got: %v", tt.wantStatus, rr.Code)
