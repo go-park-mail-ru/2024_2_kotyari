@@ -3,7 +3,6 @@ package errs
 import "errors"
 
 type HTTPErrorResponse struct {
-	ErrorCode    int    `json:"error_code"`
 	ErrorMessage string `json:"error_message"`
 }
 
@@ -19,4 +18,5 @@ var (
 	SessionSaveError        = errors.New("error when saving session")
 	LogoutError             = errors.New("error when terminating session")
 	UnauthorizedMessage     = errors.New("not authorized")
+	PasswordsDoNotMatch     = errors.New("passwords do not match")
 )

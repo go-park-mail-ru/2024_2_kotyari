@@ -9,7 +9,7 @@ import (
 	"2024_2_kotyari/errs"
 )
 
-// SignupHandler handles user signup requests
+// Signup handles user signup requests
 // @Summary      Signup a new user
 // @Description  This endpoint creates a new user in the system
 // @Tags         auth
@@ -21,34 +21,48 @@ import (
 // @Failure      409   {object}  errs.HTTPErrorResponse "User already exists"
 // @Failure      500   {object}  errs.HTTPErrorResponse "Internal server error"
 // @Router       /signup [post]
-func (s *Server) SignupHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) Signup(w http.ResponseWriter, r *http.Request) {
 	var signupRequest credsApiRequest
 
 	err := json.NewDecoder(r.Body).Decode(&signupRequest)
 	if err != nil {
 		writeJSON(w, http.StatusBadRequest, errs.HTTPErrorResponse{
-			ErrorCode:    http.StatusBadRequest,
 			ErrorMessage: errs.InvalidJSONFormat.Error(),
 		})
 		return
 	}
-	if !validateCredentials(&w, signupRequest, true) {
+	if !validateRegistration(&w, signupRequest) {
 		return
 	}
 
-	err = db.CreateUser(signupRequest.Email, signupRequest.User)
-	if err != nil {
+	_, exists := db.GetUserByEmail(signupRequest.Email)
+	if exists {
 		writeJSON(w, http.StatusConflict, errs.HTTPErrorResponse{
-			ErrorCode:    http.StatusConflict,
-			ErrorMessage: err.Error(),
+			ErrorMessage: errs.UserAlreadyExists.Error(),
 		})
 		return
 	}
 
+	// Генерация соли и хеширование пароля
+	salt, err := generateSalt()
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
+			ErrorMessage: errs.InternalServerError.Error(),
+		})
+		return
+	}
+	hashedPassword := hashPassword(signupRequest.Password, salt)
+
+	// Сохраняем нового пользователя
+	user := db.User{
+		Username: signupRequest.Username,
+		Password: hashedPassword,
+	}
+	db.CreateUser(signupRequest.Email, user)
+
 	session, err := s.sessions.Get(r, config.GetSessionName())
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
-			ErrorCode:    http.StatusInternalServerError,
 			ErrorMessage: errs.SessionCreationError.Error(),
 		})
 		return
@@ -60,7 +74,6 @@ func (s *Server) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	err = s.sessions.Save(r, w, session)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
-			ErrorCode:    http.StatusInternalServerError,
 			ErrorMessage: errs.SessionSaveError.Error(),
 		})
 		return
@@ -69,13 +82,10 @@ func (s *Server) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, nil)
 }
 
-func writeJSON(w http.ResponseWriter, headerStatusCode int, data any) {
+func writeJSON(w http.ResponseWriter, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(headerStatusCode)
+	w.WriteHeader(status)
 	if data != nil {
-		err := json.NewEncoder(w).Encode(data)
-		if err != nil {
-			http.Error(w, errs.InternalServerError.Error(), http.StatusInternalServerError)
-		}
+		json.NewEncoder(w).Encode(data)
 	}
 }
