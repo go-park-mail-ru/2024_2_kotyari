@@ -17,40 +17,40 @@ func TestCreateUser(t *testing.T) {
 		{
 			"test@test.com",
 			User{
-				Username:     "user1",
-				PasswordHash: "pass1",
+				Username: "user1",
+				Password: "pass1",
 			},
 			nil,
 		},
 		{
 			"test@test.com",
 			User{
-				Username:     "user1",
-				PasswordHash: "pass1",
+				Username: "user1",
+				Password: "pass1",
 			},
 			errs.UserAlreadyExists,
 		},
 		{
 			"test1@test.com",
 			User{
-				Username:     "user1",
-				PasswordHash: "pass1",
+				Username: "user1",
+				Password: "pass1",
 			},
 			nil,
 		},
 		{
 			"test2@test.com",
 			User{
-				Username:     "user1",
-				PasswordHash: "pass1",
+				Username: "user1",
+				Password: "pass1",
 			},
 			nil,
 		},
 		{
 			"test2@test.com",
 			User{
-				Username:     "user1",
-				PasswordHash: "pass1",
+				Username: "user1",
+				Password: "pass1",
 			},
 			errs.UserAlreadyExists,
 		},

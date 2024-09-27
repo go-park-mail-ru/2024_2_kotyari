@@ -55,8 +55,8 @@ func (s *Server) Signup(w http.ResponseWriter, r *http.Request) {
 
 	// Сохраняем нового пользователя
 	user := db.User{
-		Username:     signupRequest.Username,
-		PasswordHash: hashedPassword,
+		Username: signupRequest.Username,
+		Password: hashedPassword,
 	}
 	db.CreateUser(signupRequest.Email, user)
 

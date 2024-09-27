@@ -109,7 +109,7 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, exists := db.GetUserByEmail(creds.Email)
-	if !exists || !verifyPassword(user.PasswordHash, creds.Password) {
+	if !exists || !verifyPassword(user.Password, creds.Password) {
 		writeJSON(w, http.StatusUnauthorized, errs.HTTPErrorResponse{
 			ErrorMessage: errs.UnauthorizedCredentials.Error(),
 		})
