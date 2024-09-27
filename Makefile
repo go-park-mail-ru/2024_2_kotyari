@@ -32,3 +32,5 @@ test-coverage:
 
 fmt:
 	go fmt ./...
+
+.PHONY: clean build
