@@ -32,7 +32,7 @@ func InitTestSession() Session {
 	}
 }
 
-func InitServerConfig() (Server, error) {
+func InitServer() Server {
 	var config Server
 
 	err := env.Parse(&config)
@@ -40,5 +40,5 @@ func InitServerConfig() (Server, error) {
 		log.Fatalf("error parsing environment variables: %v", err)
 	}
 
-	return config, nil
+	return config
 }
