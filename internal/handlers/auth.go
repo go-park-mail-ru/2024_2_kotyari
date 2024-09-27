@@ -7,9 +7,9 @@ import (
 	"github.com/gorilla/sessions"
 	"net/http"
 
-	"golang.org/x/crypto/argon2"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/db"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
+	"golang.org/x/crypto/argon2"
 )
 
 type AuthApp struct {
@@ -105,7 +105,7 @@ func (a *AuthApp) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if email, isAuthenticated := session.Values["user_id"].(string); isAuthenticated {
-		user, _ := db.GetUserByEmail(email)
+		user, _ := a.db.GetUserByEmail(email)
 		writeJSON(w, http.StatusOK, UsernameResponse{Username: user.Username})
 		return
 	}
@@ -113,7 +113,6 @@ func (a *AuthApp) Login(w http.ResponseWriter, r *http.Request) {
 	err = json.NewDecoder(r.Body).Decode(&creds)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
-			ErrorCode:    http.StatusInternalServerError,
 			ErrorMessage: errs.InternalServerError.Error(),
 		})
 		return
