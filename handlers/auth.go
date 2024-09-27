@@ -22,13 +22,14 @@ func validateRegistration(w *http.ResponseWriter, creds credsApiRequest) bool {
 		return false
 	}
 
-	switch {
-	case creds.Password != creds.RepeatPassword:
+	if creds.Password != creds.RepeatPassword {
 		writeJSON(*w, http.StatusBadRequest, errs.HTTPErrorResponse{
 			ErrorMessage: errs.PasswordsDoNotMatch.Error(),
 		})
 		return false
-	case !isValidUsername(creds.Username):
+	}
+
+	if !isValidUsername(creds.Username) {
 		writeJSON(*w, http.StatusBadRequest, errs.HTTPErrorResponse{
 			ErrorMessage: errs.InvalidUsernameFormat.Error(),
 		})
