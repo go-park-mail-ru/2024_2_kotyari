@@ -27,7 +27,14 @@ const (
 
 func setUpCORS() *cors.Cors {
 	return cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000", "http://localhost:8080", "http://127.0.0.1:3000", "http://127.0.0.1:8080"},
+		AllowedOrigins: []string{
+			"http://localhost:3000",
+			"http://localhost:8080",
+			"http://127.0.0.1:3000",
+			"http://127.0.0.1:8080",
+			"94.139.246.241:3000",
+			"94.139.246.241:8000",
+		},
 		AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions},
 		AllowedHeaders:   []string{"Accept", "Accept-Language", "Content-Type", "Authorization"},
 		AllowCredentials: true,
