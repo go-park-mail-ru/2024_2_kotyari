@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/sessions"
 	"net/http"
 
@@ -24,49 +25,6 @@ func NewApp() *AuthApp {
 	}
 }
 
-func validateLogin(w *http.ResponseWriter, creds credsApiRequest) bool {
-	return validateEmailAndPassword(w, creds)
-}
-
-func validateRegistration(w *http.ResponseWriter, creds credsApiRequest) bool {
-	if !validateEmailAndPassword(w, creds) {
-		return false
-	}
-
-	if creds.Password != creds.RepeatPassword {
-		writeJSON(*w, http.StatusBadRequest, errs.HTTPErrorResponse{
-			ErrorMessage: errs.PasswordsDoNotMatch.Error(),
-		})
-		return false
-	}
-
-	if !isValidUsername(creds.Username) {
-		writeJSON(*w, http.StatusBadRequest, errs.HTTPErrorResponse{
-			ErrorMessage: errs.InvalidUsernameFormat.Error(),
-		})
-		return false
-	}
-
-	return true
-}
-
-func validateEmailAndPassword(w *http.ResponseWriter, creds credsApiRequest) bool {
-	switch {
-	case !isValidEmail(creds.Email):
-		writeJSON(*w, http.StatusBadRequest, errs.HTTPErrorResponse{
-			ErrorMessage: errs.InvalidEmailFormat.Error(),
-		})
-		return false
-	case !isValidPassword(creds.Password):
-		writeJSON(*w, http.StatusBadRequest, errs.HTTPErrorResponse{
-			ErrorMessage: errs.InvalidPasswordFormat.Error(),
-		})
-		return false
-	}
-
-	return true
-}
-
 type Server struct {
 	sessions sessions.Store
 }
@@ -76,10 +34,6 @@ func newAppForTests() *AuthApp {
 		sessions: newTestSessions(),
 		db:       db.InitUsersWithData(),
 	}
-}
-
-type UsernameResponse struct {
-	Username string `json:"username"`
 }
 
 // Login обрабатывает вход пользователя и создает сессию
@@ -131,6 +85,8 @@ func (a *AuthApp) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println("ok")
+	//a.sessions.Save()
 	writeJSON(w, http.StatusOK, UsernameResponse{Username: user.Username})
 }
 

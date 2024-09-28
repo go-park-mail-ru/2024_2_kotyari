@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/db"
@@ -66,6 +67,7 @@ func (a *AuthApp) SignUp(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+
 	session.Values["user_id"] = signupRequest.Email
 	session.Options.MaxAge = 3600 * 10
 	session.Options.HttpOnly = true
@@ -78,13 +80,18 @@ func (a *AuthApp) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, http.StatusOK, nil)
+	fmt.Println(a.sessions.Get(r))
+
+	writeJSON(w, http.StatusOK, UsernameResponse{Username: user.Username})
 }
 
 func writeJSON(w http.ResponseWriter, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	if data != nil {
-		json.NewEncoder(w).Encode(data)
+		err := json.NewEncoder(w).Encode(data)
+		if err != nil {
+			return
+		}
 	}
 }
