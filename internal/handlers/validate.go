@@ -59,7 +59,7 @@ func isValidEmail(email string) bool {
 }
 
 func isValidUsername(username string) bool {
-	return len(username) > 5 && len(username) < 20
+	return len(username) > 2 && len(username) < 20
 }
 
 func isInGroup(char rune, group string) bool {
