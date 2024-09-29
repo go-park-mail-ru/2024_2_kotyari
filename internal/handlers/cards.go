@@ -19,6 +19,7 @@ func NewCardsApp(productsDB db.ProductManager) *CardsApp {
 	}
 }
 
+// Products
 // @Summary Get Products
 // @Description Возвращает список всех продуктов
 // @Tags Products
@@ -26,7 +27,7 @@ func NewCardsApp(productsDB db.ProductManager) *CardsApp {
 // @Success 200 {object} map[string]db.Product
 // @Failure 500 {string} string "Ошибка при кодировании JSON"
 // @Router /catalog/products [get]
-func (c *CardsApp) Products(w http.ResponseWriter, r *http.Request) {
+func (c *CardsApp) Products(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	products := c.db.GetAllProducts()
@@ -40,7 +41,7 @@ func (c *CardsApp) Products(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-// @Summary Get Product by ID
+// ProductByID @Summary Get Product by ID
 // @Description Возвращает продукт по его ID
 // @Tags Products
 // @Produce json

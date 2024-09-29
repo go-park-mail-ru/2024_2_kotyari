@@ -9,8 +9,7 @@ import (
 // @title Swagger Oxic API
 // @version 1.0
 // @description This is simple oxic server
-
-// @host localhost:8000
+// @host 94.139.246.241:8000
 // @BasePath /
 func main() {
 	err := godotenv.Load(".env")

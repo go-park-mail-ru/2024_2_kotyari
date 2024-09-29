@@ -37,6 +37,7 @@ func (s *Server) Run() {
 	s.r.HandleFunc("/basket", s.auth.IsLogin).Methods(http.MethodGet)
 	s.r.HandleFunc("/records", s.auth.IsLogin).Methods(http.MethodGet)
 	s.r.HandleFunc("/favorite", s.auth.IsLogin).Methods(http.MethodGet)
+	s.r.HandleFunc("/account", s.auth.IsLogin).Methods(http.MethodGet)
 
 	handler := setUpCORS().Handler(s.r)
 

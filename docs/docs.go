@@ -24,7 +24,6 @@ const docTemplate = `{
                 "tags": [
                     "Products"
                 ],
-                "summary": "Get Product by ID",
                 "parameters": [
                     {
                         "type": "string",
@@ -85,6 +84,32 @@ const docTemplate = `{
                 }
             }
         },
+        "/islogin": {
+            "get": {
+                "description": "Проверяет, авторизован ли пользователь, и возвращает его имя пользователя",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Проверка авторизации пользователя",
+                "responses": {
+                    "200": {
+                        "description": "Информация о пользователе",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.UsernameResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Пользователь не авторизован",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/login": {
             "post": {
                 "description": "Проверяет учетные данные пользователя и создает сессию при успешной аутентификации",
@@ -111,9 +136,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Успешный вход",
+                        "description": "Имя пользователя",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/handlers.UsernameResponse"
                         }
                     },
                     "400": {
@@ -148,11 +173,8 @@ const docTemplate = `{
                 ],
                 "summary": "Логаут пользователя",
                 "responses": {
-                    "200": {
-                        "description": "Вы успешно вышли",
-                        "schema": {
-                            "type": "string"
-                        }
+                    "204": {
+                        "description": "No Content"
                     },
                     "401": {
                         "description": "Пользователь не авторизован",
@@ -269,10 +291,15 @@ const docTemplate = `{
         "errs.HTTPErrorResponse": {
             "type": "object",
             "properties": {
-                "error_code": {
-                    "type": "integer"
-                },
                 "error_message": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.UsernameResponse": {
+            "type": "object",
+            "properties": {
+                "username": {
                     "type": "string"
                 }
             }
@@ -286,6 +313,9 @@ const docTemplate = `{
                 "password": {
                     "type": "string"
                 },
+                "repeat_password": {
+                    "type": "string"
+                },
                 "username": {
                     "type": "string"
                 }
@@ -297,7 +327,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8000",
+	Host:             "94.139.246.241:8000",
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Swagger Oxic API",

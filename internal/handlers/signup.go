@@ -2,14 +2,13 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/db"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 )
 
-// Signup handles user signup requests
+// SignUp handles user signup requests
 // @Summary      Signup a new user
 // @Description  This endpoint creates a new user in the system
 // @Tags         auth
@@ -31,7 +30,7 @@ func (a *AuthApp) SignUp(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	if !validateRegistration(&w, signupRequest) {
+	if !validateRegistration(w, signupRequest) {
 		return
 	}
 
@@ -60,6 +59,12 @@ func (a *AuthApp) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = a.db.CreateUser(signupRequest.Email, user)
+	if err != nil {
+		writeJSON(w, http.StatusConflict, errs.HTTPErrorResponse{
+			ErrorMessage: err.Error(),
+		})
+	}
+
 	session, err := a.sessions.Get(r)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
@@ -71,6 +76,8 @@ func (a *AuthApp) SignUp(w http.ResponseWriter, r *http.Request) {
 	session.Values["user_id"] = signupRequest.Email
 	session.Options.MaxAge = 3600 * 10
 	session.Options.HttpOnly = true
+	session.Options.SameSite = http.SameSiteLaxMode
+	session.Options.Secure = false
 
 	err = a.sessions.Save(w, r, session)
 	if err != nil {
@@ -79,8 +86,6 @@ func (a *AuthApp) SignUp(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-
-	fmt.Println(a.sessions.Get(r))
 
 	writeJSON(w, http.StatusOK, UsernameResponse{Username: user.Username})
 }

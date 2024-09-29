@@ -8,24 +8,32 @@ import (
 	"unicode"
 )
 
-func validateLogin(w *http.ResponseWriter, creds credsApiRequest) bool {
+const (
+	timeCost    uint32 = 1         // Время обработки (количество итераций)
+	memoryCost  uint32 = 64 * 1024 // Память, используемая Argon2 (в KB)
+	parallelism uint8  = 4         // Количество параллельных потоков
+	keyLength   uint32 = 32        // Длина генерируемого ключа
+	saltLength  int    = 16        // Длина соли в байтах
+)
+
+func validateLogin(w http.ResponseWriter, creds credsApiRequest) bool {
 	return validateEmailAndPassword(w, creds)
 }
 
-func validateRegistration(w *http.ResponseWriter, creds credsApiRequest) bool {
+func validateRegistration(w http.ResponseWriter, creds credsApiRequest) bool {
 	if !validateEmailAndPassword(w, creds) {
 		return false
 	}
 
 	if creds.Password != creds.RepeatPassword {
-		writeJSON(*w, http.StatusBadRequest, errs.HTTPErrorResponse{
+		writeJSON(w, http.StatusBadRequest, errs.HTTPErrorResponse{
 			ErrorMessage: errs.PasswordsDoNotMatch.Error(),
 		})
 		return false
 	}
 
 	if !isValidUsername(creds.Username) {
-		writeJSON(*w, http.StatusBadRequest, errs.HTTPErrorResponse{
+		writeJSON(w, http.StatusBadRequest, errs.HTTPErrorResponse{
 			ErrorMessage: errs.InvalidUsernameFormat.Error(),
 		})
 		return false
@@ -34,15 +42,15 @@ func validateRegistration(w *http.ResponseWriter, creds credsApiRequest) bool {
 	return true
 }
 
-func validateEmailAndPassword(w *http.ResponseWriter, creds credsApiRequest) bool {
+func validateEmailAndPassword(w http.ResponseWriter, creds credsApiRequest) bool {
 	switch {
 	case !isValidEmail(creds.Email):
-		writeJSON(*w, http.StatusBadRequest, errs.HTTPErrorResponse{
+		writeJSON(w, http.StatusBadRequest, errs.HTTPErrorResponse{
 			ErrorMessage: errs.InvalidEmailFormat.Error(),
 		})
 		return false
 	case !isValidPassword(creds.Password):
-		writeJSON(*w, http.StatusBadRequest, errs.HTTPErrorResponse{
+		writeJSON(w, http.StatusBadRequest, errs.HTTPErrorResponse{
 			ErrorMessage: errs.InvalidPasswordFormat.Error(),
 		})
 		return false
