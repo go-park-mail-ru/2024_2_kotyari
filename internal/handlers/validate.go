@@ -59,7 +59,9 @@ func isValidEmail(email string) bool {
 }
 
 func isValidUsername(username string) bool {
-	return len(username) > 2 && len(username) < 20
+	re := regexp.MustCompile(`^[a-zа-яё][a-z0-9_а-яё]{1,40}$`)
+
+	return re.MatchString(username)
 }
 
 func isInGroup(char rune, group string) bool {
