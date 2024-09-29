@@ -354,6 +354,7 @@ var productsData = map[string]Product{
 		ShortDescription: "Насадки для электрической зубной щетки Philips Sonicare",
 		URL:              "/catalog/product/40",
 		Currency:         "Р",
+	},
 }
 
 var usersData = map[string]User{
