@@ -271,7 +271,7 @@ var productsData = map[string]Product{
 		Description:      "Вертикальный пылесос TY6545RH",
 		ShortDescription: "Вертикальный пылесос TY6545RH",
 		Image:            "/src/assets/img/static/31.webp",
-		URL:              "https://sun9-19.userapi.com/impg/zaTx2ipyBWkFIr1ZEhtnrU6Ld9qJ33B5r2bm0w/3-HbMG7pvX0.jpg?size=264x956&quality=95&sign=c6462ec73d672001248797e366734b51&type=album",
+		URL:              "https://ir.ozone.ru/s3/multimedia-g/wc1000/6573623116.jpg",
 		Currency:         "Р",
 	},
 	"32": {
@@ -327,7 +327,7 @@ var productsData = map[string]Product{
 		Image:            "https://sun9-20.userapi.com/impg/VUGPRKZ6CfqeP-zJE_aqllJ8S5RBGQIBfBFBiQ/ii3iTeGN4rA.jpg?size=1000x1000&quality=95&sign=5059a25a2603644ae1fdb30aa753b2ce&type=album",
 	},
 	"38": {
-		Image:            "",
+		Image:            "https://sun9-65.userapi.com/impg/QB6aOMLFdVAtUZYrokbyvNKhgoEChu1aIUybZg/0OsIyFEBtSo.jpg?size=1000x1000&quality=95&sign=276f81bfffa6df63a7eed2cf83fa3bda&type=album",
 		CurrentPrice:     "18699",
 		OldPrice:         "24999",
 		Discount:         "27",
