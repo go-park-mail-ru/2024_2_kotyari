@@ -112,6 +112,10 @@ func (a *AuthApp) Logout(w http.ResponseWriter, r *http.Request) {
 
 	// Устанавливаем время жизни сессии в -1, что означает, что сессия будет завершена
 	session.Options.MaxAge = -1
+	session.Options.HttpOnly = true
+	session.Options.SameSite = http.SameSiteLaxMode
+	session.Options.Secure = false
+
 	err = a.sessions.Save(w, r, session)
 	if err != nil {
 		http.Error(w, errs.LogoutError.Error(), http.StatusInternalServerError)
