@@ -53,13 +53,15 @@ func validateEmailAndPassword(w *http.ResponseWriter, creds credsApiRequest) boo
 
 // isValidEmail проверяет, является ли email действительным
 func isValidEmail(email string) bool {
-	const emailRegex = `^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$`
+	const emailRegex = `(?i)^[a-z0-9а-яё._%+-]+@[a-z0-9а-яё.-]+\.[a-zа-я]{2,}$`
 	re := regexp.MustCompile(emailRegex)
 	return re.MatchString(email)
 }
 
 func isValidUsername(username string) bool {
-	return len(username) > 5 && len(username) < 20
+	re := regexp.MustCompile(`[a-zA-Zа-яА-ЯёЁ0-9 _-]{2,40}$`)
+
+	return re.MatchString(username)
 }
 
 func isInGroup(char rune, group string) bool {
