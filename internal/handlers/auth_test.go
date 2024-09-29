@@ -10,7 +10,6 @@ import (
 
 var testUser = credsApiRequest{
 	Email:    "user@example.com",
-	Username: "Goshanchik",
 	Password: "Password123@",
 }
 

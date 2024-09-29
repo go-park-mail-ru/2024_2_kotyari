@@ -1,15 +1,12 @@
 package handlers
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"encoding/json"
 	"github.com/gorilla/sessions"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/db"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
-	"golang.org/x/crypto/argon2"
 )
 
 type AuthApp struct {
@@ -42,7 +39,7 @@ func newAppForTests() *AuthApp {
 // @Accept json
 // @Produce json
 // @Param user body db.User true "Данные пользователя"
-// @Success 200 {string} string "Успешный вход"
+// @Success 200 {object} UsernameResponse "Имя пользователя"
 // @Failure 400 {string} string "Неправильный запрос"
 // @Failure 401 {string} string "Неправильные учетные данные"
 // @Failure 500 {string} string "Ошибка при создании сессии"
@@ -58,12 +55,6 @@ func (a *AuthApp) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if email, isAuthenticated := session.Values["user_id"].(string); isAuthenticated {
-		user, _ := a.db.GetUserByEmail(email)
-		writeJSON(w, http.StatusOK, UsernameResponse{Username: user.Username})
-		return
-	}
-
 	err = json.NewDecoder(r.Body).Decode(&creds)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
@@ -72,7 +63,7 @@ func (a *AuthApp) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !validateLogin(&w, creds) {
+	if !validateLogin(w, creds) {
 		return
 	}
 
@@ -84,52 +75,18 @@ func (a *AuthApp) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	session.Values["user_id"] = creds.Email
+	session.Options.MaxAge = 3600 * 10
+	session.Options.HttpOnly = true
+	err = a.sessions.Save(w, r, session)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
+			ErrorMessage: errs.SessionSaveError.Error(),
+		})
+		return
+	}
+
 	writeJSON(w, http.StatusOK, UsernameResponse{Username: user.Username})
-}
-
-const (
-	timeCost    uint32 = 1         // Время обработки (количество итераций)
-	memoryCost  uint32 = 64 * 1024 // Память, используемая Argon2 (в KB)
-	parallelism uint8  = 4         // Количество параллельных потоков
-	keyLength   uint32 = 32        // Длина генерируемого ключа
-	saltLength  int    = 16        // Длина соли в байтах
-)
-
-func generateSalt() ([]byte, error) {
-	salt := make([]byte, saltLength)
-	_, err := rand.Read(salt)
-	if err != nil {
-		return nil, err
-	}
-	return salt, nil
-}
-
-func hashPassword(password string, salt []byte) string {
-	hash := argon2.IDKey([]byte(password), salt, timeCost, memoryCost, parallelism, keyLength)
-	fullHash := append(salt, hash...)
-	return base64.RawStdEncoding.EncodeToString(fullHash)
-}
-
-// Разделение соли и хеша
-func splitSaltAndHash(saltHashBase64 string) ([]byte, []byte, error) {
-	saltHash, err := base64.RawStdEncoding.DecodeString(saltHashBase64)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	salt := saltHash[:saltLength] // Первые saltLength байт — это соль
-	hash := saltHash[saltLength:] // Остальное — это хеш
-	return salt, hash, nil
-}
-
-func verifyPassword(storedSaltHashBase64, password string) bool {
-	salt, storedHash, err := splitSaltAndHash(storedSaltHashBase64)
-	if err != nil {
-		return false
-	}
-	computedHash := argon2.IDKey([]byte(password), salt, timeCost, memoryCost, parallelism, keyLength)
-
-	return string(storedHash) == string(computedHash)
 }
 
 // Logout очищает куки и завершает сессию
@@ -137,12 +94,11 @@ func verifyPassword(storedSaltHashBase64, password string) bool {
 // @Description Завершает сессию пользователя, очищая куки и удаляя все значения из сессии
 // @Tags auth
 // @Produce json
-// @Success 200 {string} string "Вы успешно вышли"
+// @Success 204
 // @Failure 401 {string} string "Пользователь не авторизован"
 // @Failure 500 {string} string "Ошибка при завершении сессии"
 // @Router /logout [post]
 func (a *AuthApp) Logout(w http.ResponseWriter, r *http.Request) {
-	// Получаем сессию из запроса
 	session, err := a.sessions.Get(r)
 	if err != nil {
 		http.Error(w, errs.UnauthorizedMessage.Error(), http.StatusUnauthorized)
@@ -153,16 +109,23 @@ func (a *AuthApp) Logout(w http.ResponseWriter, r *http.Request) {
 
 	// Устанавливаем время жизни сессии в -1, что означает, что сессия будет завершена
 	session.Options.MaxAge = -1
-
-	// Сохраняем изменения сессии
-	err = session.Save(r, w)
+	err = a.sessions.Save(w, r, session)
 	if err != nil {
 		http.Error(w, errs.LogoutError.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	writeJSON(w, http.StatusNoContent, nil)
 }
 
+// IsLogin проверяет, авторизован ли пользователь, и возвращает его имя пользователя
+// @Summary Проверка авторизации пользователя
+// @Description Проверяет, авторизован ли пользователь, и возвращает его имя пользователя
+// @Tags auth
+// @Produce json
+// @Success 200 {object} UsernameResponse "Информация о пользователе"
+// @Failure 401 {string} string "Пользователь не авторизован"
+// @Router /islogin [get]
 func (a *AuthApp) IsLogin(w http.ResponseWriter, r *http.Request) {
 	session, err := a.sessions.Get(r)
 	if err != nil {
