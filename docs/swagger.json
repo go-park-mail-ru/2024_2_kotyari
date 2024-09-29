@@ -6,7 +6,7 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "localhost:8000",
+    "host": "94.139.246.241:8000",
     "basePath": "/",
     "paths": {
         "/catalog/product/{id}": {
@@ -18,7 +18,6 @@
                 "tags": [
                     "Products"
                 ],
-                "summary": "Get Product by ID",
                 "parameters": [
                     {
                         "type": "string",
@@ -79,6 +78,32 @@
                 }
             }
         },
+        "/islogin": {
+            "get": {
+                "description": "Проверяет, авторизован ли пользователь, и возвращает его имя пользователя",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Проверка авторизации пользователя",
+                "responses": {
+                    "200": {
+                        "description": "Информация о пользователе",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.UsernameResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Пользователь не авторизован",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/login": {
             "post": {
                 "description": "Проверяет учетные данные пользователя и создает сессию при успешной аутентификации",
@@ -105,9 +130,9 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Успешный вход",
+                        "description": "Имя пользователя",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/handlers.UsernameResponse"
                         }
                     },
                     "400": {
@@ -142,11 +167,8 @@
                 ],
                 "summary": "Логаут пользователя",
                 "responses": {
-                    "200": {
-                        "description": "Вы успешно вышли",
-                        "schema": {
-                            "type": "string"
-                        }
+                    "204": {
+                        "description": "No Content"
                     },
                     "401": {
                         "description": "Пользователь не авторизован",
@@ -263,10 +285,15 @@
         "errs.HTTPErrorResponse": {
             "type": "object",
             "properties": {
-                "error_code": {
-                    "type": "integer"
-                },
                 "error_message": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.UsernameResponse": {
+            "type": "object",
+            "properties": {
+                "username": {
                     "type": "string"
                 }
             }
@@ -278,6 +305,9 @@
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                },
+                "repeat_password": {
                     "type": "string"
                 },
                 "username": {

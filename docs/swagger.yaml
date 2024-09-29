@@ -31,9 +31,12 @@ definitions:
     type: object
   errs.HTTPErrorResponse:
     properties:
-      error_code:
-        type: integer
       error_message:
+        type: string
+    type: object
+  handlers.UsernameResponse:
+    properties:
+      username:
         type: string
     type: object
   handlers.credsApiRequest:
@@ -42,10 +45,12 @@ definitions:
         type: string
       password:
         type: string
+      repeat_password:
+        type: string
       username:
         type: string
     type: object
-host: localhost:8000
+host: 94.139.246.241:8000
 info:
   contact: {}
   description: This is simple oxic server
@@ -76,7 +81,6 @@ paths:
           description: Ошибка при кодировании JSON
           schema:
             type: string
-      summary: Get Product by ID
       tags:
       - Products
   /catalog/products:
@@ -98,6 +102,23 @@ paths:
       summary: Get Products
       tags:
       - Products
+  /islogin:
+    get:
+      description: Проверяет, авторизован ли пользователь, и возвращает его имя пользователя
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Информация о пользователе
+          schema:
+            $ref: '#/definitions/handlers.UsernameResponse'
+        "401":
+          description: Пользователь не авторизован
+          schema:
+            type: string
+      summary: Проверка авторизации пользователя
+      tags:
+      - auth
   /login:
     post:
       consumes:
@@ -115,9 +136,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: Успешный вход
+          description: Имя пользователя
           schema:
-            type: string
+            $ref: '#/definitions/handlers.UsernameResponse'
         "400":
           description: Неправильный запрос
           schema:
@@ -140,10 +161,8 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: Вы успешно вышли
-          schema:
-            type: string
+        "204":
+          description: No Content
         "401":
           description: Пользователь не авторизован
           schema:
