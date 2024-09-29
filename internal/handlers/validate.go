@@ -78,7 +78,7 @@ func isValidPassword(password string) bool {
 			hasUpper = true
 		case unicode.IsLower(char):
 			hasLower = true
-		case isInGroup(char, "@$%*?&#."):
+		case isInGroup(char, "!@#$%^:&?*."):
 			hasSpecial = true
 		}
 	}
