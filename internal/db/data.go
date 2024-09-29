@@ -270,7 +270,7 @@ var productsData = map[string]Product{
 		CurrentPrice:     "10080",
 		Description:      "Вертикальный пылесос TY6545RH",
 		ShortDescription: "Вертикальный пылесос TY6545RH",
-		Image:            "/src/assets/img/static/31.webp",
+		Image:            "https://ir.ozone.ru/s3/multimedia-1-j/wc1000/7051900735.jpg",
 		URL:              "https://ir.ozone.ru/s3/multimedia-g/wc1000/6573623116.jpg",
 		Currency:         "Р",
 	},
