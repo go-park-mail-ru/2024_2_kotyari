@@ -6,3 +6,7 @@ type credsApiRequest struct {
 	Password       string `json:"password"`
 	RepeatPassword string `json:"repeat_password,omitempty"`
 }
+
+type UsernameResponse struct {
+	Username string `json:"username"`
+}

@@ -4,10 +4,20 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"2024_2_kotyari/db"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/db"
 
 	"github.com/gorilla/mux"
 )
+
+type CardsApp struct {
+	db db.ProductManager
+}
+
+func NewCardsApp(productsDB db.ProductManager) *CardsApp {
+	return &CardsApp{
+		db: productsDB,
+	}
+}
 
 // @Summary Get Products
 // @Description Возвращает список всех продуктов
@@ -16,10 +26,10 @@ import (
 // @Success 200 {object} map[string]db.Product
 // @Failure 500 {string} string "Ошибка при кодировании JSON"
 // @Router /catalog/products [get]
-func Products(w http.ResponseWriter, r *http.Request) {
+func (c *CardsApp) Products(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	products := db.GetAllProducts()
+	products := c.db.GetAllProducts()
 
 	err := json.NewEncoder(w).Encode(products)
 	if err != nil {
@@ -39,11 +49,11 @@ func Products(w http.ResponseWriter, r *http.Request) {
 // @Failure 404 {string} string "Продукт не найден"
 // @Failure 500 {string} string "Ошибка при кодировании JSON"
 // @Router /catalog/product/{id} [get]
-func ProductByID(w http.ResponseWriter, r *http.Request) {
+func (c *CardsApp) ProductByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	productID := vars["id"]
 
-	product, exists := db.GetProductByID(productID)
+	product, exists := c.db.GetProductByID(productID)
 	if !exists {
 		http.Error(w, "Продукт не найден", http.StatusNotFound)
 		return

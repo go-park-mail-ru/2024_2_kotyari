@@ -33,4 +33,13 @@ test-coverage:
 fmt:
 	go fmt ./...
 
+docker-build:
+	docker build -t back-go-image:latest .
+
+docker-run:
+	docker compose up -d
+
+docker-refresh:
+	docker stop back-go && docker rm back-go && docker rmi back-go-image && docker compose up -d
+
 .PHONY: clean build

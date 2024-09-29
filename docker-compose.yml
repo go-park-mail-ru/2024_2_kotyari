@@ -4,4 +4,7 @@ services:
   go-back:
     build: .
     ports:
-      - "8080:8080"
+      - "8000:8000"
+    image: back-go-image
+    container_name: back-go
+    restart: unless-stopped
