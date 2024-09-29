@@ -76,6 +76,8 @@ func (a *AuthApp) SignUp(w http.ResponseWriter, r *http.Request) {
 	session.Values["user_id"] = signupRequest.Email
 	session.Options.MaxAge = 3600 * 10
 	session.Options.HttpOnly = true
+	session.Options.SameSite = http.SameSiteNoneMode
+	session.Options.Secure = false
 
 	err = a.sessions.Save(w, r, session)
 	if err != nil {
