@@ -37,5 +37,6 @@ func setUpCORS() *cors.Cors {
 		},
 		AllowCredentials: true,
 		MaxAge:           hour,
+		Debug:            false,
 	})
 }
