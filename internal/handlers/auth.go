@@ -78,8 +78,8 @@ func (a *AuthApp) Login(w http.ResponseWriter, r *http.Request) {
 	session.Values["user_id"] = creds.Email
 	session.Options.MaxAge = 3600 * 10
 	session.Options.HttpOnly = true
+	session.Options.SameSite = http.SameSiteLaxMode
 	session.Options.Secure = false
-	session.Options.SameSite = http.SameSiteNoneMode
 
 	err = a.sessions.Save(w, r, session)
 	if err != nil {
