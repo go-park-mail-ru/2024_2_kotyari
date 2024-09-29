@@ -5,63 +5,40 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/db"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/handlers"
 	"github.com/gorilla/mux"
-	"github.com/rs/cors"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"log"
 	"net/http"
 )
 
 type Server struct {
-	CORS *cors.Cors
-	r    *mux.Router
-	a    *handlers.AuthApp
-	c    *handlers.CardsApp
-	cfg  config.Server
-}
-
-const (
-	second = 1
-	minute = 60 * second
-	hour   = 60 * minute
-)
-
-func setUpCORS() *cors.Cors {
-	return cors.New(cors.Options{
-		AllowedOrigins: []string{
-			"http://localhost:3000",
-			"http://localhost:8080",
-			"http://127.0.0.1:3000",
-			"http://127.0.0.1:8080",
-			"94.139.246.241:3000",
-			"94.139.246.241:8000",
-		},
-		AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions},
-		AllowedHeaders:   []string{"Accept", "Accept-Language", "Content-Type", "Authorization"},
-		AllowCredentials: true,
-		MaxAge:           hour,
-		Debug:            true,
-	})
+	r       *mux.Router
+	auth    *handlers.AuthApp
+	catalog *handlers.CardsApp
+	cfg     config.Server
 }
 
 func NewServer() *Server {
 	return &Server{
-		r:    mux.NewRouter(),
-		a:    handlers.NewApp(),
-		c:    handlers.NewCardsApp(db.NewProducts()),
-		CORS: setUpCORS(),
-		cfg:  config.InitServer(),
+		r:       mux.NewRouter(),
+		auth:    handlers.NewApp(),
+		catalog: handlers.NewCardsApp(db.NewProducts()),
+		cfg:     config.InitServer(),
 	}
 }
 
 func (s *Server) Run() {
-	s.r.HandleFunc("/login", s.a.Login).Methods(http.MethodPost)
-	s.r.HandleFunc("/logout", s.a.Logout).Methods(http.MethodPost)
-	s.r.HandleFunc("/signup", s.a.SignUp).Methods(http.MethodPost)
-	s.r.HandleFunc("/catalog/products", s.c.Products).Methods(http.MethodGet)
-	s.r.HandleFunc("/catalog/product/{id}", s.c.ProductByID).Methods(http.MethodGet)
+	s.r.HandleFunc("/login", s.auth.Login).Methods(http.MethodPost)
+	s.r.HandleFunc("/logout", s.auth.Logout).Methods(http.MethodPost)
+	s.r.HandleFunc("/signup", s.auth.SignUp).Methods(http.MethodPost)
+	s.r.HandleFunc("/catalog/products", s.catalog.Products).Methods(http.MethodGet)
+	s.r.HandleFunc("/catalog/product/{id}", s.catalog.ProductByID).Methods(http.MethodGet)
 	s.r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
-	handler := s.CORS.Handler(s.r)
+	s.r.HandleFunc("/basket", s.auth.IsLogin).Methods(http.MethodGet)
+	s.r.HandleFunc("/records", s.auth.IsLogin).Methods(http.MethodGet)
+	s.r.HandleFunc("/favorite", s.auth.IsLogin).Methods(http.MethodGet)
+
+	handler := setUpCORS().Handler(s.r)
 
 	log.Printf("Сервер запущен на: %s\n", s.cfg.ServerAddress)
 	err := http.ListenAndServe(s.cfg.ServerAddress, handler)

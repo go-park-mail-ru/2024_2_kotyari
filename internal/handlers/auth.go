@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/sessions"
 	"net/http"
 
@@ -85,8 +84,6 @@ func (a *AuthApp) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("ok")
-	//a.sessions.Save()
 	writeJSON(w, http.StatusOK, UsernameResponse{Username: user.Username})
 }
 
@@ -164,4 +161,20 @@ func (a *AuthApp) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusNoContent, nil)
+}
+
+func (a *AuthApp) IsLogin(w http.ResponseWriter, r *http.Request) {
+	session, err := a.sessions.Get(r)
+	if err != nil {
+		http.Error(w, errs.UnauthorizedMessage.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	if email, isAuthenticated := session.Values["user_id"].(string); isAuthenticated {
+		user, _ := a.db.GetUserByEmail(email)
+		writeJSON(w, http.StatusOK, UsernameResponse{Username: user.Username})
+		return
+	}
+
+	http.Error(w, errs.UnauthorizedMessage.Error(), http.StatusUnauthorized)
 }
