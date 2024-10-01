@@ -1,42 +1,23 @@
 package app
 
 import (
-	"github.com/rs/cors"
-	"net/http"
+	"log"
+
+	"github.com/caarlos0/env"
 )
 
-const (
-	second = 1
-	minute = 60 * second
-	hour   = 60 * minute
-)
+type server struct {
+	ServerAddress   string `env:"SERVER_ADDRESS"` // Адрес сервера из переменной окружения
+	SessionLifetime string `env:"SESSION_LIFETIME" envDefault:"3600"`
+}
 
-func setUpCORS() *cors.Cors {
-	return cors.New(cors.Options{
-		AllowedOrigins: []string{
-			"http://localhost:3000",
-			"http://localhost:8080",
-			"http://127.0.0.1:3000",
-			"http://127.0.0.1:8080",
-			"94.139.246.241",
-			"http://94.139.246.241:8000",
-			"http://94.139.246.241",
-		},
-		AllowedMethods: []string{
-			http.MethodGet,
-			http.MethodPost,
-			http.MethodPut,
-			http.MethodDelete,
-			http.MethodOptions},
-		AllowedHeaders: []string{
-			"Accept",
-			"Accept-Language",
-			"Content-Type",
-			"Authorization",
-			"Access-Control-Allow-Origin",
-		},
-		AllowCredentials: true,
-		MaxAge:           hour,
-		Debug:            false,
-	})
+func initServer() server {
+	var config server
+
+	err := env.Parse(&config)
+	if err != nil {
+		log.Fatalf("error parsing environment variables: %v", err)
+	}
+
+	return config
 }
