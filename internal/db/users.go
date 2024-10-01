@@ -1,8 +1,9 @@
 package db
 
 import (
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"sync"
+
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 )
 
 type Users struct {

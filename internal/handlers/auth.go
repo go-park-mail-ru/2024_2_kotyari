@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/gorilla/sessions"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/db"
@@ -10,25 +9,23 @@ import (
 )
 
 type AuthApp struct {
-	db       *db.Users
-	sessions *sessionManager
+	userDB   db.UserManager
+	sessions SessionManager
 }
 
 func NewApp() *AuthApp {
+	userDB := db.InitUsersWithData()
 	return &AuthApp{
 		sessions: newSessions(),
-		db:       db.InitUsersWithData(),
+		userDB:   userDB,
 	}
 }
 
-type Server struct {
-	sessions sessions.Store
-}
-
 func newAppForTests() *AuthApp {
+	userDB := db.InitUsersWithData()
 	return &AuthApp{
 		sessions: newTestSessions(),
-		db:       db.InitUsersWithData(),
+		userDB:   userDB,
 	}
 }
 
@@ -52,6 +49,7 @@ func (a *AuthApp) Login(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
 			ErrorMessage: errs.SessionCreationError.Error(),
 		})
+
 		return
 	}
 
@@ -60,6 +58,7 @@ func (a *AuthApp) Login(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
 			ErrorMessage: errs.InternalServerError.Error(),
 		})
+
 		return
 	}
 
@@ -67,11 +66,12 @@ func (a *AuthApp) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, exists := a.db.GetUserByEmail(creds.Email)
+	user, exists := a.userDB.GetUserByEmail(creds.Email)
 	if !exists || !verifyPassword(user.Password, creds.Password) {
 		writeJSON(w, http.StatusUnauthorized, errs.HTTPErrorResponse{
 			ErrorMessage: errs.UnauthorizedCredentials.Error(),
 		})
+
 		return
 	}
 
@@ -86,13 +86,14 @@ func (a *AuthApp) Login(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
 			ErrorMessage: errs.SessionSaveError.Error(),
 		})
+
 		return
 	}
 
 	writeJSON(w, http.StatusOK, UsernameResponse{Username: user.Username})
 }
 
-// Logout очищает куки и завершает сессию
+// Logout завершает сессию пользователя
 // @Summary Логаут пользователя
 // @Description Завершает сессию пользователя, очищая куки и удаляя все значения из сессии
 // @Tags auth
@@ -107,10 +108,8 @@ func (a *AuthApp) Logout(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, errs.UnauthorizedMessage.Error(), http.StatusUnauthorized)
 		return
 	}
-	// Очищаем значения сессии, создавая новую пустую мапу
-	session.Values = make(map[interface{}]interface{})
 
-	// Устанавливаем время жизни сессии в -1, что означает, что сессия будет завершена
+	session.Values = make(map[interface{}]interface{})
 	session.Options.MaxAge = -1
 	session.Options.HttpOnly = true
 	session.Options.SameSite = http.SameSiteLaxMode
@@ -125,7 +124,7 @@ func (a *AuthApp) Logout(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusNoContent, nil)
 }
 
-// IsLogin проверяет, авторизован ли пользователь, и возвращает его имя пользователя
+// IsLogin проверяет, авторизован ли пользователь
 // @Summary Проверка авторизации пользователя
 // @Description Проверяет, авторизован ли пользователь, и возвращает его имя пользователя
 // @Tags auth
@@ -137,12 +136,14 @@ func (a *AuthApp) IsLogin(w http.ResponseWriter, r *http.Request) {
 	session, err := a.sessions.Get(r)
 	if err != nil {
 		http.Error(w, errs.UnauthorizedMessage.Error(), http.StatusUnauthorized)
+
 		return
 	}
 
 	if email, isAuthenticated := session.Values["user_id"].(string); isAuthenticated {
-		user, _ := a.db.GetUserByEmail(email)
+		user, _ := a.userDB.GetUserByEmail(email)
 		writeJSON(w, http.StatusOK, UsernameResponse{Username: user.Username})
+
 		return
 	}
 

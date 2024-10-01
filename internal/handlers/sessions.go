@@ -6,6 +6,11 @@ import (
 	"github.com/gorilla/sessions"
 )
 
+type SessionManager interface {
+	Get(r *http.Request) (*sessions.Session, error)
+	Save(w http.ResponseWriter, r *http.Request, session *sessions.Session) error
+}
+
 type sessionManager struct {
 	sessions sessions.Store
 	cfg      session
