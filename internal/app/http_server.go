@@ -1,13 +1,14 @@
 package app
 
 import (
+	"log"
+	"net/http"
+
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/config"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/db"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/handlers"
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
-	"log"
-	"net/http"
 )
 
 type Server struct {
@@ -26,7 +27,7 @@ func NewServer() *Server {
 	}
 }
 
-func (s *Server) Run() {
+func (s *Server) setupRoutes() {
 	s.r.HandleFunc("/login", s.auth.Login).Methods(http.MethodPost)
 	s.r.HandleFunc("/logout", s.auth.Logout).Methods(http.MethodPost)
 	s.r.HandleFunc("/signup", s.auth.SignUp).Methods(http.MethodPost)
@@ -39,8 +40,13 @@ func (s *Server) Run() {
 	s.r.HandleFunc("/favorite", s.auth.IsLogin).Methods(http.MethodGet)
 	s.r.HandleFunc("/account", s.auth.IsLogin).Methods(http.MethodGet)
 	s.r.HandleFunc("/", s.auth.IsLogin).Methods(http.MethodGet)
+}
 
-	handler := setUpCORS().Handler(s.r)
+func (s *Server) Run() {
+	s.setupRoutes()
+
+	// Оборачиваем маршруты CORS middleware
+	handler := corsMiddleware(s.r)
 
 	log.Printf("Сервер запущен на: %s\n", s.cfg.ServerAddress)
 	err := http.ListenAndServe(s.cfg.ServerAddress, handler)
