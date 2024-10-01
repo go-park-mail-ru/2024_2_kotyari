@@ -1,0 +1,211 @@
+basePath: /
+definitions:
+  db.Product:
+    properties:
+      currency:
+        description: Поле не обязательно
+        type: string
+      currentPrice:
+        type: string
+      description:
+        type: string
+      discount:
+        description: Поле не обязательно
+        type: string
+      image:
+        type: string
+      oldPrice:
+        description: Поле не обязательно
+        type: string
+      shortDescription:
+        type: string
+      url:
+        type: string
+    type: object
+  db.User:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  errs.HTTPErrorResponse:
+    properties:
+      error_message:
+        type: string
+    type: object
+  handlers.UsernameResponse:
+    properties:
+      username:
+        type: string
+    type: object
+  handlers.credsApiRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      repeat_password:
+        type: string
+      username:
+        type: string
+    type: object
+host: 94.139.246.241:8000
+info:
+  contact: {}
+  description: This is simple oxic server
+  title: Swagger Oxic API
+  version: "1.0"
+paths:
+  /catalog/product/{id}:
+    get:
+      description: Возвращает продукт по его ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/db.Product'
+        "404":
+          description: Продукт не найден
+          schema:
+            type: string
+        "500":
+          description: Ошибка при кодировании JSON
+          schema:
+            type: string
+      tags:
+      - Products
+  /catalog/products:
+    get:
+      description: Возвращает список всех продуктов
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              $ref: '#/definitions/db.Product'
+            type: object
+        "500":
+          description: Ошибка при кодировании JSON
+          schema:
+            type: string
+      summary: Get Products
+      tags:
+      - Products
+  /islogin:
+    get:
+      description: Проверяет, авторизован ли пользователь, и возвращает его имя пользователя
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Информация о пользователе
+          schema:
+            $ref: '#/definitions/handlers.UsernameResponse'
+        "401":
+          description: Пользователь не авторизован
+          schema:
+            type: string
+      summary: Проверка авторизации пользователя
+      tags:
+      - auth
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Проверяет учетные данные пользователя и создает сессию при успешной
+        аутентификации
+      parameters:
+      - description: Данные пользователя
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/db.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Имя пользователя
+          schema:
+            $ref: '#/definitions/handlers.UsernameResponse'
+        "400":
+          description: Неправильный запрос
+          schema:
+            type: string
+        "401":
+          description: Неправильные учетные данные
+          schema:
+            type: string
+        "500":
+          description: Ошибка при создании сессии
+          schema:
+            type: string
+      summary: Логин пользователя
+      tags:
+      - auth
+  /logout:
+    post:
+      description: Завершает сессию пользователя, очищая куки и удаляя все значения
+        из сессии
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Пользователь не авторизован
+          schema:
+            type: string
+        "500":
+          description: Ошибка при завершении сессии
+          schema:
+            type: string
+      summary: Логаут пользователя
+      tags:
+      - auth
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint creates a new user in the system
+      parameters:
+      - description: Signup Request Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.credsApiRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/errs.HTTPErrorResponse'
+        "409":
+          description: User already exists
+          schema:
+            $ref: '#/definitions/errs.HTTPErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errs.HTTPErrorResponse'
+      summary: Signup a new user
+      tags:
+      - auth
+swagger: "2.0"
