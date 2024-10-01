@@ -9,7 +9,8 @@ import (
 )
 
 func TestCreateUser(t *testing.T) {
-	var usersDB Users
+	t.Parallel()
+	usersDB := InitUsersWithData()
 
 	tests := []struct {
 		email string

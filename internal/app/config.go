@@ -6,18 +6,18 @@ import (
 	"github.com/caarlos0/env"
 )
 
-type server struct {
+type config struct {
 	ServerAddress   string `env:"SERVER_ADDRESS"` // Адрес сервера из переменной окружения
 	SessionLifetime string `env:"SESSION_LIFETIME" envDefault:"3600"`
 }
 
-func initServer() server {
-	var config server
+func initServer() config {
+	var cfg config
 
-	err := env.Parse(&config)
+	err := env.Parse(&cfg)
 	if err != nil {
 		log.Fatalf("error parsing environment variables: %v", err)
 	}
 
-	return config
+	return cfg
 }

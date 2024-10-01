@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/db"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/db"
 	"github.com/gorilla/mux"
 )
 

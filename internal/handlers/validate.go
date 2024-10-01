@@ -1,11 +1,12 @@
 package handlers
 
 import (
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"net/http"
 	"regexp"
 	"strings"
 	"unicode"
+
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 )
 
 const (
@@ -29,6 +30,7 @@ func validateRegistration(w http.ResponseWriter, creds credsApiRequest) bool {
 		writeJSON(w, http.StatusBadRequest, errs.HTTPErrorResponse{
 			ErrorMessage: errs.PasswordsDoNotMatch.Error(),
 		})
+
 		return false
 	}
 
@@ -36,6 +38,7 @@ func validateRegistration(w http.ResponseWriter, creds credsApiRequest) bool {
 		writeJSON(w, http.StatusBadRequest, errs.HTTPErrorResponse{
 			ErrorMessage: errs.InvalidUsernameFormat.Error(),
 		})
+
 		return false
 	}
 
@@ -48,11 +51,13 @@ func validateEmailAndPassword(w http.ResponseWriter, creds credsApiRequest) bool
 		writeJSON(w, http.StatusBadRequest, errs.HTTPErrorResponse{
 			ErrorMessage: errs.InvalidEmailFormat.Error(),
 		})
+
 		return false
 	case !isValidPassword(creds.Password):
 		writeJSON(w, http.StatusBadRequest, errs.HTTPErrorResponse{
 			ErrorMessage: errs.InvalidPasswordFormat.Error(),
 		})
+
 		return false
 	}
 
@@ -63,6 +68,7 @@ func validateEmailAndPassword(w http.ResponseWriter, creds credsApiRequest) bool
 func isValidEmail(email string) bool {
 	const emailRegex = `(?i)^[a-z0-9а-яё._%+-]+@[a-z0-9а-яё.-]+\.[a-zа-я]{2,}$`
 	re := regexp.MustCompile(emailRegex)
+
 	return re.MatchString(email)
 }
 
@@ -92,5 +98,6 @@ func isValidPassword(password string) bool {
 			hasSpecial = true
 		}
 	}
+
 	return hasMinLen && hasNumber && hasUpper && hasLower && hasSpecial
 }

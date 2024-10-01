@@ -6,6 +6,8 @@ import (
 )
 
 func TestGetProductByID(t *testing.T) {
+	t.Parallel()
+
 	db := NewProducts()
 
 	t.Run("existing product", func(t *testing.T) {
@@ -20,6 +22,7 @@ func TestGetProductByID(t *testing.T) {
 		if !exists {
 			t.Errorf("expected product with ID %s to exist", id)
 		}
+
 		if !reflect.DeepEqual(product, expectedProduct) {
 			t.Errorf("expected product %v, but got %v", expectedProduct, product)
 		}
@@ -30,6 +33,7 @@ func TestGetProductByID(t *testing.T) {
 
 		// Проверяем несуществующий продукт
 		id := "999"
+
 		_, exists := db.GetProductByID(id)
 		if exists {
 			t.Errorf("expected product with ID %s to not exist", id)
@@ -38,10 +42,9 @@ func TestGetProductByID(t *testing.T) {
 }
 
 func TestGetAllProducts(t *testing.T) {
-	db := NewProducts()
-	t.Parallel() // Параллельное выполнение теста
+	t.Parallel()
 
-	// Получаем все продукты
+	db := NewProducts()
 	products := db.GetAllProducts()
 
 	// Проверяем количество продуктов
@@ -52,10 +55,12 @@ func TestGetAllProducts(t *testing.T) {
 
 	// Проверяем, что продукты совпадают
 	for id, expectedProduct := range productsData {
+
 		product, exists := products[id]
 		if !exists {
 			t.Errorf("expected product with ID %s to exist", id)
 		}
+
 		if !reflect.DeepEqual(product, expectedProduct) {
 			t.Errorf("expected product %v, but got %v", expectedProduct, product)
 		}

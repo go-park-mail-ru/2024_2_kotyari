@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/db"
-
 	"github.com/gorilla/mux"
 )
 
@@ -35,6 +34,7 @@ func (c *CardsApp) Products(w http.ResponseWriter, _ *http.Request) {
 	err := json.NewEncoder(w).Encode(products)
 	if err != nil {
 		http.Error(w, "Ошибка при кодировании JSON", http.StatusInternalServerError)
+
 		return
 	}
 
@@ -57,13 +57,16 @@ func (c *CardsApp) ProductByID(w http.ResponseWriter, r *http.Request) {
 	product, exists := c.db.GetProductByID(productID)
 	if !exists {
 		http.Error(w, "Продукт не найден", http.StatusNotFound)
+
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+
 	err := json.NewEncoder(w).Encode(product)
 	if err != nil {
 		http.Error(w, "Ошибка при кодировании JSON", http.StatusInternalServerError)
+
 		return
 	}
 

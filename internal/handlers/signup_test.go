@@ -73,6 +73,7 @@ func TestSignupHandler(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
+
 				if httpError.ErrorMessage != tt.wantErrorMessage {
 					t.Errorf("Expected error message: %s, got: %s", tt.wantErrorMessage, httpError.ErrorMessage)
 				}
@@ -82,6 +83,7 @@ func TestSignupHandler(t *testing.T) {
 
 	t.Run("Concurrent Signups", func(t *testing.T) {
 		var wg sync.WaitGroup
+
 		a := newAppForTests()
 
 		requestStrings := []string{
@@ -91,6 +93,7 @@ func TestSignupHandler(t *testing.T) {
 		}
 		for _, requestString := range requestStrings {
 			wg.Add(1)
+
 			go func(requestString string) {
 				defer wg.Done()
 				req := httptest.NewRequest("POST", "/signup", strings.NewReader(requestString))

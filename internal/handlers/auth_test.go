@@ -83,14 +83,16 @@ func TestLoginHandler(t *testing.T) {
 
 // Тест для LogoutHandler
 func TestLogoutHandler(t *testing.T) {
+	// Используем функцию newAppForTests из пакета handlers
 	server := newAppForTests()
 
-	req := httptest.NewRequest(http.MethodGet, "/logout", nil)
+	req := httptest.NewRequest(http.MethodPost, "/logout", nil)
 	req.AddCookie(&http.Cookie{Name: "session_id", Value: "test-session-id"}) // Имитация сессии
 	w := httptest.NewRecorder()
+
 	server.Logout(w, req)
 
 	if w.Code != http.StatusNoContent {
-		t.Errorf("Ожидалось 200, имеем %v", w.Code)
+		t.Errorf("Expected 204 No Content, got %v", w.Code)
 	}
 }

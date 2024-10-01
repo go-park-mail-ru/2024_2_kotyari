@@ -1,13 +1,20 @@
 package db
 
 import (
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"sync"
+
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 )
 
 type Users struct {
 	mu    sync.RWMutex
 	users map[string]User
+}
+
+func InitUsers() *Users {
+	return &Users{
+		users: make(map[string]User),
+	}
 }
 
 func InitUsersWithData() *Users {
