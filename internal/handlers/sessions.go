@@ -1,18 +1,18 @@
 package handlers
 
 import (
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/config"
-	"github.com/gorilla/sessions"
 	"net/http"
+
+	"github.com/gorilla/sessions"
 )
 
 type sessionManager struct {
 	sessions sessions.Store
-	cfg      config.Session
+	cfg      session
 }
 
 func newSessions() *sessionManager {
-	cfg := config.InitSessions()
+	cfg := initSessions()
 
 	return &sessionManager{
 		sessions: sessions.NewCookieStore([]byte(cfg.SessionKey)),
@@ -21,7 +21,7 @@ func newSessions() *sessionManager {
 }
 
 func newTestSessions() *sessionManager {
-	cfg := config.InitTestSession()
+	cfg := initTestSession()
 
 	return &sessionManager{
 		sessions: sessions.NewCookieStore([]byte(cfg.SessionKey)),
