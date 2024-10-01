@@ -42,15 +42,12 @@ func (s *Server) setupRoutes() {
 	s.r.HandleFunc("/", s.auth.IsLogin).Methods(http.MethodGet)
 }
 
-func (s *Server) Run() {
+func (s *Server) Run() error {
 	s.setupRoutes()
 
 	// Оборачиваем маршруты CORS middleware
 	handler := corsMiddleware(s.r)
 
 	log.Printf("Сервер запущен на: %s\n", s.cfg.ServerAddress)
-	err := http.ListenAndServe(s.cfg.ServerAddress, handler)
-	if err != nil {
-		log.Fatal(err)
-	}
+	return http.ListenAndServe(s.cfg.ServerAddress, handler)
 }

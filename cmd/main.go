@@ -1,9 +1,10 @@
 package main
 
 import (
+	"log"
+
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/app"
 	"github.com/joho/godotenv"
-	"log"
 )
 
 // @title Swagger Oxic API
@@ -17,5 +18,8 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	app.NewServer().Run()
+	server := app.NewServer()
+	if err := server.Run(); err != nil {
+		log.Fatalf("Error starting server: %v", err)
+	}
 }
