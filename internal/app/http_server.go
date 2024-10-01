@@ -1,12 +1,12 @@
 package app
 
 import (
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/middlewares"
 	"log"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/db"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/handlers"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/middlewars"
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
@@ -15,13 +15,13 @@ type Server struct {
 	r       *mux.Router
 	auth    *handlers.AuthApp
 	catalog *handlers.CardsApp
-	cfg     server
+	cfg     config
 }
 
 func NewServer() *Server {
 	return &Server{
 		r:       mux.NewRouter(),
-		auth:    handlers.NewApp(),
+		auth:    handlers.NewApp(db.InitUsers(), handlers.NewSessions()),
 		catalog: handlers.NewCardsApp(db.NewProducts()),
 		cfg:     initServer(),
 	}
@@ -46,7 +46,7 @@ func (s *Server) Run() error {
 	s.setupRoutes()
 
 	// Оборачиваем маршруты CORS middleware
-	handler := middlewars.CorsMiddleware(s.r, s.cfg.SessionLifetime)
+	handler := middlewares.CorsMiddleware(s.r, s.cfg.SessionLifetime)
 
 	log.Printf("Сервер запущен на: %s\n", s.cfg.ServerAddress)
 	return http.ListenAndServe(s.cfg.ServerAddress, handler)

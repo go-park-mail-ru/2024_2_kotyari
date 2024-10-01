@@ -10,14 +10,13 @@ import (
 
 type AuthApp struct {
 	userDB   db.UserManager
-	sessions SessionManager
+	sessions SessionInterface
 }
 
-func NewApp() *AuthApp {
-	userDB := db.InitUsersWithData()
+func NewApp(users db.UserManager, sessions SessionInterface) *AuthApp {
 	return &AuthApp{
-		sessions: newSessions(),
-		userDB:   userDB,
+		sessions: sessions,
+		userDB:   users,
 	}
 }
 
@@ -75,11 +74,8 @@ func (a *AuthApp) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session.Values["user_id"] = creds.Email
-	session.Options.MaxAge = 3600 * 10
-	session.Options.HttpOnly = true
-	session.Options.SameSite = http.SameSiteLaxMode
-	session.Options.Secure = false
+	session.Values[sessionKey] = creds.Email
+	setSessionOptions(session, 10*hour)
 
 	err = a.sessions.Save(w, r, session)
 	if err != nil {
@@ -110,10 +106,7 @@ func (a *AuthApp) Logout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	session.Values = make(map[interface{}]interface{})
-	session.Options.MaxAge = -1
-	session.Options.HttpOnly = true
-	session.Options.SameSite = http.SameSiteLaxMode
-	session.Options.Secure = false
+	setSessionOptions(session, nullTime)
 
 	err = a.sessions.Save(w, r, session)
 	if err != nil {
@@ -140,7 +133,7 @@ func (a *AuthApp) IsLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if email, isAuthenticated := session.Values["user_id"].(string); isAuthenticated {
+	if email, isAuthenticated := session.Values[sessionKey].(string); isAuthenticated {
 		user, _ := a.userDB.GetUserByEmail(email)
 		writeJSON(w, http.StatusOK, UsernameResponse{Username: user.Username})
 

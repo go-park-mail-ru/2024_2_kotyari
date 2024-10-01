@@ -11,6 +11,12 @@ type Users struct {
 	users map[string]User
 }
 
+func InitUsers() *Users {
+	return &Users{
+		users: make(map[string]User),
+	}
+}
+
 func InitUsersWithData() *Users {
 	return &Users{
 		users: usersData,
