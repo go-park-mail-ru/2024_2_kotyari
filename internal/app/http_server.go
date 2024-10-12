@@ -1,8 +1,9 @@
 package app
 
 import (
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/logger"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/middlewares"
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/db"
@@ -16,6 +17,8 @@ type Server struct {
 	auth    *handlers.AuthApp
 	catalog *handlers.CardsApp
 	cfg     config
+
+	log *slog.Logger
 }
 
 func NewServer() *Server {
@@ -24,6 +27,7 @@ func NewServer() *Server {
 		auth:    handlers.NewApp(db.InitUsers(), handlers.NewSessions()),
 		catalog: handlers.NewCardsApp(db.NewProducts()),
 		cfg:     initServer(),
+		log:     logger.InitLogger(),
 	}
 }
 
@@ -45,9 +49,9 @@ func (s *Server) setupRoutes() {
 func (s *Server) Run() error {
 	s.setupRoutes()
 
-	// Оборачиваем маршруты CORS middleware
 	handler := middlewares.CorsMiddleware(s.r, s.cfg.SessionLifetime)
 
-	log.Printf("Сервер запущен на: %s\n", s.cfg.ServerAddress)
+	s.log.Info("starting server", slog.String("address:", s.cfg.ServerAddress))
+	//log.Printf("Сервер запущен на: %s\n", s.cfg.ServerAddress)
 	return http.ListenAndServe(s.cfg.ServerAddress, handler)
 }
