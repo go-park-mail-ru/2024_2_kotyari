@@ -7,21 +7,14 @@ import (
 	"unicode"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
-const (
-	timeCost    uint32 = 1         // Время обработки (количество итераций)
-	memoryCost  uint32 = 64 * 1024 // Память, используемая Argon2 (в KB)
-	parallelism uint8  = 4         // Количество параллельных потоков
-	keyLength   uint32 = 32        // Длина генерируемого ключа
-	saltLength  int    = 16        // Длина соли в байтах
-)
-
-func validateLogin(w http.ResponseWriter, creds credsApiRequest) bool {
+func validateLogin(w http.ResponseWriter, creds model.UserApiRequest) bool {
 	return validateEmailAndPassword(w, creds)
 }
 
-func validateRegistration(w http.ResponseWriter, creds credsApiRequest) bool {
+func validateRegistration(w http.ResponseWriter, creds model.UserApiRequest) bool {
 	if !validateEmailAndPassword(w, creds) {
 		return false
 	}
@@ -45,7 +38,7 @@ func validateRegistration(w http.ResponseWriter, creds credsApiRequest) bool {
 	return true
 }
 
-func validateEmailAndPassword(w http.ResponseWriter, creds credsApiRequest) bool {
+func validateEmailAndPassword(w http.ResponseWriter, creds model.UserApiRequest) bool {
 	switch {
 	case !isValidEmail(creds.Email):
 		writeJSON(w, http.StatusBadRequest, errs.HTTPErrorResponse{
