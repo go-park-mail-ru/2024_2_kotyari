@@ -4,12 +4,16 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/db"
+	userD "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/user"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	userR "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/user"
+	userU "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/user"
 )
 
 func (a *AuthApp) SignUp(w http.ResponseWriter, r *http.Request) {
-	var signupRequest credsApiRequest
+	var signupRequest model.UserApiRequest
+	userHandler := userD.NewUserDelivery(userU.NewUserUsecase(userR.NewUserMapRepository()))
 
 	err := json.NewDecoder(r.Body).Decode(&signupRequest)
 	if err != nil {
@@ -24,34 +28,7 @@ func (a *AuthApp) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, exists := a.userDB.GetUserByEmail(signupRequest.Email)
-	if exists {
-		writeJSON(w, http.StatusConflict, errs.HTTPErrorResponse{
-			ErrorMessage: errs.UserAlreadyExists.Error(),
-		})
-
-		return
-	}
-
-	// Генерация соли и хеширование пароля
-	salt, err := generateSalt()
-	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
-			ErrorMessage: errs.InternalServerError.Error(),
-		})
-
-		return
-	}
-
-	hashedPassword := hashPassword(signupRequest.Password, salt)
-
-	// Сохраняем нового пользователя
-	user := db.User{
-		Username: signupRequest.Username,
-		Password: hashedPassword,
-	}
-
-	err = a.userDB.CreateUser(signupRequest.Email, user)
+	err = userHandler.CreateUser(signupRequest)
 	if err != nil {
 		writeJSON(w, http.StatusConflict, errs.HTTPErrorResponse{
 			ErrorMessage: err.Error(),
@@ -81,7 +58,9 @@ func (a *AuthApp) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, http.StatusOK, UsernameResponse{Username: user.Username})
+	writeJSON(w, http.StatusOK, model.UsernameResponse{
+		Username: signupRequest.Username,
+	})
 }
 
 func writeJSON(w http.ResponseWriter, status int, data interface{}) {

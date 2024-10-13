@@ -2,10 +2,17 @@ package handlers
 
 import (
 	"encoding/json"
+
 	"net/http"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/db"
+	userD "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/user"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	userR "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/user"
+	userU "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/user"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
+	"github.com/gorilla/sessions"
 )
 
 type AuthApp struct {
@@ -41,9 +48,10 @@ func newAppForTests() *AuthApp {
 // @Failure 500 {string} string "Ошибка при создании сессии"
 // @Router /login [post]
 func (a *AuthApp) Login(w http.ResponseWriter, r *http.Request) {
-	var creds credsApiRequest
-
+	var creds model.UserApiRequest
+	userHandler := userD.NewUserDelivery(userU.NewUserUsecase(userR.NewUserMapRepository()))
 	session, err := a.sessions.Get(r)
+
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
 			ErrorMessage: errs.SessionCreationError.Error(),
@@ -57,7 +65,6 @@ func (a *AuthApp) Login(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
 			ErrorMessage: errs.InternalServerError.Error(),
 		})
-
 		return
 	}
 
@@ -65,8 +72,8 @@ func (a *AuthApp) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, exists := a.userDB.GetUserByEmail(creds.Email)
-	if !exists || !verifyPassword(user.Password, creds.Password) {
+	user, exists := userHandler.GetUserByEmail(creds)
+	if !exists || !utils.VerifyPassword(user.Password, creds.Password) {
 		writeJSON(w, http.StatusUnauthorized, errs.HTTPErrorResponse{
 			ErrorMessage: errs.UnauthorizedCredentials.Error(),
 		})
@@ -86,7 +93,7 @@ func (a *AuthApp) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, http.StatusOK, UsernameResponse{Username: user.Username})
+	writeJSON(w, http.StatusOK, model.UsernameResponse{Username: user.Username})
 }
 
 // Logout завершает сессию пользователя
@@ -104,7 +111,7 @@ func (a *AuthApp) Logout(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, errs.UnauthorizedMessage.Error(), http.StatusUnauthorized)
 		return
 	}
-
+	// Очищаем значения сессии, создавая новую пустую мапу
 	session.Values = make(map[interface{}]interface{})
 	setSessionOptions(session, nullTime)
 
@@ -126,7 +133,9 @@ func (a *AuthApp) Logout(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {string} string "Пользователь не авторизован"
 // @Router /islogin [get]
 func (a *AuthApp) IsLogin(w http.ResponseWriter, r *http.Request) {
+	userHandler := userD.NewUserDelivery(userU.NewUserUsecase(userR.NewUserMapRepository()))
 	session, err := a.sessions.Get(r)
+
 	if err != nil {
 		http.Error(w, errs.UnauthorizedMessage.Error(), http.StatusUnauthorized)
 
@@ -134,9 +143,8 @@ func (a *AuthApp) IsLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if email, isAuthenticated := session.Values[sessionKey].(string); isAuthenticated {
-		user, _ := a.userDB.GetUserByEmail(email)
-		writeJSON(w, http.StatusOK, UsernameResponse{Username: user.Username})
-
+		user, _ := userHandler.GetUserByEmail(model.UserApiRequest{Email: email})
+		writeJSON(w, http.StatusOK, model.UsernameResponse{Username: user.Username})
 		return
 	}
 

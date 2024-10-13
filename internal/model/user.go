@@ -1,6 +1,11 @@
-package handlers
+package model
 
-type credsApiRequest struct {
+type User struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type UserApiRequest struct {
 	Email          string `json:"email"`
 	Username       string `json:"username,omitempty"`
 	Password       string `json:"password"`
