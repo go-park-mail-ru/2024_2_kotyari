@@ -20,6 +20,7 @@ func (d *Delivery) GetUserByEmail(uRequest model.UserApiRequest) (model.User, bo
 
 func (d *Delivery) CreateUser(uRequest model.UserApiRequest) error {
 	salt, err := utils.GenerateSalt()
+
 	if err != nil {
 		return err
 	}
