@@ -6,26 +6,28 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
-var testUser = credsApiRequest{
+var testUser = model.UserApiRequest{
 	Email:    "user@example.com",
 	Password: "Password123@",
 }
 
-var testUserIncorrectEmail = credsApiRequest{
+var testUserIncorrectEmail = model.UserApiRequest{
 	Email:    "user1example.ru",
 	Username: "Goshanchik",
 	Password: "Password123@",
 }
 
-var testUserIncorrectPass = credsApiRequest{
+var testUserIncorrectPass = model.UserApiRequest{
 	Email:    "user1@example.ru",
 	Username: "Goshanchik",
 	Password: "password123",
 }
 
-var testUserNotFound = credsApiRequest{
+var testUserNotFound = model.UserApiRequest{
 	Email:    "notfound@example.com",
 	Username: "Goshanchik",
 	Password: "Password123@",
@@ -37,7 +39,7 @@ func TestLoginHandler(t *testing.T) {
 	tests := []struct {
 		name       string
 		method     string
-		body       credsApiRequest
+		body       model.UserApiRequest
 		wantStatus int
 	}{
 		{

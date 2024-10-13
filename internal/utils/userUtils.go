@@ -1,4 +1,4 @@
-package handlers
+package utils
 
 import (
 	"crypto/rand"
@@ -7,7 +7,15 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-func generateSalt() ([]byte, error) {
+const (
+	timeCost    uint32 = 1         // Время обработки (количество итераций)
+	memoryCost  uint32 = 64 * 1024 // Память, используемая Argon2 (в KB)
+	parallelism uint8  = 4         // Количество параллельных потоков
+	keyLength   uint32 = 32        // Длина генерируемого ключа
+	saltLength  int    = 16        // Длина соли в байтах
+)
+
+func GenerateSalt() ([]byte, error) {
 	salt := make([]byte, saltLength)
 	_, err := rand.Read(salt)
 	if err != nil {
@@ -17,7 +25,7 @@ func generateSalt() ([]byte, error) {
 	return salt, nil
 }
 
-func hashPassword(password string, salt []byte) string {
+func HashPassword(password string, salt []byte) string {
 	hash := argon2.IDKey([]byte(password), salt, timeCost, memoryCost, parallelism, keyLength)
 	fullHash := append(salt, hash...)
 
@@ -37,7 +45,7 @@ func splitSaltAndHash(saltHashBase64 string) ([]byte, []byte, error) {
 	return salt, hash, nil
 }
 
-func verifyPassword(storedSaltHashBase64, password string) bool {
+func VerifyPassword(storedSaltHashBase64, password string) bool {
 	salt, storedHash, err := splitSaltAndHash(storedSaltHashBase64)
 	if err != nil {
 		return false
