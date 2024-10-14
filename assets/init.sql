@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
 	"email" text NOT NULL,
 	"username" text NOT NULL,
+	"city" text NOT NULL DEFAULT 'Москва',
 	"age" smallint CHECK (age >= 0 AND age <= 120),
 	"avatar_url" text,
 	"password" text NOT NULL,
