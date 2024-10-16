@@ -1,4 +1,4 @@
-package handlers
+package user
 
 import (
 	"net/http"
@@ -7,12 +7,10 @@ import (
 )
 
 const (
-	second = 1
-	minute = 60 * second
-	hour   = 60 * minute
-
-	nullTime = -1
-
+	second     = 1
+	minute     = 60 * second
+	hour       = 60 * minute
+	nullTime   = -1
 	sessionKey = "user_id"
 )
 
@@ -56,7 +54,6 @@ func (s *SessionManager) Save(w http.ResponseWriter, r *http.Request, session *s
 
 func setSessionOptions(session *sessions.Session, maxAge int) {
 	session.Options.MaxAge = maxAge
-
 	session.Options.HttpOnly = true
 	session.Options.SameSite = http.SameSiteLaxMode
 	session.Options.Secure = false

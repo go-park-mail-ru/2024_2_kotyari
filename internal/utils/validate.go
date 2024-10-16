@@ -1,7 +1,6 @@
-package handlers
+package utils
 
 import (
-	"net/http"
 	"regexp"
 	"strings"
 	"unicode"
@@ -10,51 +9,31 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
-func validateLogin(w http.ResponseWriter, creds model.UserApiRequest) bool {
-	return validateEmailAndPassword(w, creds)
+func ValidateRegistration(userCredentials model.UserSignupRequestDTO) error {
+	if err := ValidateEmailAndPassword(userCredentials.Email, userCredentials.Password); err != nil {
+		return err
+	}
+
+	if userCredentials.Password != userCredentials.RepeatPassword {
+		return errs.PasswordsDoNotMatch
+	}
+
+	if !isValidUsername(userCredentials.Username) {
+		return errs.InvalidUsernameFormat
+	}
+
+	return nil
 }
 
-func validateRegistration(w http.ResponseWriter, creds model.UserApiRequest) bool {
-	if !validateEmailAndPassword(w, creds) {
-		return false
-	}
-
-	if creds.Password != creds.RepeatPassword {
-		writeJSON(w, http.StatusBadRequest, errs.HTTPErrorResponse{
-			ErrorMessage: errs.PasswordsDoNotMatch.Error(),
-		})
-
-		return false
-	}
-
-	if !isValidUsername(creds.Username) {
-		writeJSON(w, http.StatusBadRequest, errs.HTTPErrorResponse{
-			ErrorMessage: errs.InvalidUsernameFormat.Error(),
-		})
-
-		return false
-	}
-
-	return true
-}
-
-func validateEmailAndPassword(w http.ResponseWriter, creds model.UserApiRequest) bool {
+func ValidateEmailAndPassword(email string, password string) error {
 	switch {
-	case !isValidEmail(creds.Email):
-		writeJSON(w, http.StatusBadRequest, errs.HTTPErrorResponse{
-			ErrorMessage: errs.InvalidEmailFormat.Error(),
-		})
-
-		return false
-	case !isValidPassword(creds.Password):
-		writeJSON(w, http.StatusBadRequest, errs.HTTPErrorResponse{
-			ErrorMessage: errs.InvalidPasswordFormat.Error(),
-		})
-
-		return false
+	case !isValidEmail(email):
+		return errs.InvalidEmailFormat
+	case !isValidPassword(password):
+		return errs.InvalidPasswordFormat
 	}
 
-	return true
+	return nil
 }
 
 // isValidEmail проверяет, является ли email действительным
