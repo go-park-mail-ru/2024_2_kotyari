@@ -1,11 +1,5 @@
 package db
 
-// User представляет пользователя в системе
-type User struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
 // Product представляет товар в каталоге
 type Product struct {
 	CurrentPrice     string `json:"currentPrice"`

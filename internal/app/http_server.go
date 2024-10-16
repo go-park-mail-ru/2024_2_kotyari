@@ -1,27 +1,29 @@
 package app
 
 import (
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/middlewares"
 	"log"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/db"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/user"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/handlers"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/middlewares"
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 type Server struct {
 	r       *mux.Router
-	auth    *handlers.AuthApp
+	auth    *user.AuthManager
 	catalog *handlers.CardsApp
 	cfg     config
 }
 
 func NewServer() *Server {
 	return &Server{
-		r:       mux.NewRouter(),
-		auth:    handlers.NewApp(db.InitUsers(), handlers.NewSessions()),
+		r:    mux.NewRouter(),
+		auth: user.NewAuthManager(user.NewSessions()),
+		//auth:    handlers.NewApp(db.InitUsers(), user.NewSessions()),
 		catalog: handlers.NewCardsApp(db.NewProducts()),
 		cfg:     initServer(),
 	}
@@ -35,11 +37,11 @@ func (s *Server) setupRoutes() {
 	s.r.HandleFunc("/catalog/product/{id}", s.catalog.ProductByID).Methods(http.MethodGet)
 	s.r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
-	s.r.HandleFunc("/basket", s.auth.IsLogin).Methods(http.MethodGet)
-	s.r.HandleFunc("/records", s.auth.IsLogin).Methods(http.MethodGet)
-	s.r.HandleFunc("/favorite", s.auth.IsLogin).Methods(http.MethodGet)
-	s.r.HandleFunc("/account", s.auth.IsLogin).Methods(http.MethodGet)
-	s.r.HandleFunc("/", s.auth.IsLogin).Methods(http.MethodGet)
+	//s.r.HandleFunc("/basket", s.auth.IsLogin).Methods(http.MethodGet)
+	//s.r.HandleFunc("/records", s.auth.IsLogin).Methods(http.MethodGet)
+	//s.r.HandleFunc("/favorite", s.auth.IsLogin).Methods(http.MethodGet)
+	//s.r.HandleFunc("/account", s.auth.IsLogin).Methods(http.MethodGet)
+	//s.r.HandleFunc("/", s.auth.IsLogin).Methods(http.MethodGet)
 }
 
 func (s *Server) Run() error {

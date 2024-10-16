@@ -1,27 +1,36 @@
 package user
 
 import (
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/user"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/user"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
-type UsecaseInterface interface {
-	GetUserByEmail(email string) (model.User, bool)
-	CreateUser(email string, user model.User) error
+type RepoInterface interface {
+	GetUserByEmail(email string) (*model.User, bool)
+	InsertUser(user *model.User) (*model.User, error)
 }
 
-func NewUserUsecase(userRepo user.RepoInterface) UsecaseInterface {
+func NewUserUsecase(userRepo RepoInterface) user.UsecaseInterface {
 	return &Usecase{repo: userRepo}
 }
 
 type Usecase struct {
-	repo user.RepoInterface
+	repo RepoInterface
 }
 
-func (u Usecase) GetUserByEmail(email string) (model.User, bool) {
-	return u.repo.GetUserByEmail(email)
+func (u *Usecase) GetUserByEmail(userLoginRequest *model.UserLoginRequestDTO) (*model.User, bool) {
+	return u.repo.GetUserByEmail(userLoginRequest.Email)
 }
 
-func (u Usecase) CreateUser(email string, user model.User) error {
-	return u.repo.InsertUser(email, user)
+func (u *Usecase) CreateUser(userSignupRequest *model.UserSignupRequestDTO) (*model.User, error) {
+	salt, err := utils.GenerateSalt()
+	if err != nil {
+		return nil, err
+	}
+
+	userSignupRequest.Password = utils.HashPassword(userSignupRequest.Password, salt)
+	userModel := userSignupRequest.ToUserModel()
+
+	return u.repo.InsertUser(userModel)
 }
