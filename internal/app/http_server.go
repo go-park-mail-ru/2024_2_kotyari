@@ -1,7 +1,8 @@
 package app
 
 import (
-	"context"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/logger"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/middlewares"
 	"log/slog"
 	"net/http"
 
