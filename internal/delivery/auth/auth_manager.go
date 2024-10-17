@@ -1,6 +1,7 @@
-package user
+package auth
 
 import (
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/user"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	userR "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/user"
@@ -9,38 +10,34 @@ import (
 	"net/http"
 )
 
-type AuthManager struct {
-	userDB   userU.RepoInterface
-	delivery Delivery
-	sessions SessionInterface
+type Manager struct {
+	Delivery user.Delivery
+	Sessions SessionInterface
 }
 
-func NewAuthManager(sessions SessionInterface) *AuthManager {
-	return &AuthManager{
-		userDB:   userR.InitUsers(),
-		delivery: *NewUserDelivery(userU.NewUserUsecase(userR.NewUserMapRepository())),
-		sessions: sessions,
+func NewAuthManager(sessions SessionInterface) *Manager {
+	return &Manager{
+		Delivery: *user.NewUserDelivery(userU.NewUserUsecase(userR.NewUserMapRepository())),
+		Sessions: sessions,
 	}
 }
 
-func newTestsAuthManager() *AuthManager {
-	userTestDB := userR.InitUsersWithData()
-	return &AuthManager{
-		userDB:   userTestDB,
-		delivery: *NewUserDelivery(userU.NewUserUsecase(userR.NewUserMapRepository())),
-		sessions: newTestSessions(),
+func newTestsAuthManager() *Manager {
+	return &Manager{
+		Delivery: *user.NewUserDelivery(userU.NewUserUsecase(userR.NewUserMapRepository())),
+		Sessions: newTestSessions(),
 	}
 }
 
-func (am *AuthManager) SignUp(w http.ResponseWriter, r *http.Request) {
-	user, err := am.delivery.CreateUser(r)
+func (am *Manager) SignUp(w http.ResponseWriter, r *http.Request) {
+	user, err := am.Delivery.CreateUser(r)
 	if err != nil {
 		utils.WriteJSON(w, errs.ErrCodesMapping[err], errs.HTTPErrorResponse{
 			ErrorMessage: err.Error(),
 		})
 	}
 
-	session, err := am.sessions.Get(r)
+	session, err := am.Sessions.Get(r)
 	if err != nil {
 		utils.WriteJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
 			ErrorMessage: errs.SessionCreationError.Error(),
@@ -49,9 +46,9 @@ func (am *AuthManager) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session.Values[sessionKey] = user.Email
+	session.Values[SessionKey] = user.Email
 	setSessionOptions(session, 10*hour)
-	err = am.sessions.Save(w, r, session)
+	err = am.Sessions.Save(w, r, session)
 	if err != nil {
 		utils.WriteJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
 			ErrorMessage: errs.SessionSaveError.Error(),
@@ -65,8 +62,8 @@ func (am *AuthManager) SignUp(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (am *AuthManager) Login(w http.ResponseWriter, r *http.Request) {
-	session, err := am.sessions.Get(r)
+func (am *Manager) Login(w http.ResponseWriter, r *http.Request) {
+	session, err := am.Sessions.Get(r)
 	if err != nil {
 		utils.WriteJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
 			ErrorMessage: errs.SessionCreationError.Error(),
@@ -75,7 +72,7 @@ func (am *AuthManager) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := am.delivery.GetUserByEmail(r)
+	user, err := am.Delivery.LoginByEmail(r)
 	if err != nil {
 		utils.WriteJSON(w, errs.ErrCodesMapping[err], errs.HTTPErrorResponse{
 			ErrorMessage: err.Error(),
@@ -84,10 +81,10 @@ func (am *AuthManager) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session.Values[sessionKey] = user.Email
+	session.Values[SessionKey] = user.Email
 	setSessionOptions(session, 10*hour)
 
-	err = am.sessions.Save(w, r, session)
+	err = am.Sessions.Save(w, r, session)
 	if err != nil {
 		utils.WriteJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
 			ErrorMessage: errs.SessionSaveError.Error(),
@@ -99,11 +96,11 @@ func (am *AuthManager) Login(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSON(w, http.StatusOK, model.UsernameResponse{Username: user.Username})
 }
 
-func (am *AuthManager) Logout(w http.ResponseWriter, r *http.Request) {
-	session, err := am.sessions.Get(r)
+func (am *Manager) Logout(w http.ResponseWriter, r *http.Request) {
+	session, err := am.Sessions.Get(r)
 	if err != nil {
 		utils.WriteJSON(w, http.StatusUnauthorized, errs.HTTPErrorResponse{
-			ErrorMessage: errs.UserNotAuthorised.Error(),
+			ErrorMessage: errs.UserNotAuthorized.Error(),
 		})
 
 		return
@@ -112,7 +109,7 @@ func (am *AuthManager) Logout(w http.ResponseWriter, r *http.Request) {
 	session.Values = make(map[interface{}]interface{})
 	setSessionOptions(session, nullTime)
 
-	err = am.sessions.Save(w, r, session)
+	err = am.Sessions.Save(w, r, session)
 	if err != nil {
 		utils.WriteJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
 			ErrorMessage: errs.LogoutError.Error(),
@@ -122,4 +119,12 @@ func (am *AuthManager) Logout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJSON(w, http.StatusNoContent, nil)
+}
+
+func (am *Manager) Soon(w http.ResponseWriter, r *http.Request) {
+	username := r.Context().Value("username").(string)
+
+	utils.WriteJSON(w, http.StatusOK, model.UsernameResponse{
+		Username: username,
+	})
 }

@@ -19,7 +19,7 @@ type Usecase struct {
 	repo RepoInterface
 }
 
-func (u *Usecase) GetUserByEmail(userLoginRequest *model.UserLoginRequestDTO) (*model.User, bool) {
+func (u *Usecase) LoginByEmail(userLoginRequest *model.UserLoginRequestDTO) (*model.User, bool) {
 	return u.repo.GetUserByEmail(userLoginRequest.Email)
 }
 
@@ -33,4 +33,8 @@ func (u *Usecase) CreateUser(userSignupRequest *model.UserSignupRequestDTO) (*mo
 	userModel := userSignupRequest.ToUserModel()
 
 	return u.repo.InsertUser(userModel)
+}
+
+func (u *Usecase) GetUserByEmail(email string) (*model.User, bool) {
+	return u.repo.GetUserByEmail(email)
 }

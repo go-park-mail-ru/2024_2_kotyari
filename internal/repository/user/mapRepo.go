@@ -19,12 +19,6 @@ type MapRepo struct {
 	users map[string]model.User
 }
 
-func InitUsers() *MapRepo {
-	return &MapRepo{
-		users: make(map[string]model.User),
-	}
-}
-
 // Fix
 var usersData = map[string]model.User{
 	"user@example.com": {

@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/db"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/user"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/auth"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/handlers"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/middlewares"
 	"github.com/gorilla/mux"
@@ -14,16 +14,15 @@ import (
 
 type Server struct {
 	r       *mux.Router
-	auth    *user.AuthManager
+	auth    *auth.Manager
 	catalog *handlers.CardsApp
 	cfg     config
 }
 
 func NewServer() *Server {
 	return &Server{
-		r:    mux.NewRouter(),
-		auth: user.NewAuthManager(user.NewSessions()),
-		//auth:    handlers.NewApp(db.InitUsers(), user.NewSessions()),
+		r:       mux.NewRouter(),
+		auth:    auth.NewAuthManager(auth.NewSessions()),
 		catalog: handlers.NewCardsApp(db.NewProducts()),
 		cfg:     initServer(),
 	}
@@ -37,11 +36,12 @@ func (s *Server) setupRoutes() {
 	s.r.HandleFunc("/catalog/product/{id}", s.catalog.ProductByID).Methods(http.MethodGet)
 	s.r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
-	//s.r.HandleFunc("/basket", s.auth.IsLogin).Methods(http.MethodGet)
-	//s.r.HandleFunc("/records", s.auth.IsLogin).Methods(http.MethodGet)
-	//s.r.HandleFunc("/favorite", s.auth.IsLogin).Methods(http.MethodGet)
-	//s.r.HandleFunc("/account", s.auth.IsLogin).Methods(http.MethodGet)
-	//s.r.HandleFunc("/", s.auth.IsLogin).Methods(http.MethodGet)
+	getUnimplemented := s.r.Methods(http.MethodGet).Subrouter()
+	getUnimplemented.HandleFunc("/basket", s.auth.Soon)
+	getUnimplemented.HandleFunc("/records", s.auth.Soon)
+	getUnimplemented.HandleFunc("/favorite", s.auth.Soon)
+	getUnimplemented.HandleFunc("/account", s.auth.Soon)
+	getUnimplemented.Use(middlewares.AuthMiddleware(s.auth))
 }
 
 func (s *Server) Run() error {

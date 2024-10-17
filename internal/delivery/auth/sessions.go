@@ -1,4 +1,4 @@
-package user
+package auth
 
 import (
 	"net/http"
@@ -11,7 +11,7 @@ const (
 	minute     = 60 * second
 	hour       = 60 * minute
 	nullTime   = -1
-	sessionKey = "user_id"
+	SessionKey = "user_id"
 )
 
 type SessionInterface interface {
