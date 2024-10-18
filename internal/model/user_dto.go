@@ -1,5 +1,10 @@
 package model
 
+type UserDTO struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+}
+
 type UserSignupRequestDTO struct {
 	Email          string `json:"email"`
 	Username       string `json:"username"`
