@@ -8,7 +8,7 @@ import (
 	userU "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/user"
 )
 
-func NewUserMapRepository() userU.RepoInterface {
+func NewUserMapRepository() userU.UserStorer {
 	return &MapRepo{
 		users: map[string]model.User{},
 	}
@@ -37,24 +37,24 @@ func InitUsersWithData() *MapRepo {
 	}
 }
 
-func (db *MapRepo) GetUserByEmail(email string) (*model.User, bool) {
+func (db *MapRepo) GetUserByEmail(email string) (model.User, bool) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
 	user, exists := db.users[email]
 
-	return &user, exists
+	return user, exists
 }
 
-func (db *MapRepo) InsertUser(user *model.User) (*model.User, error) {
+func (db *MapRepo) InsertUser(user model.User) (model.User, error) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
 	if _, ok := db.users[user.Email]; ok {
-		return nil, errs.UserAlreadyExists
+		return model.User{}, errs.UserAlreadyExists
 	}
 
-	db.users[user.Email] = *user
+	db.users[user.Email] = user
 
 	return user, nil
 

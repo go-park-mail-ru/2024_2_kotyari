@@ -14,21 +14,23 @@ import (
 )
 
 type Server struct {
-	r       *mux.Router
-	auth    *auth.Manager
-	catalog *handlers.CardsApp
-	cfg     config
-
-	log *slog.Logger
+	r        *mux.Router
+	sessions auth.SessionInterface
+	auth     auth.AuthManager
+	catalog  *handlers.CardsApp
+	cfg      config
 }
 
 func NewServer() *Server {
+	sessions := auth.NewSessions()
+	authManager := auth.NewAuthManager(sessions)
 	return &Server{
 		r:       mux.NewRouter(),
 		auth:    auth.NewAuthManager(auth.NewSessions()),
 		catalog: handlers.NewCardsApp(db.NewProducts()),
 		cfg:     initServer(),
 		log:     logger.InitLogger(),
+		r:        mux.NewRouter(),
 	}
 }
 
@@ -41,11 +43,11 @@ func (s *Server) setupRoutes() {
 	s.r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	getUnimplemented := s.r.Methods(http.MethodGet).Subrouter()
-	getUnimplemented.HandleFunc("/basket", s.auth.Soon)
-	getUnimplemented.HandleFunc("/records", s.auth.Soon)
-	getUnimplemented.HandleFunc("/favorite", s.auth.Soon)
-	getUnimplemented.HandleFunc("/account", s.auth.Soon)
-	getUnimplemented.Use(middlewares.AuthMiddleware(s.auth))
+	getUnimplemented.HandleFunc("/basket", s.auth.UnimplementedRoutesHandler)
+	getUnimplemented.HandleFunc("/records", s.auth.UnimplementedRoutesHandler)
+	getUnimplemented.HandleFunc("/favorite", s.auth.UnimplementedRoutesHandler)
+	getUnimplemented.HandleFunc("/account", s.auth.UnimplementedRoutesHandler)
+	getUnimplemented.Use(middlewares.AuthMiddleware(s.sessions))
 }
 
 func (s *Server) Run() error {

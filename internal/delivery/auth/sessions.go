@@ -7,11 +7,9 @@ import (
 )
 
 const (
-	second     = 1
-	minute     = 60 * second
-	hour       = 60 * minute
-	nullTime   = -1
-	SessionKey = "user_id"
+	defaultSessionSetTime = 10 * 3600 // Кука by default ставится на 10 часов
+	deleteSession         = -1
+	SessionKey            = "user_id"
 )
 
 type SessionInterface interface {

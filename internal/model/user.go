@@ -5,3 +5,10 @@ type User struct {
 	Email    string
 	Password string
 }
+
+func (u *User) ToUserDTO() *UserDTO {
+	return &UserDTO{
+		Username: u.Username,
+		Email:    u.Email,
+	}
+}
