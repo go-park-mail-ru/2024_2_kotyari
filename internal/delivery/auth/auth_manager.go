@@ -1,40 +1,50 @@
 package auth
 
 import (
+	"net/http"
+
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/user"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	userR "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/user"
 	userU "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/user"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
-	"net/http"
 )
 
+type AuthManager interface {
+	SignUp(w http.ResponseWriter, r *http.Request)
+	Login(w http.ResponseWriter, r *http.Request)
+	Logout(w http.ResponseWriter, r *http.Request)
+	UnimplementedRoutesHandler(w http.ResponseWriter, r *http.Request)
+}
+
 type Manager struct {
-	Delivery user.Delivery
+	Delivery user.UserDelivery
 	Sessions SessionInterface
 }
 
-func NewAuthManager(sessions SessionInterface) *Manager {
+func NewAuthManager(sessions SessionInterface) AuthManager {
 	return &Manager{
-		Delivery: *user.NewUserDelivery(userU.NewUserUsecase(userR.NewUserMapRepository())),
+		Delivery: user.NewUserDelivery(userU.NewUserUseCase(userR.NewUserMapRepository())),
 		Sessions: sessions,
 	}
 }
 
 func newTestsAuthManager() *Manager {
 	return &Manager{
-		Delivery: *user.NewUserDelivery(userU.NewUserUsecase(userR.NewUserMapRepository())),
+		Delivery: user.NewUserDelivery(userU.NewUserUseCase(userR.NewUserMapRepository())),
 		Sessions: newTestSessions(),
 	}
 }
 
 func (am *Manager) SignUp(w http.ResponseWriter, r *http.Request) {
-	user, err := am.Delivery.CreateUser(r)
+	userDTO, err := am.Delivery.CreateUser(r)
 	if err != nil {
 		utils.WriteJSON(w, errs.ErrCodesMapping[err], errs.HTTPErrorResponse{
 			ErrorMessage: err.Error(),
 		})
+
+		return
 	}
 
 	session, err := am.Sessions.Get(r)
@@ -46,8 +56,8 @@ func (am *Manager) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session.Values[SessionKey] = user.Email
-	setSessionOptions(session, 10*hour)
+	session.Values[SessionKey] = userDTO.Email
+	setSessionOptions(session, defaultSessionSetTime)
 	err = am.Sessions.Save(w, r, session)
 	if err != nil {
 		utils.WriteJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
@@ -58,7 +68,7 @@ func (am *Manager) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJSON(w, http.StatusOK, model.UsernameResponse{
-		Username: user.Username,
+		Username: userDTO.Username,
 	})
 }
 
@@ -72,7 +82,7 @@ func (am *Manager) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := am.Delivery.LoginByEmail(r)
+	userDTO, err := am.Delivery.LoginByEmail(r)
 	if err != nil {
 		utils.WriteJSON(w, errs.ErrCodesMapping[err], errs.HTTPErrorResponse{
 			ErrorMessage: err.Error(),
@@ -81,9 +91,8 @@ func (am *Manager) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session.Values[SessionKey] = user.Email
-	setSessionOptions(session, 10*hour)
-
+	session.Values[SessionKey] = userDTO.Email
+	setSessionOptions(session, defaultSessionSetTime)
 	err = am.Sessions.Save(w, r, session)
 	if err != nil {
 		utils.WriteJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
@@ -93,7 +102,9 @@ func (am *Manager) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, model.UsernameResponse{Username: user.Username})
+	utils.WriteJSON(w, http.StatusOK, model.UsernameResponse{
+		Username: userDTO.Username,
+	})
 }
 
 func (am *Manager) Logout(w http.ResponseWriter, r *http.Request) {
@@ -106,9 +117,7 @@ func (am *Manager) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session.Values = make(map[interface{}]interface{})
-	setSessionOptions(session, nullTime)
-
+	setSessionOptions(session, deleteSession)
 	err = am.Sessions.Save(w, r, session)
 	if err != nil {
 		utils.WriteJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
@@ -121,10 +130,18 @@ func (am *Manager) Logout(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSON(w, http.StatusNoContent, nil)
 }
 
-func (am *Manager) Soon(w http.ResponseWriter, r *http.Request) {
-	username := r.Context().Value("username").(string)
+func (am *Manager) UnimplementedRoutesHandler(w http.ResponseWriter, r *http.Request) {
+	email := r.Context().Value(SessionKey).(string)
+	userDTO, err := am.Delivery.GetSessionUser(email)
+	if err != nil {
+		utils.WriteJSON(w, errs.ErrCodesMapping[err], errs.HTTPErrorResponse{
+			ErrorMessage: err.Error(),
+		})
+
+		return
+	}
 
 	utils.WriteJSON(w, http.StatusOK, model.UsernameResponse{
-		Username: username,
+		Username: userDTO.Username,
 	})
 }

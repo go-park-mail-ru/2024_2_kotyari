@@ -7,3 +7,10 @@ type User struct {
 	City     string
 	Password string
 }
+
+func (u *User) ToUserDTO() *UserDTO {
+	return &UserDTO{
+		Username: u.Username,
+		Email:    u.Email,
+	}
+}
