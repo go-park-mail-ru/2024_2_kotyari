@@ -8,3 +8,29 @@ services:
     image: back-go-image
     container_name: back-go
     restart: unless-stopped
+    networks:
+      - app-network
+
+  pg_db:
+    image: postgres:16.4
+    ports:
+      - "54320:5432"
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - pg_data:/var/lib/postgresql/data/
+    container_name: pg_db
+    restart: unless-stopped
+    networks:
+      - app-network
+
+volumes:
+  pg_data:
+
+networks:
+  app-network:
+    driver: bridge
