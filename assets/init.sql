@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS "orders" (
 	"address" text NOT NULL DEFAULT NULL,  -- Адрес доставки (если не используется стоковый адрес)
 	"stock_address_id" bigint,  -- Ссылка на таблицу стоковых адресов
 	"total_price" integer NOT NULL CHECK ("total_price" > 0),
-	"status" order_status DEFAULT 'paid',
+	"status" order_status DEFAULT 'awaiting_payment',
 	"created_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	"updated_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY ("id"),
