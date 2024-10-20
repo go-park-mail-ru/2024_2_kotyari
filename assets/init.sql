@@ -13,6 +13,18 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"updated_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY ("id")
 );
+CREATE TYPE seller_type AS ENUM ('individual', 'company');
+-- Таблица продавцов, с указанием типа продавца (физическое лицо или компания), проверенности и рейтинга
+CREATE TABLE IF NOT EXISTS "sellers" (
+     "id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
+     "seller_name" text NOT NULL,  -- Название продавца (для компаний) или ФИО (для физических лиц)
+     "seller_type" seller_type NOT NULL CHECK (seller_type IN ('individual', 'company')),  -- Тип продавца (физ лицо или компания)
+     "verified" boolean NOT NULL DEFAULT false,  -- Флаг, указывающий, что продавец проверен
+     "rating" real CHECK (rating >= 0 AND rating <= 5) DEFAULT 0 NOT NULL,  -- Рейтинг продавца от 0 до 5
+     "created_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+     "updated_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+     PRIMARY KEY ("id")
+);
 
 -- Таблица продуктов, хранящая информацию о товаре (цена, описание, скидка, изображения, характеристики и др.)
 CREATE TABLE IF NOT EXISTS "products" (
@@ -178,24 +190,6 @@ CREATE TABLE IF NOT EXISTS "product_categories" (
 	FOREIGN KEY ("product_id") REFERENCES "products"("id"),
 	FOREIGN KEY ("category_id") REFERENCES "categories"("id")
 );
-
-CREATE TYPE seller_type AS ENUM ('individual', 'company');
--- Таблица продавцов, с указанием типа продавца (физическое лицо или компания), проверенности и рейтинга
-CREATE TABLE IF NOT EXISTS "sellers" (
-	"id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
-	"seller_name" text NOT NULL,  -- Название продавца (для компаний) или ФИО (для физических лиц)
-	"seller_type" seller_type NOT NULL CHECK (seller_type IN ('individual', 'company')),  -- Тип продавца (физ лицо или компания)
-	"verified" boolean NOT NULL DEFAULT false,  -- Флаг, указывающий, что продавец проверен
-	"rating" real CHECK (rating >= 0 AND rating <= 5) DEFAULT 0 NOT NULL,  -- Рейтинг продавца от 0 до 5
-	"created_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	"updated_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	PRIMARY KEY ("id")
-);
-
--- Добавление продавца к продукту (один продукт - один продавец)
-ALTER TABLE "products" ADD COLUMN "seller_id" bigint NOT NULL;
-ALTER TABLE "products" ADD FOREIGN KEY ("seller_id") REFERENCES "sellers"("id") ON DELETE CASCADE;
-
 -- Индекс для ускорения поиска товаров по продавцу
 CREATE INDEX idx_product_seller ON products(seller_id);
 
