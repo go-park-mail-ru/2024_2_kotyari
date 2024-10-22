@@ -6,19 +6,18 @@ import (
 	"unicode"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
-func ValidateRegistration(userCredentials model.UserSignupRequestDTO) error {
-	if err := ValidateEmailAndPassword(userCredentials.Email, userCredentials.Password); err != nil {
+func ValidateRegistration(email string, username string, password string, repeatPassword string) error {
+	if err := ValidateEmailAndPassword(email, password); err != nil {
 		return err
 	}
 
-	if userCredentials.Password != userCredentials.RepeatPassword {
+	if password != repeatPassword {
 		return errs.PasswordsDoNotMatch
 	}
 
-	if !isValidUsername(userCredentials.Username) {
+	if !isValidUsername(username) {
 		return errs.InvalidUsernameFormat
 	}
 

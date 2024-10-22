@@ -1,14 +1,15 @@
 package model
 
-type User struct {
-	Username string
-	Email    string
-	Password string
-}
+import "time"
 
-func (u *User) ToUserDTO() *UserDTO {
-	return &UserDTO{
-		Username: u.Username,
-		Email:    u.Email,
-	}
+type User struct {
+	ID           uint32
+	Email        string
+	Username     string
+	City         string
+	Age          uint8
+	AvatarUrl    string
+	Password     string
+	Blocked      bool
+	BlockedUntil time.Time
 }
