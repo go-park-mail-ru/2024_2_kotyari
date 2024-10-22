@@ -53,7 +53,7 @@ func NewServer() *Server {
 
 func (s *Server) setupRoutes() {
 
-	//s.r.HandleFunc("/login", s.auth.Login).Methods(http.MethodPost)
+	s.r.HandleFunc("/login", s.auth.GetUserByEmail).Methods(http.MethodPost)
 	//s.r.HandleFunc("/logout", s.auth.Logout).Methods(http.MethodPost)
 	s.r.HandleFunc("/signup", s.auth.CreateUser).Methods(http.MethodPost)
 	s.r.HandleFunc("/catalog/products", s.catalog.Products).Methods(http.MethodGet)

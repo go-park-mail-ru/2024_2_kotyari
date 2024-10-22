@@ -9,8 +9,13 @@ type UsersSignUpRequest struct {
 	RepeatPassword string `json:"repeat_password"`
 }
 
-type CreateUserResponse struct {
+type UsersUsernameResponse struct {
 	Username string `json:"username"`
+}
+
+type UsersLoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 func (ur *UsersSignUpRequest) ToModel() model.User {
@@ -18,5 +23,12 @@ func (ur *UsersSignUpRequest) ToModel() model.User {
 		Email:    ur.Email,
 		Username: ur.Username,
 		Password: ur.Password,
+	}
+}
+
+func (ul *UsersLoginRequest) ToModel() model.User {
+	return model.User{
+		Email:    ul.Email,
+		Password: ul.Password,
 	}
 }

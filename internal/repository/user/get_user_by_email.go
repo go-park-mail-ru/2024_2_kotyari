@@ -1,18 +1,27 @@
 package user
 
-import "context"
+import (
+	"context"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+)
 
-func (ur *UsersRepo) GetUserByEmail(ctx context.Context, email string) (string, error) {
+func (ur *UsersRepo) GetUserByEmail(ctx context.Context, userModel model.User) (model.User, error) {
 	const query = `
-	select username from users where users.email = ? limit 1 	
+		select username, password from users where users.email =$1;	
 	`
 
-	var username string
+	var (
+		username string
+		password string
+	)
 
-	err := ur.db.QueryRow(ctx, query, email).Scan(&username)
+	err := ur.db.QueryRow(ctx, query, userModel.Email).Scan(&username, &password)
 	if err != nil {
-		return "", err
+		return model.User{}, err
 	}
 
-	return username, nil
+	return model.User{
+		Username: username,
+		Password: password,
+	}, nil
 }

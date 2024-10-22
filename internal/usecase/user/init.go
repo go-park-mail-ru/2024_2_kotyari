@@ -8,6 +8,7 @@ import (
 
 type userManager interface {
 	CreateUser(ctx context.Context, userModel model.User) (string, error)
+	GetUserByEmail(ctx context.Context, userModel model.User) (model.User, error)
 }
 
 type UsersService struct {

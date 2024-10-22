@@ -27,7 +27,7 @@ func (d *UsersDelivery) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
-	//var resp CreateUserResponse
+	//var resp UsersUsernameResponse
 
 	username, err := d.userManager.CreateUser(r.Context(), req.ToModel())
 	fmt.Println("Username: ", username)
@@ -39,7 +39,7 @@ func (d *UsersDelivery) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, CreateUserResponse{
+	utils.WriteJSON(w, http.StatusOK, UsersUsernameResponse{
 		Username: username,
 	})
 }
