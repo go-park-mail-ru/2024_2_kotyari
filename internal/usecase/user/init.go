@@ -6,17 +6,17 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
-type userManager interface {
+type userRepository interface {
 	CreateUser(ctx context.Context, userModel model.User) (string, error)
 	GetUserByEmail(ctx context.Context, userModel model.User) (model.User, error)
 }
 
 type UsersService struct {
-	userManager userManager
+	userRepo userRepository
 }
 
-func NewUserService(userManager userManager) *UsersService {
+func NewUserService(userRepository userRepository) *UsersService {
 	return &UsersService{
-		userManager: userManager,
+		userRepo: userRepository,
 	}
 }

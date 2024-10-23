@@ -22,6 +22,7 @@ var (
 	WrongCredentials      = errors.New("неверный email или пароль")
 	UserNotAuthorized     = errors.New("пользователь не авторизован")
 	LogoutError           = errors.New("ошибка при завершении сессии")
+	UserDoesNotExist      = errors.New("пользователь не существует")
 )
 
 var ErrCodesMapping = map[error]int{
@@ -37,4 +38,5 @@ var ErrCodesMapping = map[error]int{
 	UserNotAuthorized:     http.StatusUnauthorized,
 	LogoutError:           http.StatusInternalServerError,
 	PasswordsDoNotMatch:   http.StatusBadRequest,
+	UserDoesNotExist:      http.StatusNotFound,
 }

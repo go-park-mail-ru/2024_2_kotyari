@@ -2,10 +2,10 @@ package user
 
 import (
 	"encoding/json"
-	"fmt"
+	"net/http"
+
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
-	"net/http"
 )
 
 func (d *UsersDelivery) CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -27,10 +27,8 @@ func (d *UsersDelivery) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
-	//var resp UsersUsernameResponse
 
 	username, err := d.userManager.CreateUser(r.Context(), req.ToModel())
-	fmt.Println("Username: ", username)
 	if err != nil {
 		utils.WriteJSON(w, errs.ErrCodesMapping[err], errs.HTTPErrorResponse{
 			ErrorMessage: err.Error(),

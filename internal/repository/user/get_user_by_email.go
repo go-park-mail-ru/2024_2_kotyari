@@ -2,26 +2,27 @@ package user
 
 import (
 	"context"
+	"errors"
+
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/jackc/pgx/v5"
 )
 
-func (ur *UsersRepo) GetUserByEmail(ctx context.Context, userModel model.User) (model.User, error) {
+func (ur *UsersStore) GetUserByEmail(ctx context.Context, userModel model.User) (model.User, error) {
 	const query = `
 		select username, password from users where users.email =$1;	
 	`
 
-	var (
-		username string
-		password string
-	)
+	var user model.User
 
-	err := ur.db.QueryRow(ctx, query, userModel.Email).Scan(&username, &password)
+	err := ur.db.QueryRow(ctx, query, userModel.Email).Scan(&user.Username, &user.Password)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return model.User{}, errs.UserDoesNotExist
+		}
 		return model.User{}, err
 	}
 
-	return model.User{
-		Username: username,
-		Password: password,
-	}, nil
+	return user, nil
 }

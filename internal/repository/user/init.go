@@ -2,10 +2,10 @@ package user
 
 import "github.com/jackc/pgx/v5/pgxpool"
 
-type UsersRepo struct {
+type UsersStore struct {
 	db *pgxpool.Pool
 }
 
-func NewUserRepo(db *pgxpool.Pool) *UsersRepo {
-	return &UsersRepo{db: db}
+func NewUserRepo(db *pgxpool.Pool) *UsersStore {
+	return &UsersStore{db: db}
 }
