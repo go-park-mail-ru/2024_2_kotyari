@@ -1,5 +1,7 @@
 package db
 
+import "github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+
 // Инициализация продуктов в базе данных
 var productsData = map[string]Product{
 	"1": {
@@ -357,7 +359,8 @@ var productsData = map[string]Product{
 	},
 }
 
-var usersData = map[string]User{
+// Fix
+var usersData = map[string]model.User{
 	"user@example.com": {
 		Username: "Goshanchik",
 		Password: "gbHWrVy4JEmoO06xZa4Z3h/LnkSFl0wzkJNtDXXLmq9pU8LRhOhRQRnZ79AdABaK",

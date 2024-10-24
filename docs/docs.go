@@ -203,10 +203,10 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "Signup a new user",
+                "summary": "SignUp a new user",
                 "parameters": [
                     {
-                        "description": "Signup Request Body",
+                        "description": "SignUp Request Body",
                         "name": "body",
                         "in": "body",
                         "required": true,
