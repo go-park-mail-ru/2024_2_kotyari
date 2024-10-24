@@ -4,11 +4,12 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"email" text UNIQUE NOT NULL,
 	"username" text NOT NULL,
 	"city" text NOT NULL DEFAULT 'Москва',
+	-- "date_of_birth" date,
 	"age" smallint CHECK (age >= 0 AND age <= 120),
 	"avatar_url" text,
 	"password" text NOT NULL,
 	"blocked" boolean NOT NULL DEFAULT false,
-	"block_until" timestamp with time zone DEFAULT NULL,
+	"blocked_until" timestamp with time zone DEFAULT NULL,
 	"created_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	"updated_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY ("id")

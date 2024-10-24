@@ -16,6 +16,7 @@ help:
 	@echo 'back-refresh - Refreshing Go application container'
 	@echo 'pg-refresh - Refreshing PostgreSQL database container'
 	@echo 'all-refresh - Refreshing both Go application and PostgreSQL database containers'
+	@echo 'all-stop - Stop all docker containers'
 
 build:
 	go build -o ${BINARY_NAME} ./cmd/main.go
@@ -45,11 +46,17 @@ all-run:
 	docker compose up -d
 
 back-refresh:
-	docker stop back-go && docker rm back-go && docker rmi back-go-image && docker compose up -d
+	docker stop back_go && docker rm back_go && docker rmi back-go-image && docker compose up -d
 
 pg-refresh:
 	docker stop pg_db && docker rm pg_db && docker compose up -d
 
-all-refresh: back-refresh pg-refresh
+redis-refresh:
+	docker stop redis_service && docker rm redis_service && docker compose up -d
+
+all-stop:
+	docker stop back_go && docker stop pg_db && docker stop redis_service
+
+all-refresh: back-refresh pg-refresh redis-refresh
 
 .PHONY: clean build

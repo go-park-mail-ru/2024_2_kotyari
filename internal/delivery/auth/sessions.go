@@ -1,4 +1,4 @@
-package handlers
+package auth
 
 import (
 	"net/http"
@@ -7,13 +7,9 @@ import (
 )
 
 const (
-	second = 1
-	minute = 60 * second
-	hour   = 60 * minute
-
-	nullTime = -1
-
-	sessionKey = "user_id"
+	defaultSessionSetTime = 10 * 3600 // Кука by default ставится на 10 часов
+	deleteSession         = -1
+	SessionKey            = "user_id"
 )
 
 type SessionInterface interface {
@@ -56,7 +52,6 @@ func (s *SessionManager) Save(w http.ResponseWriter, r *http.Request, session *s
 
 func setSessionOptions(session *sessions.Session, maxAge int) {
 	session.Options.MaxAge = maxAge
-
 	session.Options.HttpOnly = true
 	session.Options.SameSite = http.SameSiteLaxMode
 	session.Options.Secure = false
