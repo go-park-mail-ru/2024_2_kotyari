@@ -8,8 +8,9 @@ import (
 )
 
 type userRepository interface {
-	CreateUser(ctx context.Context, userModel model.User) (uint32, string, error)
+	CreateUser(ctx context.Context, userModel model.User) (model.User, error)
 	GetUserByEmail(ctx context.Context, userModel model.User) (model.User, error)
+	GetUserByUserID(ctx context.Context, id uint32) (model.User, error)
 }
 
 type UsersService struct {

@@ -28,7 +28,7 @@ func (d *UsersDelivery) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sessionID, username, err := d.userManager.CreateUser(r.Context(), req.ToModel())
+	sessionID, user, err := d.userManager.CreateUser(r.Context(), req.ToModel())
 	if err != nil {
 		utils.WriteJSON(w, errs.ErrCodesMapping[err], errs.HTTPErrorResponse{
 			ErrorMessage: err.Error(),
@@ -47,7 +47,8 @@ func (d *UsersDelivery) CreateUser(w http.ResponseWriter, r *http.Request) {
 		Value:    sessionID,
 	})
 
-	utils.WriteJSON(w, http.StatusOK, UsersUsernameResponse{
-		Username: username,
+	utils.WriteJSON(w, http.StatusOK, UsersDefaultResponse{
+		Username: user.Username,
+		City:     user.City,
 	})
 }

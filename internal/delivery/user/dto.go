@@ -9,13 +9,14 @@ type UsersSignUpRequest struct {
 	RepeatPassword string `json:"repeat_password"`
 }
 
-type UsersUsernameResponse struct {
-	Username string `json:"username"`
-}
-
 type UsersLoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+type UsersDefaultResponse struct {
+	Username string `json:"username"`
+	City     string `json:"city"`
 }
 
 func (ur *UsersSignUpRequest) ToModel() model.User {

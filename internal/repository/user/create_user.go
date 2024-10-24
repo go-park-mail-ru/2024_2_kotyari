@@ -6,27 +6,24 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
-func (ur *UsersStore) CreateUser(ctx context.Context, userModel model.User) (uint32, string, error) {
+func (us *UsersStore) CreateUser(ctx context.Context, userModel model.User) (model.User, error) {
 	const query = `
 		insert into users(email, username, password) 
 		values ($1, $2, $3)
-		returning id, username;
+		returning id, username, city;
 	`
 
-	var (
-		userID   uint32
-		username string
-	)
+	var user model.User
 
-	err := ur.db.QueryRow(ctx, query,
+	err := us.db.QueryRow(ctx, query,
 		userModel.Email,
 		userModel.Username,
 		userModel.Password,
-	).Scan(&userID, &username)
+	).Scan(&user.ID, &user.Username, &user.City)
 
 	if err != nil {
-		return 0, "", err
+		return model.User{}, err
 	}
 
-	return userID, username, nil
+	return user, nil
 }

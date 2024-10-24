@@ -1,27 +1,18 @@
 package middlewares
 
 import (
-	"context"
+	"errors"
 	"net/http"
 
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/auth"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
-func AuthMiddleware(sessions auth.SessionInterface) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			session, err := sessions.Get(r)
-			if err != nil {
-				utils.WriteJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
-					ErrorMessage: errs.InternalServerError.Error(),
-				})
-
-				return
-			}
-			email, exists := session.Values[auth.SessionKey].(string)
-			if !exists {
+func AuthMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, err := r.Cookie("session-id")
+		if err != nil {
+			if errors.Is(err, http.ErrNoCookie) {
 				utils.WriteJSON(w, http.StatusUnauthorized, errs.HTTPErrorResponse{
 					ErrorMessage: errs.UserNotAuthorized.Error(),
 				})
@@ -29,8 +20,13 @@ func AuthMiddleware(sessions auth.SessionInterface) func(http.Handler) http.Hand
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), auth.SessionKey, email)
-			next.ServeHTTP(w, r.WithContext(ctx))
-		})
-	}
+			utils.WriteJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
+				ErrorMessage: errs.InternalServerError.Error(),
+			})
+
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
