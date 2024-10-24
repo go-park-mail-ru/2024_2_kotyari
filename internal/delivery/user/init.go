@@ -7,8 +7,8 @@ import (
 )
 
 type userManager interface {
-	CreateUser(ctx context.Context, user model.User) (string, error)
-	GetUserByEmail(ctx context.Context, user model.User) (string, error)
+	CreateUser(ctx context.Context, user model.User) (string, string, error)
+	GetUserByEmail(ctx context.Context, user model.User) (string, string, error)
 }
 
 type UsersDelivery struct {

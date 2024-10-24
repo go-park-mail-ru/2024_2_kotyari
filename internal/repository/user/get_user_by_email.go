@@ -11,12 +11,12 @@ import (
 
 func (ur *UsersStore) GetUserByEmail(ctx context.Context, userModel model.User) (model.User, error) {
 	const query = `
-		select username, password from users where users.email =$1;	
+		select id, username, password from users where users.email =$1;	
 	`
 
 	var user model.User
 
-	err := ur.db.QueryRow(ctx, query, userModel.Email).Scan(&user.Username, &user.Password)
+	err := ur.db.QueryRow(ctx, query, userModel.Email).Scan(&user.ID, &user.Username, &user.Password)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return model.User{}, errs.UserDoesNotExist

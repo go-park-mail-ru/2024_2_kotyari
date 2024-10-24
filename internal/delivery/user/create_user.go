@@ -28,7 +28,7 @@ func (d *UsersDelivery) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	username, err := d.userManager.CreateUser(r.Context(), req.ToModel())
+	sessionID, username, err := d.userManager.CreateUser(r.Context(), req.ToModel())
 	if err != nil {
 		utils.WriteJSON(w, errs.ErrCodesMapping[err], errs.HTTPErrorResponse{
 			ErrorMessage: err.Error(),
@@ -36,6 +36,16 @@ func (d *UsersDelivery) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+
+	/// TODO: Remove magic constant
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session-id",
+		MaxAge:   3600,
+		Secure:   false,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+		Value:    sessionID,
+	})
 
 	utils.WriteJSON(w, http.StatusOK, UsersUsernameResponse{
 		Username: username,
