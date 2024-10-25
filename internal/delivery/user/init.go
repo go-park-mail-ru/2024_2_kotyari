@@ -8,7 +8,7 @@ import (
 
 type userManager interface {
 	CreateUser(ctx context.Context, user model.User) (string, model.User, error)
-	GetUserByEmail(ctx context.Context, user model.User) (string, model.User, error)
+	LoginUser(ctx context.Context, user model.User) (string, model.User, error)
 	GetUserBySessionID(ctx context.Context, sessionID string) (string, string, error)
 }
 

@@ -13,8 +13,7 @@ func (us *UsersService) CreateUser(ctx context.Context, user model.User) (string
 		return "", model.User{}, err
 	}
 
-	hashedUserPassword := utils.HashPassword(user.Password, salt)
-	user.Password = hashedUserPassword
+	user.Password = utils.HashPassword(user.Password, salt)
 	dbUser, err := us.userRepo.CreateUser(ctx, user)
 	if err != nil {
 		return "", model.User{}, err

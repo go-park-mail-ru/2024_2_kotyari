@@ -8,7 +8,7 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
-func (us *UsersService) GetUserByEmail(ctx context.Context, user model.User) (string, model.User, error) {
+func (us *UsersService) LoginUser(ctx context.Context, user model.User) (string, model.User, error) {
 	dbUser, err := us.userRepo.GetUserByEmail(ctx, user)
 	if err != nil {
 		return "", model.User{}, err

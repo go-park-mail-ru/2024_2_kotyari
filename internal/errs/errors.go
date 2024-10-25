@@ -19,6 +19,7 @@ var (
 	InternalServerError   = errors.New("внутренняя ошибка сервера")
 	SessionCreationError  = errors.New("ошибка при создании сессии")
 	SessionSaveError      = errors.New("ошибка при сохранении сессии")
+	SessionNotFound       = errors.New("сессия не найдена")
 	WrongCredentials      = errors.New("неверный email или пароль")
 	UserNotAuthorized     = errors.New("пользователь не авторизован")
 	LogoutError           = errors.New("ошибка при завершении сессии")
@@ -34,6 +35,7 @@ var ErrCodesMapping = map[error]int{
 	InternalServerError:   http.StatusInternalServerError,
 	SessionCreationError:  http.StatusInternalServerError,
 	SessionSaveError:      http.StatusInternalServerError,
+	SessionNotFound:       http.StatusUnauthorized,
 	WrongCredentials:      http.StatusUnauthorized,
 	UserNotAuthorized:     http.StatusUnauthorized,
 	LogoutError:           http.StatusInternalServerError,

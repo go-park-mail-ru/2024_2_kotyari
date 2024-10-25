@@ -20,7 +20,7 @@ func (d *UsersDelivery) GetUserByEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sessionID, user, err := d.userManager.GetUserByEmail(r.Context(), req.ToModel())
+	sessionID, user, err := d.userManager.LoginUser(r.Context(), req.ToModel())
 	if err != nil {
 		utils.WriteJSON(w, http.StatusBadRequest, errs.HTTPErrorResponse{
 			ErrorMessage: errs.WrongCredentials.Error(),
