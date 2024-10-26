@@ -9,11 +9,11 @@ import (
 )
 
 func (d *UsersDelivery) GetUserById(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("session-id")
+	cookie, err := r.Cookie(utils.SessionName)
 	if err != nil {
 		if errors.Is(err, http.ErrNoCookie) {
-			utils.WriteJSON(w, http.StatusBadRequest, errs.HTTPErrorResponse{
-				ErrorMessage: err.Error(),
+			utils.WriteJSON(w, http.StatusUnauthorized, errs.HTTPErrorResponse{
+				ErrorMessage: errs.UserNotAuthorized.Error(),
 			})
 
 			return
@@ -28,7 +28,8 @@ func (d *UsersDelivery) GetUserById(w http.ResponseWriter, r *http.Request) {
 
 	username, city, err := d.userManager.GetUserBySessionID(r.Context(), cookie.Value)
 	if err != nil {
-		utils.WriteJSON(w, errs.ErrCodesMapping[err], errs.HTTPErrorResponse{
+		err, code := d.errResolver.Get(err)
+		utils.WriteJSON(w, code, errs.HTTPErrorResponse{
 			ErrorMessage: err.Error(),
 		})
 

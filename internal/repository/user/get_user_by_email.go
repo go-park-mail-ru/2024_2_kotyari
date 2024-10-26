@@ -3,6 +3,8 @@ package user
 import (
 	"context"
 	"errors"
+	"fmt"
+	"log"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
@@ -21,6 +23,8 @@ func (us *UsersStore) GetUserByEmail(ctx context.Context, userModel model.User) 
 		if errors.Is(err, pgx.ErrNoRows) {
 			return model.User{}, errs.UserDoesNotExist
 		}
+
+		log.Println(fmt.Errorf("[UserStore.GetUserByEmail] An error occured: %w", err))
 		return model.User{}, err
 	}
 

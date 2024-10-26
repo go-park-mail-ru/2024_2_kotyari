@@ -10,11 +10,11 @@ import (
 )
 
 func (sd *SessionDelivery) Delete(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("session-id")
+	cookie, err := r.Cookie(utils.SessionName)
 	if err != nil {
 		if errors.Is(err, http.ErrNoCookie) {
-			utils.WriteJSON(w, http.StatusBadRequest, errs.HTTPErrorResponse{
-				ErrorMessage: err.Error(),
+			utils.WriteJSON(w, http.StatusUnauthorized, errs.HTTPErrorResponse{
+				ErrorMessage: errs.UserNotAuthorized.Error(),
 			})
 
 			return
@@ -29,20 +29,15 @@ func (sd *SessionDelivery) Delete(w http.ResponseWriter, r *http.Request) {
 
 	err = sd.sessionRemover.Delete(r.Context(), model.Session{SessionID: cookie.Value})
 	if err != nil {
-		utils.WriteJSON(w, errs.ErrCodesMapping[err], errs.HTTPErrorResponse{
+		err, code := sd.errResolver.Get(err)
+		utils.WriteJSON(w, code, errs.HTTPErrorResponse{
 			ErrorMessage: err.Error(),
 		})
 
 		return
 	}
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session-id",
-		Value:    "",
-		MaxAge:   -1,
-		Secure:   false,
-		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
-	})
+
+	http.SetCookie(w, utils.RemoveSessionCookie())
 
 	utils.WriteJSON(w, http.StatusNoContent, nil)
 }

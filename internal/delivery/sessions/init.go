@@ -3,6 +3,7 @@ package sessions
 import (
 	"context"
 
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
@@ -12,10 +13,12 @@ type sessionRemover interface {
 
 type SessionDelivery struct {
 	sessionRemover sessionRemover
+	errResolver    errs.GetErrorCode
 }
 
-func NewSessionDelivery(sessionRemover sessionRemover) *SessionDelivery {
+func NewSessionDelivery(sessionRemover sessionRemover, errResolver errs.GetErrorCode) *SessionDelivery {
 	return &SessionDelivery{
 		sessionRemover: sessionRemover,
+		errResolver:    errResolver,
 	}
 }

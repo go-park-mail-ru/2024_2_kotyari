@@ -21,7 +21,8 @@ func (d *UsersDelivery) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err = utils.ValidateRegistration(req.Email, req.Username, req.Password, req.RepeatPassword); err != nil {
-		utils.WriteJSON(w, errs.ErrCodesMapping[err], errs.HTTPErrorResponse{
+		err, code := d.errResolver.Get(err)
+		utils.WriteJSON(w, code, errs.HTTPErrorResponse{
 			ErrorMessage: err.Error(),
 		})
 
@@ -30,22 +31,15 @@ func (d *UsersDelivery) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	sessionID, user, err := d.userManager.CreateUser(r.Context(), req.ToModel())
 	if err != nil {
-		utils.WriteJSON(w, errs.ErrCodesMapping[err], errs.HTTPErrorResponse{
+		err, code := d.errResolver.Get(err)
+		utils.WriteJSON(w, code, errs.HTTPErrorResponse{
 			ErrorMessage: err.Error(),
 		})
 
 		return
 	}
 
-	/// TODO: Remove magic constant
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session-id",
-		MaxAge:   3600,
-		Secure:   false,
-		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
-		Value:    sessionID,
-	})
+	http.SetCookie(w, utils.SetSessionCookie(sessionID))
 
 	utils.WriteJSON(w, http.StatusOK, UsersDefaultResponse{
 		Username: user.Username,

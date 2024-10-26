@@ -10,6 +10,7 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/db"
 	sessionsDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/sessions"
 	userDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/user"
+	errResolveLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/handlers"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/middlewares"
 	sessionsRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/sessions"
@@ -30,19 +31,17 @@ type Server struct {
 }
 
 func NewServer() *Server {
-
+	errResolver := errResolveLib.NewErrorStore()
 	redisClient := redis.MustLoadRedisClient()
 	sessionsRepo := sessionsRepoLib.NewSessionRepo(redisClient)
 	sessionsService := sessionsServiceLib.NewSessionService(sessionsRepo)
-	sessionsDelivery := sessionsDeliveryLib.NewSessionDelivery(sessionsRepo)
+	sessionsDelivery := sessionsDeliveryLib.NewSessionDelivery(sessionsRepo, errResolver)
 
 	dbPool := postgres.MustLoadPgxPool()
 	userRepo := userRepoLib.NewUserRepo(dbPool)
 	userService := userServiceLib.NewUserService(userRepo, *sessionsService)
-	userHandler := userDeliveryLib.NewUsersHandler(userService)
+	userHandler := userDeliveryLib.NewUsersHandler(userService, errResolver)
 
-	//sessions := auth.NewSessions()
-	//authManager := auth.NewAuthManager(sessions)
 	return &Server{
 		r:        mux.NewRouter(),
 		auth:     userHandler,
@@ -55,7 +54,7 @@ func NewServer() *Server {
 
 func (s *Server) setupRoutes() {
 
-	s.r.HandleFunc("/login", s.auth.GetUserByEmail).Methods(http.MethodPost)
+	s.r.HandleFunc("/login", s.auth.LoginUser).Methods(http.MethodPost)
 	s.r.HandleFunc("/logout", s.sessions.Delete).Methods(http.MethodPost)
 	s.r.HandleFunc("/signup", s.auth.CreateUser).Methods(http.MethodPost)
 	s.r.HandleFunc("/catalog", s.catalog.Products).Methods(http.MethodGet)

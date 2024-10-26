@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
@@ -14,10 +15,12 @@ type userManager interface {
 
 type UsersDelivery struct {
 	userManager userManager
+	errResolver errs.GetErrorCode
 }
 
-func NewUsersHandler(userManager userManager) *UsersDelivery {
+func NewUsersHandler(userManager userManager, errResolver errs.GetErrorCode) *UsersDelivery {
 	return &UsersDelivery{
 		userManager: userManager,
+		errResolver: errResolver,
 	}
 }

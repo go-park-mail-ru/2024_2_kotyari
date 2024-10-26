@@ -10,6 +10,9 @@ services:
     restart: unless-stopped
     networks:
       - app-network
+    depends_on:
+      - pg_db
+      - redis_service
 
   pg_db:
     image: postgres:16.4

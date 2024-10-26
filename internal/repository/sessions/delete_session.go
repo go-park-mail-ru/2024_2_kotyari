@@ -9,7 +9,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func (sr *SessionRepo) Delete(ctx context.Context, session model.Session) error {
+func (sr *SessionStore) Delete(ctx context.Context, session model.Session) error {
 	err := sr.redis.Del(ctx, session.SessionID).Err()
 	if errors.Is(err, redis.Nil) {
 		return errs.SessionNotFound

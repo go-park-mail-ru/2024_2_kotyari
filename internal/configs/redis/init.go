@@ -3,13 +3,13 @@ package redis
 import (
 	"context"
 	"fmt"
+	"log"
+
 	"github.com/caarlos0/env"
 	"github.com/redis/go-redis/v9"
-	"log"
 )
 
 type redisConfig struct {
-	User     string `env:"REDIS_USER"`
 	Password string `env:"REDIS_PASSWORD"`
 }
 

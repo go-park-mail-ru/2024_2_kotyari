@@ -10,7 +10,7 @@ import (
 
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, err := r.Cookie("session-id")
+		_, err := r.Cookie(utils.SessionName)
 		if err != nil {
 			if errors.Is(err, http.ErrNoCookie) {
 				utils.WriteJSON(w, http.StatusUnauthorized, errs.HTTPErrorResponse{

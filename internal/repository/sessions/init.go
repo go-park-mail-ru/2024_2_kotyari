@@ -2,12 +2,12 @@ package sessions
 
 import "github.com/redis/go-redis/v9"
 
-type SessionRepo struct {
+type SessionStore struct {
 	redis *redis.Client
 }
 
-func NewSessionRepo(redisClient *redis.Client) *SessionRepo {
-	return &SessionRepo{
+func NewSessionRepo(redisClient *redis.Client) *SessionStore {
+	return &SessionStore{
 		redis: redisClient,
 	}
 }
