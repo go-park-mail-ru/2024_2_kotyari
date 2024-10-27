@@ -8,7 +8,7 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
-func (d *UsersDelivery) GetUserById(w http.ResponseWriter, r *http.Request) {
+func (d *UsersHandler) GetUserById(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie(utils.SessionName)
 	if err != nil {
 		if errors.Is(err, http.ErrNoCookie) {
@@ -26,7 +26,7 @@ func (d *UsersDelivery) GetUserById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	username, city, err := d.userManager.GetUserBySessionID(r.Context(), cookie.Value)
+	user, err := d.userManager.GetUserBySessionID(r.Context(), cookie.Value)
 	if err != nil {
 		err, code := d.errResolver.Get(err)
 		utils.WriteJSON(w, code, errs.HTTPErrorResponse{
@@ -37,7 +37,7 @@ func (d *UsersDelivery) GetUserById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJSON(w, http.StatusOK, UsersDefaultResponse{
-		Username: username,
-		City:     city,
+		Username: user.Username,
+		City:     user.City,
 	})
 }

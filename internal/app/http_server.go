@@ -18,28 +18,45 @@ import (
 	sessionsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
 	userServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/user"
 	"github.com/gorilla/mux"
-	httpSwagger "github.com/swaggo/http-swagger"
 )
+
+type usersDelivery interface {
+	CreateUser(w http.ResponseWriter, r *http.Request)
+	GetUserById(w http.ResponseWriter, r *http.Request)
+	LoginUser(w http.ResponseWriter, r *http.Request)
+}
+
+type sessionRemover interface {
+	Delete(w http.ResponseWriter, r *http.Request)
+}
 
 type Server struct {
 	r        *mux.Router
-	sessions *sessionsDeliveryLib.SessionDelivery
-	auth     *userDeliveryLib.UsersDelivery
+	sessions sessionRemover
+	auth     usersDelivery
 	catalog  *handlers.CardsApp
 	cfg      config
 	log      *slog.Logger
 }
 
-func NewServer() *Server {
+func NewServer() (*Server, error) {
 	errResolver := errResolveLib.NewErrorStore()
-	redisClient := redis.MustLoadRedisClient()
+	redisClient, err := redis.LoadRedisClient()
+	if err != nil {
+		return nil, err
+	}
+
 	sessionsRepo := sessionsRepoLib.NewSessionRepo(redisClient)
 	sessionsService := sessionsServiceLib.NewSessionService(sessionsRepo)
-	sessionsDelivery := sessionsDeliveryLib.NewSessionDelivery(sessionsRepo, errResolver)
+	sessionsDelivery := sessionsDeliveryLib.NewSessionDelivery(sessionsService, errResolver)
 
-	dbPool := postgres.MustLoadPgxPool()
-	userRepo := userRepoLib.NewUserRepo(dbPool)
-	userService := userServiceLib.NewUserService(userRepo, *sessionsService)
+	dbPool, err := postgres.LoadPgxPool()
+	if err != nil {
+		return nil, err
+	}
+
+	userRepo := userRepoLib.NewUsersStore(dbPool)
+	userService := userServiceLib.NewUserService(userRepo, sessionsService)
 	userHandler := userDeliveryLib.NewUsersHandler(userService, errResolver)
 
 	return &Server{
@@ -49,7 +66,7 @@ func NewServer() *Server {
 		cfg:      initServer(),
 		log:      logger.InitLogger(),
 		sessions: sessionsDelivery,
-	}
+	}, nil
 }
 
 func (s *Server) setupRoutes() {
@@ -60,10 +77,9 @@ func (s *Server) setupRoutes() {
 	s.r.HandleFunc("/catalog", s.catalog.Products).Methods(http.MethodGet)
 	s.r.HandleFunc("/product/{id}", s.catalog.ProductByID).Methods(http.MethodGet)
 	s.r.HandleFunc("/", s.auth.GetUserById).Methods(http.MethodGet)
-	s.r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	getUnimplemented := s.r.Methods(http.MethodGet).Subrouter()
-	getUnimplemented.HandleFunc("/basket", func(w http.ResponseWriter, r *http.Request) {
+	getUnimplemented.HandleFunc("/cart", func(w http.ResponseWriter, r *http.Request) {
 
 	})
 	getUnimplemented.HandleFunc("/records", func(w http.ResponseWriter, r *http.Request) {

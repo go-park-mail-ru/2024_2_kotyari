@@ -9,7 +9,7 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
-func (sd *SessionDelivery) Delete(w http.ResponseWriter, r *http.Request) {
+func (sd *SessionHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie(utils.SessionName)
 	if err != nil {
 		if errors.Is(err, http.ErrNoCookie) {
@@ -27,7 +27,7 @@ func (sd *SessionDelivery) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = sd.sessionRemover.Delete(r.Context(), model.Session{SessionID: cookie.Value})
+	err = sd.sessionManager.Delete(r.Context(), model.Session{SessionID: cookie.Value})
 	if err != nil {
 		err, code := sd.errResolver.Get(err)
 		utils.WriteJSON(w, code, errs.HTTPErrorResponse{

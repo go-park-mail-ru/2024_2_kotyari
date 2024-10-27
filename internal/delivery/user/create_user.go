@@ -8,7 +8,7 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
-func (d *UsersDelivery) CreateUser(w http.ResponseWriter, r *http.Request) {
+func (d *UsersHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var req UsersSignUpRequest
 
 	err := json.NewDecoder(r.Body).Decode(&req)

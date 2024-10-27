@@ -7,18 +7,19 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
-type sessionRemover interface {
+type sessionManager interface {
+	Create(ctx context.Context, userID uint32) (string, error)
 	Delete(ctx context.Context, session model.Session) error
 }
 
-type SessionDelivery struct {
-	sessionRemover sessionRemover
+type SessionHandler struct {
+	sessionManager sessionManager
 	errResolver    errs.GetErrorCode
 }
 
-func NewSessionDelivery(sessionRemover sessionRemover, errResolver errs.GetErrorCode) *SessionDelivery {
-	return &SessionDelivery{
-		sessionRemover: sessionRemover,
+func NewSessionDelivery(sessionCreator sessionManager, errResolver errs.GetErrorCode) *SessionHandler {
+	return &SessionHandler{
+		sessionManager: sessionCreator,
 		errResolver:    errResolver,
 	}
 }

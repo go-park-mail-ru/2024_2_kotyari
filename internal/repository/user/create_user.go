@@ -10,19 +10,13 @@ import (
 )
 
 func (us *UsersStore) CreateUser(ctx context.Context, userModel model.User) (model.User, error) {
-	const selectQuery = `
-		select id, city from users where email=$1;
-	`
-
 	const insertQuery = `
 		insert into users(email, username, password) 
 		values ($1, $2, $3)
-		returning id, username, city;
+		returning id, city;
 	`
 
-	var user model.User
-
-	err := us.db.QueryRow(ctx, selectQuery, userModel.Email).Scan(&user.ID, &user.City)
+	_, err := us.GetUserByEmail(ctx, userModel)
 	if err == nil {
 		return model.User{}, errs.UserAlreadyExists
 	}
@@ -31,12 +25,11 @@ func (us *UsersStore) CreateUser(ctx context.Context, userModel model.User) (mod
 		userModel.Email,
 		userModel.Username,
 		userModel.Password,
-	).Scan(&user.ID, &user.Username, &user.City)
-
+	).Scan(&userModel.ID, &userModel.City)
 	if err != nil {
 		log.Println(fmt.Errorf("[UserStore.CreateUser] An error occured: %w", err))
 		return model.User{}, err
 	}
 
-	return user, nil
+	return userModel, nil
 }

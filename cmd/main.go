@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/app"
@@ -20,7 +21,11 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	server := app.NewServer()
+	server, err := app.NewServer()
+	if err != nil {
+		log.Fatal(fmt.Errorf("error occured when creating server, %w", err))
+	}
+
 	if err := server.Run(); err != nil {
 		log.Fatalf("Error starting server: %v", err)
 	}

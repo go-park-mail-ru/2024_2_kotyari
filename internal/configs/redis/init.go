@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 
@@ -13,21 +14,21 @@ type redisConfig struct {
 	Password string `env:"REDIS_PASSWORD"`
 }
 
-func mustLoadRedisConfig() redisConfig {
+func loadRedisConfig() (redisConfig, error) {
 	cfg := redisConfig{}
 
 	if err := env.Parse(&cfg); err != nil {
-		log.Fatal(err)
+		return redisConfig{}, err
 	}
 
-	test := redisConfig{}
-	if test == cfg {
-		log.Fatal("[mustLoadRedisConfig] redis config is empty")
+	emptyConfig := redisConfig{}
+	if cfg == emptyConfig {
+		return redisConfig{}, errors.New("[loadRedisConfig] redis config is empty")
 	}
 
 	log.Printf("redis config successfully loaded")
 
-	return cfg
+	return cfg, nil
 }
 
 func newRedisConfigURL(p redisConfig) string {
@@ -36,21 +37,24 @@ func newRedisConfigURL(p redisConfig) string {
 	)
 }
 
-func MustLoadRedisClient() *redis.Client {
-	cfg := mustLoadRedisConfig()
+func LoadRedisClient() (*redis.Client, error) {
+	cfg, err := loadRedisConfig()
+	if err != nil {
+		return nil, err
+	}
 
 	opts, err := redis.ParseURL(newRedisConfigURL(cfg))
 	if err != nil {
-		log.Fatalf("[MustLoadRedisClient] failed to parse config: %s", err.Error())
+		return nil, fmt.Errorf("[LoadRedisClient] failed to parse config: %w", err)
 	}
 
 	redisClient := redis.NewClient(opts)
 
 	if err = testPing(redisClient); err != nil {
-		log.Fatalf("[TestPing] failed to ping redis: %s", err.Error())
+		return nil, fmt.Errorf("[LoadRedisClient] failed to ping redis: %w", err)
 	}
 
-	return redisClient
+	return redisClient, nil
 }
 
 func testPing(redisClient *redis.Client) error {
