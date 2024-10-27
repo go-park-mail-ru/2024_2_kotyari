@@ -3,6 +3,8 @@ package app
 import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/logger"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/middlewares"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/handlers/orders"
+	rorders "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/orders"
 	"log/slog"
 	"net/http"
 
@@ -154,6 +156,7 @@ func NewServer() (*Server, error) {
 		sessions: sessionsDelivery,
 		files:    fileDelivery,
 		cart:     cartApp,
+		orders:  ordersHandler,
 	}, nil
 }
 
@@ -186,6 +189,8 @@ func (s *Server) setupRoutes() {
 
 	})
 	getUnimplemented.HandleFunc("/favorite", func(w http.ResponseWriter, r *http.Request) {
+	s.r.HandleFunc("/orders", s.orders.GetOrders).Methods(http.MethodGet)
+	s.r.HandleFunc("/order/{id}", s.orders.GetOrderByID).Methods(http.MethodGet)
 
 	})
 
