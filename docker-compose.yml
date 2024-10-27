@@ -8,6 +8,8 @@ services:
     image: back-go-image
     container_name: back_go
     restart: unless-stopped
+    volumes:
+      - ./files:/app/files
     networks:
       - app-network
     depends_on:
@@ -51,6 +53,7 @@ services:
 volumes:
   pg_data:
   redis_data:
+  go_back:
 
 networks:
   app-network:

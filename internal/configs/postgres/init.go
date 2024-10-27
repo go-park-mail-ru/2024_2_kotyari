@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/url"
 	"time"
 
 	"github.com/caarlos0/env"
@@ -42,9 +43,11 @@ func loadPGConfig() (postgresConfig, error) {
 }
 
 func newPostgresConfigURL(p postgresConfig) string {
-	return fmt.Sprintf("postgres://%s:%s@pg_db/%s",
-		p.Username,
-		p.Password,
+	link := "postgres://%s:%s@pg_db/%s"
+	//link := "postgres://%s:%s@localhost:54320/%s"
+	return fmt.Sprintf(link,
+		url.QueryEscape(p.Username),
+		url.QueryEscape(p.Password),
 		p.DBName,
 	)
 }

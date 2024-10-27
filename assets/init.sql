@@ -4,7 +4,6 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"email" text UNIQUE NOT NULL,
 	"username" text NOT NULL,
 	"city" text NOT NULL DEFAULT 'Москва',
-	-- "date_of_birth" date,
 	"age" smallint CHECK (age >= 0 AND age <= 120),
 	"avatar_url" text,
 	"password" text NOT NULL,
@@ -15,12 +14,12 @@ CREATE TABLE IF NOT EXISTS "users" (
 	PRIMARY KEY ("id")
 );
 CREATE TYPE seller_type AS ENUM ('individual', 'company');
+
 -- Таблица продавцов, с указанием типа продавца (физическое лицо или компания), проверенности и рейтинга
 CREATE TABLE IF NOT EXISTS "sellers" (
      "id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
-     "seller_name" text NOT NULL,  -- Название продавца (для компаний) или ФИО (для физических лиц)
-     "seller_type" seller_type NOT NULL CHECK (seller_type IN ('individual', 'company')),  -- Тип продавца (физ лицо или компания)
-     "verified" boolean NOT NULL DEFAULT false,  -- Флаг, указывающий, что продавец проверен
+     "name" text NOT NULL,  -- Название продавца (для компаний) или ФИО (для физических лиц)
+     "logo" text not null,
      "rating" real CHECK (rating >= 0 AND rating <= 5) DEFAULT 0 NOT NULL,  -- Рейтинг продавца от 0 до 5
      "created_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
      "updated_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -33,18 +32,18 @@ CREATE TABLE IF NOT EXISTS "products" (
     "seller_id" bigint NOT NULL,
 	"count" integer NOT NULL DEFAULT '1' CHECK (count >= 0),
 	"price" integer NOT NULL CHECK (price > 0),  -- Новая цена
-	"old_price" integer CHECK (old_price > 0),  -- Старая цена
-	"currency" text NOT NULL DEFAULT 'rub',
+	"original_price" integer CHECK (original_price > 0),  -- Оригинальная цена
 	"discount" smallint CHECK (discount >= 0 AND discount < 100),  -- Скидка
-	"description" text,
-	"short_description" text NOT NULL,
+    "title" text NOT NULL,
+	"description" text NOT NULL ,
 	"rating" real DEFAULT 0 NOT NULL CHECK (rating >= 0 AND rating <= 5),
 	"image_url" text NOT NULL,
 	"active" boolean NOT NULL DEFAULT true,
-	"days_to_delivery" smallint NOT NULL,  -- Дата доставки продукта
 	"created_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	"updated_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	"characteristics" jsonb,  -- Характеристики продукта в формате JSON
+--     например:
+--     {"size": "123", "color": "red"}
 	PRIMARY KEY ("id"),
     FOREIGN KEY ("seller_id") REFERENCES "sellers"("id") ON DELETE CASCADE
 );
@@ -102,38 +101,26 @@ CREATE TABLE IF NOT EXISTS "orders" (
 CREATE TABLE IF NOT EXISTS "product_options" (
 	"id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
 	"product_id" bigint NOT NULL,  -- Ссылка на товар
-	"option_name" text NOT NULL,  -- Название опции (например, цвет, размер)
-	"option_values" jsonb NOT NULL,  -- Возможные значения опции в формате JSON
-    --{
-    --    "options": [
-    --        {
-    --            "value": "красный",
-    --            "price": 1000,
-    --            "count": 10
-    --            // old price, discount, etc
-    --        },
-    --        {
-    --             "value": "синий",
-    --             "price": 1100,
-    --             "count": 5
-    --         }
-    --    ]
-    --}
-	"currency" text NOT NULL DEFAULT 'rub',
-	"image_url" text,
+	"values" jsonb NOT NULL,  -- Возможные значения опции в формате JSON
+--     [
+--          {
+--              "type": "size",
+--              "title": "Размер",
+--              "options": [
+--                  {
+--                      "link": "",
+--                      "value": "XL"
+--                  },
+--                  {
+--                      "link": "",
+--                      "value": "XS"
+--                  },
+--              ]
+--         }
+--    ]
 	"created_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY ("id"),
 	FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE
-);
-
--- Таблица для хранения изображений продукта
-CREATE TABLE IF NOT EXISTS "product_option_images" (
-	"id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
-	"option_id" bigint NOT NULL,
-	"image_url" text NOT NULL,
-	"created_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	PRIMARY KEY ("id"),
-	FOREIGN KEY ("option_id") REFERENCES "product_options"("id") ON DELETE CASCADE
 );
 
 -- Таблица связывает продукты с заказами, хранит количество и дату доставки продукта в заказе
@@ -175,9 +162,8 @@ CREATE UNIQUE INDEX unique_cart_index ON carts(user_id, product_id, COALESCE(opt
 CREATE TABLE IF NOT EXISTS "categories" (
 	"id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
 	"name" text NOT NULL,
-	"resultant_limitation" smallint NOT NULL DEFAULT '0' CHECK (resultant_limitation >= 0 AND resultant_limitation <= 120),
+    "picture" text NOT NULL,
 	"active" boolean NOT NULL DEFAULT true,
-	"color" text DEFAULT 'oklch(58.26% 0.2484 305.7)',
 	PRIMARY KEY ("id")
 );
 
@@ -205,3 +191,6 @@ CREATE INDEX idx_product_characteristics ON products USING gin (characteristics)
 -- Не уверен насколько это нужно
 ALTER TABLE orders
 ADD CONSTRAINT status_check CHECK (status IN ('awaiting_payment', 'paid', 'delivered', 'cancelled'));
+
+ALTER TABLE categories
+ADD COLUMN link_to text;
