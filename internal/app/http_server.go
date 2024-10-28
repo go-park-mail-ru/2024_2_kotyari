@@ -26,13 +26,13 @@ type usersDelivery interface {
 	LoginUser(w http.ResponseWriter, r *http.Request)
 }
 
-type sessionRemover interface {
+type sessionRemoverDelivery interface {
 	Delete(w http.ResponseWriter, r *http.Request)
 }
 
 type Server struct {
 	r        *mux.Router
-	sessions sessionRemover
+	sessions sessionRemoverDelivery
 	auth     usersDelivery
 	catalog  *handlers.CardsApp
 	cfg      config
@@ -48,7 +48,7 @@ func NewServer() (*Server, error) {
 
 	sessionsRepo := sessionsRepoLib.NewSessionRepo(redisClient)
 	sessionsService := sessionsServiceLib.NewSessionService(sessionsRepo)
-	sessionsDelivery := sessionsDeliveryLib.NewSessionDelivery(sessionsService, errResolver)
+	sessionsDelivery := sessionsDeliveryLib.NewSessionDelivery(sessionsService, sessionsRepo, errResolver)
 
 	dbPool, err := postgres.LoadPgxPool()
 	if err != nil {
