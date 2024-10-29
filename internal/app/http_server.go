@@ -191,6 +191,7 @@ func (s *Server) setupRoutes() {
 	getUnimplemented.HandleFunc("/favorite", func(w http.ResponseWriter, r *http.Request) {
 	s.r.HandleFunc("/orders", s.orders.GetOrders).Methods(http.MethodGet)
 	s.r.HandleFunc("/order/{id}", s.orders.GetOrderByID).Methods(http.MethodGet)
+	s.r.HandleFunc("/orders/create_from_cart", s.orders.CreateOrderFromCart).Methods(http.MethodPost)
 
 	})
 
