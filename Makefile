@@ -55,7 +55,16 @@ redis-refresh:
 	docker stop redis_service && docker rm redis_service && docker compose up -d
 
 all-stop:
-	docker stop back_go && docker stop pg_db && docker stop redis_service
+	docker compose down
+
+pg-delete:
+	docker compose down pg_db -v
+
+redis-delete:
+	docker compose down redis_service -v
+
+all-delete:
+	docker compose down -v
 
 all-refresh: back-refresh pg-refresh redis-refresh
 

@@ -1,12 +1,14 @@
 package utils
 
 import (
+	"context"
 	"net/http"
 	"time"
 )
 
 const (
 	SessionName            = "session-id"
+	UserSessionID          = "user-id"
 	DefaultSessionLifetime = 10 * time.Hour // 10 часов в секундах
 	deleteSessionLifetime  = -1             // Удалить сессию
 )
@@ -30,4 +32,8 @@ func RemoveSessionCookie() *http.Cookie {
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 	}
+}
+
+func SetSessionUser(parentCtx context.Context, userID uint32) context.Context {
+	return context.WithValue(parentCtx, UserSessionID, userID)
 }

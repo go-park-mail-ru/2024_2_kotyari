@@ -1,6 +1,8 @@
 package app
 
 import (
+	"context"
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -13,6 +15,7 @@ import (
 	errResolveLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/handlers"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/middlewares"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	sessionsRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/sessions"
 	userRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/user"
 	sessionsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
@@ -26,13 +29,14 @@ type usersDelivery interface {
 	LoginUser(w http.ResponseWriter, r *http.Request)
 }
 
-type sessionRemoverDelivery interface {
+type SessionDelivery interface {
 	Delete(w http.ResponseWriter, r *http.Request)
+	Get(ctx context.Context, sessionID string) (model.Session, error)
 }
 
 type Server struct {
 	r        *mux.Router
-	sessions sessionRemoverDelivery
+	sessions SessionDelivery
 	auth     usersDelivery
 	catalog  *handlers.CardsApp
 	cfg      config
@@ -48,7 +52,7 @@ func NewServer() (*Server, error) {
 
 	sessionsRepo := sessionsRepoLib.NewSessionRepo(redisClient)
 	sessionsService := sessionsServiceLib.NewSessionService(sessionsRepo)
-	sessionsDelivery := sessionsDeliveryLib.NewSessionDelivery(sessionsService, sessionsRepo, errResolver)
+	sessionsDelivery := sessionsDeliveryLib.NewSessionDelivery(sessionsRepo, errResolver)
 
 	dbPool, err := postgres.LoadPgxPool()
 	if err != nil {
@@ -70,6 +74,7 @@ func NewServer() (*Server, error) {
 }
 
 func (s *Server) setupRoutes() {
+	errResolver := errResolveLib.NewErrorStore()
 
 	s.r.HandleFunc("/login", s.auth.LoginUser).Methods(http.MethodPost)
 	s.r.HandleFunc("/logout", s.sessions.Delete).Methods(http.MethodPost)
@@ -86,12 +91,12 @@ func (s *Server) setupRoutes() {
 
 	})
 	getUnimplemented.HandleFunc("/favorite", func(w http.ResponseWriter, r *http.Request) {
-
+		fmt.Println(r.Context().Value("user-id"))
 	})
 	getUnimplemented.HandleFunc("/account", func(w http.ResponseWriter, r *http.Request) {
 
 	})
-	getUnimplemented.Use(middlewares.AuthMiddleware)
+	getUnimplemented.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 }
 
 func (s *Server) Run() error {

@@ -27,7 +27,7 @@ func (sd *SessionHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = sd.sessionRemover.Delete(r.Context(), model.Session{SessionID: cookie.Value})
+	err = sd.sessionManager.Delete(r.Context(), model.Session{SessionID: cookie.Value})
 	if err != nil {
 		err, code := sd.errResolver.Get(err)
 		utils.WriteJSON(w, code, errs.HTTPErrorResponse{
