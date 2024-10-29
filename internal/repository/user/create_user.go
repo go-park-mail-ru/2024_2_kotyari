@@ -2,28 +2,34 @@ package user
 
 import (
 	"context"
+	"fmt"
+	"log"
 
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
-func (ur *UsersStore) CreateUser(ctx context.Context, userModel model.User) (string, error) {
-	const query = `
+func (us *UsersStore) CreateUser(ctx context.Context, userModel model.User) (model.User, error) {
+	const insertQuery = `
 		insert into users(email, username, password) 
 		values ($1, $2, $3)
-		returning username;
+		returning id, city;
 	`
 
-	var username string
+	_, err := us.GetUserByEmail(ctx, userModel)
+	if err == nil {
+		return model.User{}, errs.UserAlreadyExists
+	}
 
-	err := ur.db.QueryRow(ctx, query,
+	err = us.db.QueryRow(ctx, insertQuery,
 		userModel.Email,
 		userModel.Username,
 		userModel.Password,
-	).Scan(&username)
-
+	).Scan(&userModel.ID, &userModel.City)
 	if err != nil {
-		return "", err
+		log.Println(fmt.Errorf("[UserStore.CreateUser] An error occured: %w", err))
+		return model.User{}, err
 	}
 
-	return username, nil
+	return userModel, nil
 }

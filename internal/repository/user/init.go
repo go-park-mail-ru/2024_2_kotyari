@@ -6,6 +6,6 @@ type UsersStore struct {
 	db *pgxpool.Pool
 }
 
-func NewUserRepo(db *pgxpool.Pool) *UsersStore {
+func NewUsersStore(db *pgxpool.Pool) *UsersStore {
 	return &UsersStore{db: db}
 }

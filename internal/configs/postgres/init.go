@@ -2,11 +2,13 @@ package postgres
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"github.com/caarlos0/env"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"log"
 	"time"
+
+	"github.com/caarlos0/env"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const (
@@ -22,21 +24,21 @@ type postgresConfig struct {
 	DBName   string `env:"DB_NAME"`
 }
 
-func mustLoadPGConfig() postgresConfig {
+func loadPGConfig() (postgresConfig, error) {
 	cfg := postgresConfig{}
 
 	if err := env.Parse(&cfg); err != nil {
-		log.Fatal(err)
+		return postgresConfig{}, err
 	}
 
-	test := postgresConfig{}
-	if test == cfg {
-		log.Fatal("[mustLoadPGConfig] postgres config is empty")
+	emptyConfig := postgresConfig{}
+	if cfg == emptyConfig {
+		return postgresConfig{}, errors.New("[loadPGConfig] postgres config is empty")
 	}
 
 	log.Printf("postgres config load success")
 
-	return cfg
+	return cfg, nil
 }
 
 func newPostgresConfigURL(p postgresConfig) string {
@@ -47,12 +49,15 @@ func newPostgresConfigURL(p postgresConfig) string {
 	)
 }
 
-func MustLoadPgxPool() *pgxpool.Pool {
-	cfg := mustLoadPGConfig()
+func LoadPgxPool() (*pgxpool.Pool, error) {
+	cfg, err := loadPGConfig()
+	if err != nil {
+		return nil, err
+	}
 
 	poolCfg, err := pgxpool.ParseConfig(newPostgresConfigURL(cfg))
 	if err != nil {
-		log.Fatalf("[MustLoadPgxPool] failed to parse config: %s", err.Error())
+		return nil, fmt.Errorf("[LoadPgxPool] failed to parse config: %w", err)
 	}
 
 	poolCfg.MaxConns = defaultMaxConnections
@@ -62,16 +67,21 @@ func MustLoadPgxPool() *pgxpool.Pool {
 
 	connPool, err := pgxpool.NewWithConfig(context.Background(), poolCfg)
 	if err != nil {
-		log.Fatalf("[MustLoadPgxPool] failed to connect to postgres: %s", err.Error())
+		return nil, fmt.Errorf("[LoadPgxPool] failed to connect to postgres: %w", err)
 	}
 
-	testPing(connPool)
+	err = testPing(connPool)
+	if err != nil {
+		return nil, err
+	}
 
-	return connPool
+	return connPool, nil
 }
 
-func testPing(pool *pgxpool.Pool) {
+func testPing(pool *pgxpool.Pool) error {
 	if err := pool.Ping(context.Background()); err != nil {
-		log.Fatalf("[TestPing] failed to ping postgres: %s", err.Error())
+		return fmt.Errorf("[TestPing] failed to ping postgres: %w", err)
 	}
+
+	return nil
 }

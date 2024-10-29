@@ -2,7 +2,6 @@ package utils
 
 import (
 	"regexp"
-	"strings"
 	"unicode"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
@@ -49,14 +48,10 @@ func isValidUsername(username string) bool {
 	return re.MatchString(username)
 }
 
-func isInGroup(char rune, group string) bool {
-	return strings.ContainsRune(group, char)
-}
-
 // isValidPassword проверяет, соответствует ли пароль критериям
 func isValidPassword(password string) bool {
 	var hasMinLen = len(password) >= 8
-	var hasNumber, hasUpper, hasLower, hasSpecial bool
+	var hasNumber, hasUpper, hasLower bool
 	for _, char := range password {
 		switch {
 		case unicode.IsNumber(char):
@@ -65,10 +60,8 @@ func isValidPassword(password string) bool {
 			hasUpper = true
 		case unicode.IsLower(char):
 			hasLower = true
-		case isInGroup(char, "!@#$%^:&?*."):
-			hasSpecial = true
 		}
 	}
 
-	return hasMinLen && hasNumber && hasUpper && hasLower && hasSpecial
+	return hasMinLen && hasNumber && hasUpper && hasLower
 }

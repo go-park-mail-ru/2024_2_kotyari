@@ -7,14 +7,22 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
-func (us *UsersService) CreateUser(ctx context.Context, user model.User) (string, error) {
+func (us *UsersService) CreateUser(ctx context.Context, user model.User) (string, model.User, error) {
 	salt, err := utils.GenerateSalt()
 	if err != nil {
-		return "", err
+		return "", model.User{}, err
 	}
 
-	hashedUserPassword := utils.HashPassword(user.Password, salt)
-	user.Password = hashedUserPassword
+	user.Password = utils.HashPassword(user.Password, salt)
+	dbUser, err := us.userRepo.CreateUser(ctx, user)
+	if err != nil {
+		return "", model.User{}, err
+	}
 
-	return us.userRepo.CreateUser(ctx, user)
+	sessionID, err := us.sessionService.Create(ctx, dbUser.ID)
+	if err != nil {
+		return "", model.User{}, err
+	}
+
+	return sessionID, dbUser, nil
 }

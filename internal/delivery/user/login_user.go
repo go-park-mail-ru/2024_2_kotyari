@@ -8,8 +8,8 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
-func (d *UsersHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var req UsersSignUpRequest
+func (d *UsersHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
+	var req UsersLoginRequest
 
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
@@ -20,16 +20,7 @@ func (d *UsersHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = utils.ValidateRegistration(req.Email, req.Username, req.Password, req.RepeatPassword); err != nil {
-		err, code := d.errResolver.Get(err)
-		utils.WriteJSON(w, code, errs.HTTPErrorResponse{
-			ErrorMessage: err.Error(),
-		})
-
-		return
-	}
-
-	sessionID, user, err := d.userManager.CreateUser(r.Context(), req.ToModel())
+	sessionID, user, err := d.userManager.LoginUser(r.Context(), req.ToModel())
 	if err != nil {
 		err, code := d.errResolver.Get(err)
 		utils.WriteJSON(w, code, errs.HTTPErrorResponse{
