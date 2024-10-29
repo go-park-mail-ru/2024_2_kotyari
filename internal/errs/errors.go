@@ -27,6 +27,7 @@ var (
 	UserNotAuthorized     = errors.New("пользователь не авторизован")
 	LogoutError           = errors.New("ошибка при завершении сессии")
 	UserDoesNotExist      = errors.New("пользователь не существует")
+	CartDoesNotExist      = errors.New("корзины не существует")
 	ProductsDoesNotExists = errors.New("продукты не добавили =(")
 )
 
@@ -65,6 +66,7 @@ func NewErrorStore() *ErrorStore {
 			LogoutError:           http.StatusInternalServerError,
 			PasswordsDoNotMatch:   http.StatusBadRequest,
 			UserDoesNotExist:      http.StatusNotFound,
+			CartDoesNotExist:      http.StatusNotFound,
 			ProductsDoesNotExists: http.StatusNotFound,
 		},
 	}

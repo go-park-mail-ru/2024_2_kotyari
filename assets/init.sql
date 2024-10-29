@@ -144,7 +144,6 @@ CREATE TABLE IF NOT EXISTS "carts" (
 	"id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
 	"user_id" bigint NOT NULL,
 	"product_id" bigint NOT NULL,
-    "option_id" bigint,  -- Ссылка на опцию
 	"count" integer NOT NULL CHECK (count > 0),
 	"is_selected" boolean DEFAULT false,
 	"created_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -152,8 +151,7 @@ CREATE TABLE IF NOT EXISTS "carts" (
 	"delivery_date" timestamp with time zone,  -- Дата доставки для товара в корзине
 	PRIMARY KEY ("id"),
 	FOREIGN KEY ("user_id") REFERENCES "users"("id"),
-	FOREIGN KEY ("product_id") REFERENCES "products"("id"),
-    FOREIGN KEY ("option_id") REFERENCES "product_options"("id")
+	FOREIGN KEY ("product_id") REFERENCES "products"("id")
 );
 
 CREATE UNIQUE INDEX unique_cart_index ON carts(user_id, product_id, COALESCE(option_id, -1));
