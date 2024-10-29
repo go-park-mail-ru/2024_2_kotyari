@@ -34,6 +34,10 @@ func RemoveSessionCookie() *http.Cookie {
 	}
 }
 
-func SetSessionUser(parentCtx context.Context, userID uint32) context.Context {
+func SetContextSessionUserID(parentCtx context.Context, userID uint32) context.Context {
 	return context.WithValue(parentCtx, UserSessionID, userID)
+}
+
+func GetContextSessionUserID(ctx context.Context) uint32 {
+	return ctx.Value(UserSessionID).(uint32)
 }

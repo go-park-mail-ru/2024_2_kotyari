@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -91,7 +90,7 @@ func (s *Server) setupRoutes() {
 
 	})
 	getUnimplemented.HandleFunc("/favorite", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println(r.Context().Value("user-id"))
+
 	})
 	getUnimplemented.HandleFunc("/account", func(w http.ResponseWriter, r *http.Request) {
 
