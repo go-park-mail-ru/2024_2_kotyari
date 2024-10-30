@@ -1,9 +1,14 @@
 package cart
 
-import "github.com/jackc/pgx/v5/pgxpool"
+import (
+	"log/slog"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+)
 
 type CartsStore struct {
-	db *pgxpool.Pool
+	db  *pgxpool.Pool
+	log *slog.Logger
 }
 
 func NewCartsStore(db *pgxpool.Pool) *CartsStore {
