@@ -3,6 +3,7 @@ package middlewares
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
@@ -35,6 +36,7 @@ func AuthMiddleware(sessionGetter sessionGetter, errResolver errs.GetErrorCode) 
 			}
 
 			session, err := sessionGetter.Get(r.Context(), cookie.Value)
+			fmt.Println(session)
 			if err != nil {
 				err, code := errResolver.Get(err)
 				utils.WriteJSON(w, code, errs.HTTPErrorResponse{

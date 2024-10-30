@@ -8,6 +8,9 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/logger"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/postgres"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/redis"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/db"
+	addressDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/address"
+	profileDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/profile"
 	cartDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/cart"
 	categoryDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/category"
 	fileDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/file"
@@ -15,17 +18,23 @@ import (
 	sessionsDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/sessions"
 	userDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/user"
 	errResolveLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/handlers"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/middlewares"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	cartRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/cart"
 	categoryRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/category"
 	fileRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/file"
 	productRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/product"
+	addressRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/address"
+	profileRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/profile"
 	sessionsRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/sessions"
 	userRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/user"
 	cartServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/cart"
+	addressServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/address"
+	profileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/profile"
 	sessionsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
 	userServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/user"
+
 	"github.com/gorilla/mux"
 )
 
@@ -43,6 +52,17 @@ type usersDelivery interface {
 	LoginUser(w http.ResponseWriter, r *http.Request)
 }
 
+type profilesDelivery interface {
+	GetProfile(writer http.ResponseWriter, request *http.Request)
+	UpdateProfileData(writer http.ResponseWriter, request *http.Request)
+}
+
+type addressDelivery interface {
+	CreateAddress(writer http.ResponseWriter, request *http.Request)
+	UpdateAddressData(writer http.ResponseWriter, request *http.Request)
+	GetAddress(writer http.ResponseWriter, request *http.Request)
+}
+
 type SessionDelivery interface {
 	Delete(w http.ResponseWriter, r *http.Request)
 	Get(ctx context.Context, sessionID string) (model.Session, error)
@@ -58,6 +78,8 @@ type Server struct {
 	auth     usersDelivery
 	product  productsApp
 	category categoryApp
+	profile  profilesDelivery
+	address  addressDelivery
 	cfg      config
 	log      *slog.Logger
 	files    filesDelivery
@@ -100,6 +122,14 @@ func NewServer() (*Server, error) {
 	categoryRepo := categoryRepoLib.NewCategoriesStore(dbPool, log)
 	categoryDelivery := categoryDeliveryLib.NewCategoriesDelivery(categoryRepo, log, errResolver)
 
+	profileRepo := profileRepoLib.NewProfileRepo(dbPool, logger)
+	profileService := profileServiceLib.NewProfileService(profileRepo, logger)
+	profileHandler := profileDeliveryLib.NewProfilesHandler(profileService, logger)
+
+	addressRepo := addressRepoLib.NewAddressRepo(dbPool, logger)
+	addressService := addressServiceLib.NewAddressService(addressRepo, logger)
+	addressHandler := addressDeliveryLib.NewAddressHandler(addressService, logger)
+
 	pa := NewProductsApp(router, prodHandler)
 	ca := NewCategoryApp(router, categoryDelivery)
 
@@ -114,6 +144,8 @@ func NewServer() (*Server, error) {
 		r:        router,
 		auth:     userHandler,
 		product:  pa,
+		profile:  profileHandler,
+		address:  addressHandler,
 		category: ca,
 		cfg:      initServer(),
 		log:      log,
@@ -138,6 +170,11 @@ func (s *Server) setupRoutes() {
 	s.r.HandleFunc("/files/{name}", s.files.GetImage).Methods(http.MethodGet)
 
 	getUnimplemented := s.r.Methods(http.MethodGet, http.MethodPost).Subrouter()
+	getUnimplemented.HandleFunc("/account", s.profile.GetProfile).Methods(http.MethodGet)
+	getUnimplemented.HandleFunc("/account", s.profile.UpdateProfileData).Methods(http.MethodPost)
+	getUnimplemented.HandleFunc("/address", s.address.GetAddress).Methods(http.MethodGet)
+	getUnimplemented.HandleFunc("/address", s.address.UpdateAddressData).Methods(http.MethodPost)
+	getUnimplemented := s.r.Methods(http.MethodGet, http.MethodPost).Subrouter()
 	getUnimplemented.HandleFunc("/cart", func(w http.ResponseWriter, r *http.Request) {
 
 	})
@@ -149,6 +186,7 @@ func (s *Server) setupRoutes() {
 	})
 	getUnimplemented.HandleFunc("/account", func(w http.ResponseWriter, r *http.Request) {})
 
+	})
 	s.r.HandleFunc("/", s.auth.GetUserById).Methods(http.MethodGet)
 	getUnimplemented.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 }

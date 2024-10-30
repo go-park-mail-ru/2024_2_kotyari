@@ -40,6 +40,7 @@ var (
 	CategoriesDoesNotExits = errors.New("нет категорий")
 	OptionsDoesNotExists   = errors.New("не найдены опции")
 	ImagesDoesNotExists    = errors.New("нет картинок")
+	AddressNotFound       = errors.New("адрес не найден")
 )
 
 type ErrorStore struct {
