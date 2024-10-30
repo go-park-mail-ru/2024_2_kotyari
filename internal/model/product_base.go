@@ -1,10 +1,10 @@
 package model
 
-type ProductBase struct {
+type BaseProduct struct {
 	ID            uint32
 	Description   string
 	Count         uint32
-	Title         string
+	Name          string
 	Price         uint32
 	OriginalPrice uint32
 	Discount      uint32

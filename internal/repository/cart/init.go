@@ -11,8 +11,9 @@ type CartsStore struct {
 	log *slog.Logger
 }
 
-func NewCartsStore(db *pgxpool.Pool) *CartsStore {
+func NewCartsStore(db *pgxpool.Pool, logger *slog.Logger) *CartsStore {
 	return &CartsStore{
-		db: db,
+		db:  db,
+		log: logger,
 	}
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
-func (cs *CartsStore) GetProductQuantity(ctx context.Context, productID uint32) (uint32, error) {
+func (cs *CartsStore) GetCartProductQuantity(ctx context.Context, productID uint32) (uint32, error) {
 	userID := utils.GetContextSessionUserID(ctx)
 
 	// Мб поменять на select count from products where id=$1;
