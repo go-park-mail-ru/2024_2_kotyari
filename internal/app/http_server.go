@@ -87,6 +87,7 @@ type Server struct {
 	log      *slog.Logger
 	files    filesDelivery
 	cart     CartApp
+	orders   *orders.OrdersHandler
 }
 
 func NewServer() (*Server, error) {
@@ -144,6 +145,13 @@ func NewServer() (*Server, error) {
 	pa := NewProductsApp(router, prodHandler)
 
 	fileDelivery := fileDeliveryLib.NewFilesDelivery(fileRepo)
+
+	log := logger.InitLogger()
+
+	ordersRepo := rorders.NewOrdersRepo(dbPool, log)
+	ordersManager := morders.NewOrdersManager(ordersRepo)
+	ordersHandler := orders.NewOrdersHandler(ordersManager, log)
+
 	return &Server{
 		r:        router,
 		auth:     userHandler,
@@ -197,6 +205,7 @@ func (s *Server) setupRoutes() {
 
 	s.r.HandleFunc("/", s.auth.GetUserById).Methods(http.MethodGet)
 	getUnimplemented.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
+
 }
 
 func (s *Server) Run() error {
