@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 )
 
-const baseUrl = "./files"
+const baseUrl = "files"
 
 var ErrFileDoesNotExist = errors.New("file does not exist")
 var ErrAccessDenied = errors.New("access denied to file outside allowed directory")

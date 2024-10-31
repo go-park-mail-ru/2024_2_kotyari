@@ -133,7 +133,7 @@ func (s *Server) setupRoutes() {
 	getUnimplemented.HandleFunc("/favorite", func(w http.ResponseWriter, r *http.Request) {
 
 	})
-	getUnimplemented.HandleFunc("/account", func(w http.ResponseWriter, r *http.Request) {
+	getUnimplemented.HandleFunc("/account", func(w http.ResponseWriter, r *http.Request) {})
 
 	})
 	s.r.HandleFunc("/", s.auth.GetUserById).Methods(http.MethodGet)

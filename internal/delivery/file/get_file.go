@@ -2,6 +2,7 @@ package file
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -13,7 +14,7 @@ import (
 func (fd *FilesDelivery) GetImage(w http.ResponseWriter, r *http.Request) {
 	imageName := mux.Vars(r)["name"]
 
-	// Получаем файл из ImagesUsecase
+	log.Printf(" [ FilesDelivery.GetImage ] Getting image %s", imageName)
 	file, err := fd.repo.GetFile(imageName)
 	if err != nil {
 		http.Error(w, "Image not found", http.StatusNotFound)
