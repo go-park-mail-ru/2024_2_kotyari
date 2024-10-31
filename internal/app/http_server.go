@@ -20,6 +20,7 @@ import (
 	sessionsDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/sessions"
 	userDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/user"
 	errResolveLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/handlers"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/middlewares"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	addressRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/address"
