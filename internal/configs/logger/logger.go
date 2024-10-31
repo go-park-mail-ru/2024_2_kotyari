@@ -1,9 +1,10 @@
 package logger
 
 import (
-	"github.com/natefinch/lumberjack"
 	"log/slog"
 	"os"
+
+	"github.com/natefinch/lumberjack"
 )
 
 // InitLogger инициализирует логгер для разных режимов (dev/prod/local)

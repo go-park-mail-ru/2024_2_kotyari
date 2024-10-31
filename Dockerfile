@@ -19,6 +19,8 @@ RUN apk add bash
 COPY --from=build /var/backend/main /app/main
 COPY --from=build /var/backend/.env /app/.env
 
+RUN mkdir -p /app/files
+
 WORKDIR /app
 EXPOSE 8000
 ENTRYPOINT ./main
