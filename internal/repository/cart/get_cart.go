@@ -40,7 +40,7 @@ func (cs *CartsStore) GetCart(ctx context.Context, deliveryDate time.Time) (mode
 		err = rows.Scan(
 			&cart.ID,
 			&product.ID,
-			&product.Name,
+			&product.Title,
 			&product.Price,
 			&product.ImageURL,
 			&product.OriginalPrice,
@@ -53,6 +53,10 @@ func (cs *CartsStore) GetCart(ctx context.Context, deliveryDate time.Time) (mode
 		}
 
 		cart.Products = append(cart.Products, product)
+	}
+
+	if len(cart.Products) == 0 {
+		return model.Cart{}, errs.EmptyCart
 	}
 
 	cart.UserID = userID

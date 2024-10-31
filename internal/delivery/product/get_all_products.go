@@ -19,7 +19,7 @@ func (pd *ProductsDelivery) GetAllProducts(w http.ResponseWriter, r *http.Reques
 			slog.String("error", err.Error()),
 		)
 
-		utils.WriteErrorJSON(w, errs.ProductsDoesNotExists, http.StatusNotFound)
+		utils.WriteErrorJSON(w, http.StatusNotFound, errs.ProductsDoesNotExists)
 
 		return
 	}

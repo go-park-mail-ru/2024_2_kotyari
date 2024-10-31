@@ -141,20 +141,20 @@ CREATE UNIQUE INDEX unique_order_index ON product_orders(order_id, product_id, C
 
 -- Таблица корзины пользователя, где хранится информация о продуктах в корзине
 CREATE TABLE IF NOT EXISTS "carts" (
-	"id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
-	"user_id" bigint NOT NULL,
-	"product_id" bigint NOT NULL,
-	"count" integer NOT NULL CHECK (count > 0),
-	"is_selected" boolean DEFAULT false,
-	"created_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	"updated_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	"delivery_date" timestamp with time zone,  -- Дата доставки для товара в корзине
-	PRIMARY KEY ("id"),
-	FOREIGN KEY ("user_id") REFERENCES "users"("id"),
-	FOREIGN KEY ("product_id") REFERENCES "products"("id")
+   "id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
+   "user_id" bigint NOT NULL,
+   "product_id" bigint NOT NULL,
+   "count" integer NOT NULL CHECK (count > 0),
+   "is_selected" boolean DEFAULT false,
+   "created_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   "updated_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   "delivery_date" timestamp with time zone,  -- Дата доставки для товара в корзине
+   PRIMARY KEY ("id"),
+   FOREIGN KEY ("user_id") REFERENCES "users"("id"),
+   FOREIGN KEY ("product_id") REFERENCES "products"("id")
 );
 
-CREATE UNIQUE INDEX unique_cart_index ON carts(user_id, product_id, COALESCE(option_id, -1));
+CREATE UNIQUE INDEX unique_cart_index ON carts(user_id, product_id);
 
 -- Таблица тегов для продуктов
 CREATE TABLE IF NOT EXISTS "categories" (

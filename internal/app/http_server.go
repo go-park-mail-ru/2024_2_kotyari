@@ -8,6 +8,7 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/logger"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/postgres"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/redis"
+	cartDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/cart"
 	fileDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/file"
 	productDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/product"
 	sessionsDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/sessions"
@@ -15,10 +16,12 @@ import (
 	errResolveLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/middlewares"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	cartRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/cart"
 	fileRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/file"
 	productRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/product"
 	sessionsRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/sessions"
 	userRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/user"
+	cartServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/cart"
 	sessionsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
 	userServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/user"
 	"github.com/gorilla/mux"
@@ -51,6 +54,7 @@ type Server struct {
 	cfg      config
 	log      *slog.Logger
 	files    filesDelivery
+	cart     CartApp
 }
 
 func NewServer() (*Server, error) {
@@ -88,6 +92,12 @@ func NewServer() (*Server, error) {
 
 	pa := NewProductsApp(router, prodHandler)
 
+	cartRepo := cartRepoLib.NewCartsStore(dbPool, log)
+	cartService := cartServiceLib.NewCartManager(cartRepo, log)
+	cartHandler := cartDeliveryLib.NewCartHandler(cartService, cartRepo, log)
+
+	cartApp := NewCartApp(router, cartHandler)
+
 	fileDelivery := fileDeliveryLib.NewFilesDelivery(fileRepo)
 	return &Server{
 		r:        router,
@@ -97,6 +107,7 @@ func NewServer() (*Server, error) {
 		log:      log,
 		sessions: sessionsDelivery,
 		files:    fileDelivery,
+		cart:     cartApp,
 	}, nil
 }
 
@@ -104,7 +115,8 @@ func (s *Server) setupRoutes() {
 	errResolver := errResolveLib.NewErrorStore()
 
 	s.product.InitProductsRoutes()
-
+	sub := s.cart.InitCartRoutes()
+	sub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 	s.r.HandleFunc("/login", s.auth.LoginUser).Methods(http.MethodPost)
 	s.r.HandleFunc("/logout", s.sessions.Delete).Methods(http.MethodPost)
 	s.r.HandleFunc("/signup", s.auth.CreateUser).Methods(http.MethodPost)

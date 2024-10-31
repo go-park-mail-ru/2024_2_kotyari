@@ -21,7 +21,7 @@ func (cs *CartsStore) GetCartProductByID(ctx context.Context, productID uint32) 
 
 	err := cs.db.QueryRow(ctx, query, userID, productID).Scan(&product.ID, &product.Count)
 	if err != nil {
-		cs.log.Error("[CartStore.GetProductQuantity] Error performing query: ", slog.String("error", err.Error()))
+		cs.log.Error("[CartStore.GetProductCount] Error performing query: ", slog.String("error", err.Error()))
 
 		return model.BaseProduct{}, err
 	}
