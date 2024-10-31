@@ -109,7 +109,6 @@ func (s *Server) setupRoutes() {
 	s.r.HandleFunc("/logout", s.sessions.Delete).Methods(http.MethodPost)
 	s.r.HandleFunc("/signup", s.auth.CreateUser).Methods(http.MethodPost)
 
-
 	s.r.HandleFunc("/files/{name}", s.files.GetImage).Methods(http.MethodGet)
 
 	getUnimplemented := s.r.Methods(http.MethodGet).Subrouter()
@@ -124,10 +123,9 @@ func (s *Server) setupRoutes() {
 	})
 	getUnimplemented.HandleFunc("/account", func(w http.ResponseWriter, r *http.Request) {
 
+	})
 	s.r.HandleFunc("/", s.auth.GetUserById).Methods(http.MethodGet)
-	getUnimplemented := s.r.Methods(http.MethodGet).Subrouter()
 	getUnimplemented.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
-
 }
 
 func (s *Server) Run() error {
