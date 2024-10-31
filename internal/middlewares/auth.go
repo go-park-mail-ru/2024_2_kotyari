@@ -44,7 +44,7 @@ func AuthMiddleware(sessionGetter sessionGetter, errResolver errs.GetErrorCode) 
 				return
 			}
 
-			ctx := utils.SetSessionUser(r.Context(), session.UserID)
+			ctx := utils.SetContextSessionUserID(r.Context(), session.UserID)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
