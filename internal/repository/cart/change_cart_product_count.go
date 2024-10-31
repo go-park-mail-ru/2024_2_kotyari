@@ -2,7 +2,6 @@ package cart
 
 import (
 	"context"
-	"fmt"
 	"github.com/jackc/pgx/v5"
 	"log/slog"
 
@@ -14,11 +13,15 @@ func (cs *CartsStore) ChangeCartProductCount(ctx context.Context, productID uint
 	userID := utils.GetContextSessionUserID(ctx)
 
 	tx, err := cs.db.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		cs.log.Error("[CartStore.RemoveCartProduct] failed to start transaction", "error", slog.String("error", err.Error()))
+
+		return errs.InternalServerError
+
+	}
 
 	defer func() {
-		fmt.Println("pre err", err)
 		if err != nil {
-			fmt.Println("rbackerr", err)
 			cs.log.Error("[CartStore.ChangeProductCount] an error occurred", slog.String("error", err.Error()))
 
 			err = tx.Rollback(ctx)
@@ -58,7 +61,6 @@ func (cs *CartsStore) ChangeCartProductCount(ctx context.Context, productID uint
 
 	commandTag, err = cs.db.Exec(ctx, updateCartProductCount, productID, count, userID)
 	if err != nil {
-		fmt.Println("err: ", err)
 		cs.log.Error("[CartStore.ChangeProductCount] Error changing product count in cart", slog.String("error", err.Error()))
 
 		return err

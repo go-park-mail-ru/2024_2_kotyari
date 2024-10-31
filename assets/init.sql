@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS "carts" (
    "id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
    "user_id" bigint NOT NULL,
    "product_id" bigint NOT NULL,
-   "count" integer NOT NULL CHECK (count > 0),
+   "count" integer NOT NULL,
    "is_selected" boolean DEFAULT false,
    "created_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
    "updated_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,

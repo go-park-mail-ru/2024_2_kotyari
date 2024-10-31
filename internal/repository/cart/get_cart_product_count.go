@@ -6,11 +6,10 @@ import (
 )
 
 func (cs *CartsStore) GetCartProductCount(ctx context.Context, productID uint32) (uint32, error) {
-
-	// Мб поменять на select count from products where id=$1;
 	const query = `
-		select count from products 
-		where id = $1;
+		select c.count from carts c
+		join products p on p.id = c.product_id
+		where p.id = $1;
 	`
 
 	var count uint32

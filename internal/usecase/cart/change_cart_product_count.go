@@ -7,7 +7,14 @@ import (
 )
 
 func (am *CartManager) ChangeCartProductCount(ctx context.Context, productID uint32, count int32) error {
-	productCount, err := am.cartRepository.GetCartProductCount(ctx, productID)
+	cartProductCount, err := am.cartRepository.GetCartProductCount(ctx, productID)
+	if err != nil {
+		am.log.Error("[CartManager.ChangeCartProductCount] Error getting cartProductCount count", slog.String("error", err.Error()))
+
+		return err
+	}
+
+	productCount, err := am.cartRepository.GetProductCount(ctx, productID)
 	if err != nil {
 		am.log.Error("[CartManager.ChangeCartProductCount] Error getting productCount count", slog.String("error", err.Error()))
 
@@ -19,24 +26,39 @@ func (am *CartManager) ChangeCartProductCount(ctx context.Context, productID uin
 		if int32(productCount)-count >= 0 {
 			err = am.cartRepository.ChangeCartProductCount(ctx, productID, count)
 			if err != nil {
-				am.log.Error("[CartManager.ChangeCartProductCount] Error changing product count", slog.String("error", err.Error()))
+				am.log.Error("[CartManager.ChangeCartProductCount] Error changing productCount count", slog.String("error", err.Error()))
 
-				return errs.ProductCountTooLow
+				return err
 			}
 
+			return nil
 		}
 
-		return nil
+		return errs.ProductCountTooLow
 
 	case count < 0:
-		err = am.cartRepository.ChangeCartProductCount(ctx, productID, count)
-		if err != nil {
-			am.log.Error("[CartManager.ChangeCartProductCount] Error changing product count", slog.String("error", err.Error()))
+		if int32(cartProductCount)+count >= 1 {
+			err = am.cartRepository.ChangeCartProductCount(ctx, productID, count)
+			if err != nil {
+				am.log.Error("[CartManager.ChangeCartProductCount] Error changing productCount count", slog.String("error", err.Error()))
 
-			return err
+				return err
+			}
+
+			return nil
 		}
 
+		if int32(cartProductCount)+count == 0 {
+			err = am.cartRepository.RemoveCartProduct(ctx, productID, count)
+			if err != nil {
+				am.log.Error("[CartManager.ChangeCartProductCount] Error removing cart", slog.String("error", err.Error()))
+
+				return err
+			}
+
+			return nil
+		}
 	}
 
-	return nil
+	return errs.InternalServerError
 }

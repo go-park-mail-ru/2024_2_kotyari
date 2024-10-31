@@ -7,7 +7,9 @@ import (
 
 type cartRepository interface {
 	GetCartProductCount(ctx context.Context, productID uint32) (uint32, error)
+	GetProductCount(ctx context.Context, productID uint32) (uint32, error)
 	ChangeCartProductCount(ctx context.Context, productID uint32, count int32) error
+	RemoveCartProduct(ctx context.Context, productID uint32, count int32) error
 }
 
 type CartManager struct {
