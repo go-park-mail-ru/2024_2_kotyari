@@ -1,3 +1,4 @@
+```mermaid
 erDiagram
     %% Таблица пользователей
     users {
@@ -207,3 +208,4 @@ erDiagram
 
     favorites }o--|| users : "принадлежит"
     favorites }o--|| products : "содержит"
+```
