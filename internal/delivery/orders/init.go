@@ -2,14 +2,16 @@ package orders
 
 import (
 	"context"
-	order "github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	"github.com/google/uuid"
 	"log/slog"
+	"time"
+
+	order "github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
 type ordersManager interface {
 	GetOrders(ctx context.Context) ([]order.Order, error)
-	GetOrderByID(ctx context.Context, id uuid.UUID) (*order.Order, error)
+	GetOrderById(ctx context.Context, id uuid.UUID, deliveryDate time.Time) (*order.Order, error)
 	CreateOrderFromCart(ctx context.Context, address string) (*order.Order, error)
 }
 
