@@ -2,18 +2,20 @@ package address
 
 import (
 	"context"
+	"log/slog"
+
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
-func (as *AddressService) GetAddressByProfileID(ctx context.Context, userID uint32) (model.Address, error) {
-	as.log.Info("Запрос адреса по ID профиля", "userID", userID)
+func (as *AddressService) GetAddressByProfileID(ctx context.Context, userID uint32) (model.AddressDTO, error) {
 
 	address, err := as.addressRepo.GetAddressByProfileID(ctx, userID)
 	if err != nil {
-		as.log.Error("Ошибка при получении адреса", "userID", userID, "error", err)
-		return model.Address{}, err
+		as.log.Error("[ AddressService.GetAddressByProfileID ] Ошибка при получении адреса", slog.String("error", err.Error()))
+		return model.AddressDTO{}, err
 	}
-
-	as.log.Info("Адрес успешно получен", "userID", userID)
+	if address.Flat == nil {
+		*address.Flat = ""
+	}
 	return address, nil
 }

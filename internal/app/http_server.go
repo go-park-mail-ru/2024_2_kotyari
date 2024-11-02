@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -57,8 +58,7 @@ type profilesDelivery interface {
 	UpdateProfileData(writer http.ResponseWriter, request *http.Request)
 }
 
-type addressDelivery interface {
-	CreateAddress(writer http.ResponseWriter, request *http.Request)
+type addressesDelivery interface {
 	UpdateAddressData(writer http.ResponseWriter, request *http.Request)
 	GetAddress(writer http.ResponseWriter, request *http.Request)
 }
@@ -79,7 +79,7 @@ type Server struct {
 	product  productsApp
 	category categoryApp
 	profile  profilesDelivery
-	address  addressDelivery
+	address  addressesDelivery
 	cfg      config
 	log      *slog.Logger
 	files    filesDelivery
@@ -169,10 +169,11 @@ func (s *Server) setupRoutes() {
 
 	s.r.HandleFunc("/files/{name}", s.files.GetImage).Methods(http.MethodGet)
 
-	getUnimplemented := s.r.Methods(http.MethodGet, http.MethodPost).Subrouter()
+	getUnimplemented := s.r.Methods(http.MethodGet, http.MethodPost, http.MethodPut).Subrouter()
 	getUnimplemented.HandleFunc("/account", s.profile.GetProfile).Methods(http.MethodGet)
-	getUnimplemented.HandleFunc("/account", s.profile.UpdateProfileData).Methods(http.MethodPost)
+	getUnimplemented.HandleFunc("/account", s.profile.UpdateProfileData).Methods(http.MethodPut)
 	getUnimplemented.HandleFunc("/address", s.address.GetAddress).Methods(http.MethodGet)
+	getUnimplemented.HandleFunc("/address", s.address.UpdateAddressData).Methods(http.MethodPut)
 	getUnimplemented.HandleFunc("/address", s.address.UpdateAddressData).Methods(http.MethodPost)
 	getUnimplemented := s.r.Methods(http.MethodGet, http.MethodPost).Subrouter()
 	getUnimplemented.HandleFunc("/cart", func(w http.ResponseWriter, r *http.Request) {

@@ -2,18 +2,24 @@ package address
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	"log/slog"
+
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
-func (ar *AddressStore) UpdateUsersAddress(addressID uint32, addressModel model.Address) error {
-	ar.log.Info("Начало обновления адреса", "addressID", addressID)
+func (ar *AddressStore) UpdateUsersAddress(ctx context.Context, addressID uint32, addressModel model.Address) error {
 
 	const query = `
-		update addresses set city = $1, street = $2, house = $3, flat = $4 where id = $5;
+		INSERT INTO addresses (user_id, city, street, house, flat)
+		VALUES ($1, $2, $3, $4, $5)
+		ON CONFLICT (user_id)
+    	DO UPDATE SET city = EXCLUDED.city, 
+				  street = EXCLUDED.street, 
+				  house = EXCLUDED.house, 
+				  flat = EXCLUDED.flat;
 	`
 
-	_, err := ar.db.Exec(context.Background(), query,
+	_, err := ar.db.Exec(ctx, query,
 		addressModel.City,
 		addressModel.Street,
 		addressModel.House,
@@ -21,10 +27,9 @@ func (ar *AddressStore) UpdateUsersAddress(addressID uint32, addressModel model.
 		addressID)
 
 	if err != nil {
-		ar.log.Error("Ошибка при обновлении адреса", slog.String("error", err.Error()))
+		ar.log.Error("[ AddressStore.UpdateUsersAddress ]Ошибка при обновлении адреса", slog.String("error", err.Error()))
 		return err
 	}
-
-	ar.log.Info("Адрес успешно обновлен", "addressID", addressID)
+	ar.log.Info("[ AddressStore.UpdateUsersAddress ]Обновление адреса")
 	return nil
 }

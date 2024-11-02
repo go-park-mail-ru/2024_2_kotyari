@@ -1,18 +1,19 @@
 package address
 
 import (
+	"context"
+	"log/slog"
+
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
-func (as *AddressService) UpdateUsersAddress(addressID uint32, newAddress model.Address) error {
-	as.log.Info("Начало обновления адреса", "addressID", addressID, "newAddress", newAddress)
+func (as *AddressService) UpdateUsersAddress(ctx context.Context, addressID uint32, newAddress model.Address) error {
 
-	err := as.addressRepo.UpdateUsersAddress(addressID, newAddress)
+	err := as.addressRepo.UpdateUsersAddress(ctx, addressID, newAddress)
 	if err != nil {
-		as.log.Error("Ошибка при обновлении адреса", "addressID", addressID, "error", err)
+		as.log.Error("[ AddressService.UpdateUsersAddress ] Ошибка при обновлении адреса", slog.String("error", err.Error()))
 		return err
 	}
 
-	as.log.Info("Адрес успешно обновлён", "addressID", addressID)
 	return nil
 }

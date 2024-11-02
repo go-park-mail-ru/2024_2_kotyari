@@ -11,25 +11,20 @@ import (
 )
 
 func (h *ProfilesDelivery) UpdateProfileData(writer http.ResponseWriter, request *http.Request) {
-	ctx := request.Context()
-
-	h.log.Info("Обработка запроса на обновление профиля", "request", request)
 
 	id := utils.GetContextSessionUserID(request.Context())
 
 	var req UpdateProfileRequest
 
 	if err := json.NewDecoder(request.Body).Decode(&req); err != nil {
-		h.log.Error("Ошибка десериализации запроса", slog.String("error", err.Error()))
+		h.log.Error("[ ProfilesDelivery.UpdateProfileData ] Ошибка десериализации запроса", slog.String("error", err.Error()))
 		utils.WriteJSON(writer, http.StatusBadRequest, &errs.HTTPErrorResponse{ErrorMessage: errs.InvalidJSONFormat.Error()})
 		return
 	}
-	defer request.Body.Close()
-	h.log.Debug("Получено тело запроса", "req", req)
 
-	oldProfileData, err := h.profileManager.GetProfile(ctx, uint32(id))
+	oldProfileData, err := h.profileManager.GetProfile(request.Context(), uint32(id))
 	if err != nil {
-		h.log.Warn("Не удалось получить старые данные профиля", slog.String("error", err.Error()))
+		h.log.Warn("[ ProfilesDelivery.UpdateProfileData ] Не удалось получить старые данные профиля", slog.String("error", err.Error()))
 		utils.WriteJSON(writer, http.StatusNotFound, &errs.HTTPErrorResponse{ErrorMessage: errs.UserDoesNotExist.Error()})
 		return
 	}
@@ -40,8 +35,8 @@ func (h *ProfilesDelivery) UpdateProfileData(writer http.ResponseWriter, request
 		Gender:   req.Gender,
 	}
 
-	if err := h.profileManager.UpdateProfile(oldProfileData, newProfileData); err != nil {
-		h.log.Warn("Не удалось обновить данные профиля", slog.String("error", err.Error()))
+	if err := h.profileManager.UpdateProfile(request.Context(), oldProfileData, newProfileData); err != nil {
+		h.log.Warn("[ ProfilesDelivery.UpdateProfileData ] Не удалось обновить данные профиля", slog.String("error", err.Error()))
 
 		switch err {
 		case errs.InvalidEmailFormat:
@@ -54,6 +49,5 @@ func (h *ProfilesDelivery) UpdateProfileData(writer http.ResponseWriter, request
 		return
 	}
 
-	h.log.Info("Данные профиля обновлены", "id", id)
 	utils.WriteJSON(writer, http.StatusOK, req)
 }

@@ -8,8 +8,8 @@ import (
 )
 
 type profileRepository interface {
-	ReadProfile(ctx context.Context, Id uint32) (model.Profile, error)
-	UpdateProfile(profileID uint32, profileModel model.Profile) error
+	GetProfile(ctx context.Context, Id uint32) (model.Profile, error)
+	UpdateProfile(ctx context.Context, profileID uint32, profileModel model.Profile) error
 }
 
 type ProfilesService struct {

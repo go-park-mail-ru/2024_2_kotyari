@@ -1,8 +1,9 @@
 package address
 
 import (
-	"github.com/jackc/pgx/v5/pgxpool"
 	"log/slog"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type AddressStore struct {

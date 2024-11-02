@@ -8,9 +8,8 @@ import (
 )
 
 type addressRepository interface {
-	CreateAddress(ctx context.Context, profileID uint32, addressModel model.Address) (uint32, error)
-	GetAddressByProfileID(ctx context.Context, profileID uint32) (model.Address, error)
-	UpdateUsersAddress(addressID uint32, addressModel model.Address) error
+	GetAddressByProfileID(ctx context.Context, profileID uint32) (model.AddressDTO, error)
+	UpdateUsersAddress(ctx context.Context, addressID uint32, addressModel model.Address) error
 }
 
 type AddressService struct {

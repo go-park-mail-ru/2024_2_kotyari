@@ -8,9 +8,8 @@ import (
 )
 
 type addressManager interface {
-	CreateUsersAddress(ctx context.Context, userID uint32, addressInfo model.Address) (uint32, error)
-	GetAddressByProfileID(ctx context.Context, userID uint32) (model.Address, error)
-	UpdateUsersAddress(addressID uint32, newAddress model.Address) error
+	GetAddressByProfileID(ctx context.Context, userID uint32) (model.AddressDTO, error)
+	UpdateUsersAddress(ctx context.Context, addressID uint32, newAddress model.Address) error
 }
 
 type AddressDelivery struct {
