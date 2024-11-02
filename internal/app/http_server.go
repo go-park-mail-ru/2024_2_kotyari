@@ -195,6 +195,6 @@ func (s *Server) Run() error {
 
 	handler := middlewares.CorsMiddleware(s.r, s.cfg.SessionLifetime)
 
-	s.log.Info("starting server", slog.String("address:", s.cfg.ServerAddress))
+	s.log.Info("starting  server", slog.String("address:", s.cfg.ServerAddress))
 	return http.ListenAndServe(s.cfg.ServerAddress, handler)
 }
