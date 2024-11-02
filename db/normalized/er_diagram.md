@@ -1,167 +1,182 @@
 ```mermaid
 erDiagram
+
     %% Таблица пользователей
     users {
-        bigint id PK
-        text email
-        text username
-        text city
-        smallint age
-        text avatar_url
-        text password
-        boolean blocked
-        timestamp blocked_until
-        timestamp created_at
-        timestamp updated_at
+        id PK
+        email
+        username
+        city
+        age
+        avatar_url
+        password
+        blocked
+        blocked_until
+        created_at
+        updated_at
     }
 
     %% Таблица продавцов
     sellers {
-        bigint id PK
-        text name
-        text logo
-        real rating
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    %% Таблица товаров
-    products {
-        bigint id PK
-        bigint seller_id FK
-        integer count
-        integer price
-        integer original_price
-        smallint discount
-        text title
-        text description
-        real rating
-        text image_url
-        boolean active
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    %% Таблица характеристик
-    characteristics {
-        bigint id PK
-        text name
-    }
-
-    %% Связующая таблица товаров и характеристик
-    product_characteristics {
-        bigint product_id PK, FK
-        bigint characteristic_id PK, FK
-        text value
-    }
-
-    %% Таблица опций
-    options {
-        bigint id PK
-        text name
-    }
-
-    %% Связующая таблица товаров и опций
-    product_options {
-        bigint id PK
-        bigint product_id FK
-        bigint option_id FK
-    }
-
-    %% Таблица значений опций
-    product_option_values {
-        bigint id PK
-        bigint product_option_id FK
-        text value
-        text link
-    }
-
-    %% Таблица избранных товаров
-    favorites {
-        bigint id PK
-        bigint user_id FK
-        bigint product_id FK
-        timestamp created_at
-    }
-
-    %% Таблица изображений товаров
-    product_images {
-        bigint id PK
-        bigint product_id FK
-        text image_url
-        timestamp created_at
-    }
-
-    %% Таблица складских адресов
-    stock_address {
-        bigint id PK
-        text address
-        text city
-        text country
-        text postal_code
-    }
-
-    %% Таблица заказов
-    orders {
-        bigint id PK
-        bigint user_id FK
-        text address
-        bigint stock_address_id FK
-        integer total_price
-        order_status status
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    %% Таблица связей товаров и заказов
-    product_orders {
-        bigint id PK
-        bigint order_id FK
-        bigint product_id FK
-        bigint option_value_id FK
-        integer count
-        timestamp delivery_date
-    }
-
-    %% Таблица корзины
-    carts {
-        bigint id PK
-        bigint user_id FK
-        bigint product_id FK
-        bigint option_value_id FK
-        integer count
-        boolean is_selected
-        timestamp created_at
-        timestamp updated_at
-        timestamp delivery_date
+        id PK
+        name
+        logo
+        rating
+        created_at
+        updated_at
     }
 
     %% Таблица категорий
     categories {
-        bigint id PK
-        text name
-        text picture
-        boolean active
-        text link_to
+        id PK
+        name
+        picture
+        active
+        link_to
+        created_at
+        updated_at
     }
 
-    %% Связующая таблица товаров и категорий
-    product_categories {
-        bigint id PK
-        bigint product_id FK
-        bigint category_id FK
-        boolean active
+    %% Таблица товаров
+    products {
+        id PK
+        seller_id FK
+        category_id FK
+        count
+        price
+        original_price
+        discount
+        title
+        description
+        rating
+        image_url
+        active
+        created_at
+        updated_at
+    }
+
+    %% Таблица характеристик
+    characteristics {
+        id PK
+        name
+        created_at
+        updated_at
+    }
+
+    %% Связующая таблица товаров и характеристик
+    product_characteristics {
+        product_id PK, FK
+        characteristic_id PK, FK
+        value
+        created_at
+        updated_at
+    }
+
+    %% Таблица опций
+    options {
+        id PK
+        name
+        created_at
+        updated_at
+    }
+
+    %% Связующая таблица товаров и опций
+    product_options {
+        id PK
+        product_id FK
+        option_id FK
+        created_at
+        updated_at
+    }
+
+    %% Таблица значений опций
+    product_option_values {
+        id PK
+        product_option_id FK
+        value
+        link
+        created_at
+        updated_at
+    }
+
+    %% Таблица избранных товаров
+    favorites {
+        id PK
+        user_id FK
+        product_id FK
+        created_at
+        updated_at
+    }
+
+    %% Таблица изображений товаров
+    product_images {
+        id PK
+        product_id FK
+        image_url
+        created_at
+        updated_at
+    }
+
+    %% Таблица складских адресов
+    stock_address {
+        id PK
+        address
+        city
+        country
+        postal_code
+        created_at
+        updated_at
+    }
+
+    %% Тип данных: order_status
+    %% Создание типа ENUM в ER-диаграмме не отображается, поэтому статус указан как атрибут
+
+    %% Таблица заказов
+    orders {
+        id PK
+        user_id FK
+        address
+        stock_address_id FK
+        status
+        delivery_price
+        created_at
+        updated_at
+    }
+
+    %% Таблица связей товаров и заказов
+    product_orders {
+        id PK
+        order_id FK
+        product_id FK
+        option_value_id FK
+        count
+        delivery_date
+        created_at
+        updated_at
+    }
+
+    %% Таблица корзины
+    carts {
+        id PK
+        user_id FK
+        product_id FK
+        option_value_id FK
+        count
+        is_selected
+        delivery_date
+        created_at
+        updated_at
     }
 
     %% Таблица отзывов о товарах
     product_reviews {
-        bigint id PK
-        bigint product_id FK
-        bigint user_id FK
-        smallint rating
-        text comment
-        timestamp created_at
-        timestamp updated_at
+        id PK
+        product_id FK
+        user_id FK
+        rating
+        comment
+        created_at
+        updated_at
     }
 
     %% Определение связей между таблицами
@@ -176,11 +191,11 @@ erDiagram
     products ||--o{ product_characteristics : "имеет"
     products ||--o{ product_options : "имеет"
     products ||--o{ product_images : "содержит"
-    products ||--o{ product_orders : "входит в"
+    products ||--o{ product_orders : "заказывается в"
     products ||--o{ carts : "добавлен в"
     products ||--o{ favorites : "в избранном"
     products ||--o{ product_reviews : "имеет отзывы"
-    products }o--o{ categories : "относится к"
+    products ||--|| categories : "относится к"
 
     characteristics ||--o{ product_characteristics : "определяет"
 
@@ -195,9 +210,7 @@ erDiagram
     product_option_values ||--o{ product_orders : "используется в"
     product_option_values ||--o{ carts : "выбрана в"
 
-    categories ||--o{ product_categories : "содержит"
-
-    product_categories }o--|| products : "связан с"
+    categories ||--o{ products : "содержит"
 
     product_reviews }o--|| users : "написан"
     product_reviews }o--|| products : "оценка для"

@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
-    username TEXT UNIQUE NOT NULL,
+    username TEXT NOT NULL,
     city TEXT NOT NULL DEFAULT 'Москва',
     age SMALLINT,
     avatar_url TEXT,
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS sellers (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name TEXT NOT NULL,
-    logo TEXT NOT NULL,
+    logo_url TEXT NOT NULL,
     rating REAL DEFAULT 0 NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS sellers (
 CREATE TABLE IF NOT EXISTS products (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     seller_id BIGINT NOT NULL REFERENCES sellers(id) ON DELETE CASCADE,
+    category_id BIGINT NOT NULL REFERENCES categories(id),
     count INTEGER NOT NULL DEFAULT 1,
     price INTEGER NOT NULL,
     original_price INTEGER,
@@ -48,12 +49,16 @@ CREATE TABLE IF NOT EXISTS products (
 
 CREATE TABLE IF NOT EXISTS characteristics (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name TEXT NOT NULL UNIQUE
+    name TEXT NOT NULL UNIQUE,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS product_characteristics (
     product_id BIGINT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
     characteristic_id BIGINT NOT NULL REFERENCES characteristics(id),
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     value TEXT NOT NULL,
     PRIMARY KEY (product_id, characteristic_id)
 );
@@ -63,7 +68,9 @@ CREATE TABLE IF NOT EXISTS product_characteristics (
 
 CREATE TABLE IF NOT EXISTS options (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name TEXT NOT NULL UNIQUE
+    name TEXT NOT NULL UNIQUE,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS product_options (
@@ -88,6 +95,7 @@ CREATE TABLE IF NOT EXISTS favorites (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     user_id BIGINT NOT NULL REFERENCES users(id),
     product_id BIGINT NOT NULL REFERENCES products(id),
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (user_id, product_id)
 );
@@ -99,6 +107,7 @@ CREATE TABLE IF NOT EXISTS product_images (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     product_id BIGINT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
     image_url TEXT NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (product_id, image_url)
 );
@@ -112,6 +121,8 @@ CREATE TABLE IF NOT EXISTS stock_address (
     city TEXT NOT NULL,
     country TEXT NOT NULL,
     postal_code TEXT NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (address, city, country, postal_code)
 );
 
@@ -128,7 +139,7 @@ CREATE TABLE IF NOT EXISTS orders (
     user_id BIGINT NOT NULL REFERENCES users(id),
     address TEXT,
     stock_address_id BIGINT REFERENCES stock_address(id),
-    total_price INTEGER NOT NULL,
+    delivery_price INTEGER NOT NULL,
     status order_status DEFAULT 'awaiting_payment',
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -144,7 +155,8 @@ CREATE TABLE IF NOT EXISTS product_orders (
     option_value_id BIGINT REFERENCES product_option_values(id),
     count INTEGER NOT NULL DEFAULT 1,
     delivery_date TIMESTAMP WITH TIME ZONE NOT NULL,
-    UNIQUE (order_id, product_id, COALESCE(option_value_id, -1))
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Таблица: carts
@@ -159,8 +171,7 @@ CREATE TABLE IF NOT EXISTS carts (
     is_selected BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    delivery_date TIMESTAMP WITH TIME ZONE,
-    UNIQUE (user_id, product_id, COALESCE(option_value_id, -1))
+    delivery_date TIMESTAMP WITH TIME ZONE
 );
 
 -- Таблица: categories
@@ -172,17 +183,6 @@ CREATE TABLE IF NOT EXISTS categories (
     picture TEXT NOT NULL,
     active BOOLEAN NOT NULL DEFAULT TRUE,
     link_to TEXT
-);
-
--- Таблица: product_categories
--- Связывает товары с категориями.
-
-CREATE TABLE IF NOT EXISTS product_categories (
-    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    product_id BIGINT NOT NULL REFERENCES products(id),
-    category_id BIGINT NOT NULL REFERENCES categories(id),
-    active BOOLEAN NOT NULL DEFAULT TRUE,
-    UNIQUE (product_id, category_id)
 );
 
 -- Таблица: product_reviews
