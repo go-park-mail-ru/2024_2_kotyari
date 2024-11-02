@@ -103,9 +103,9 @@ CREATE TABLE IF NOT EXISTS "stock_address" (
 CREATE TYPE order_status AS ENUM ('awaiting_payment', 'paid', 'delivered', 'cancelled');
 -- Таблица заказов, связанная с пользователями и складскими адресами
 CREATE TABLE IF NOT EXISTS "orders" (
-    "id" UUID,
+	"id" UUID,
 	"user_id" bigint NOT NULL,
-	"address" text NOT NULL DEFAULT NULL,  -- Адрес доставки (если не используется стоковый адрес)
+	"address" text NOT NULL DEFAULT '',  -- Адрес доставки (если не используется стоковый адрес)
 	"stock_address_id" bigint,  -- Ссылка на таблицу стоковых адресов
 	"total_price" integer NOT NULL CHECK ("total_price" > 0),
 	"status" order_status DEFAULT 'awaiting_payment',
@@ -144,12 +144,12 @@ CREATE TABLE IF NOT EXISTS "product_options" (
 
 -- Таблица связывает продукты с заказами, хранит количество и дату доставки продукта в заказе
 CREATE TABLE IF NOT EXISTS "product_orders" (
-    "id" UUID,
+	"id" UUID,
 	"order_id" UUID NOT NULL,
 	"product_id" bigint NOT NULL,
-    "delivery_date" timestamp with time zone NOT NULL,
     "option_id" bigint,  -- Ссылка на опцию
 	"count" integer NOT NULL DEFAULT '1' CHECK (count > 0),
+	"delivery_date" timestamp with time zone NOT NULL,  -- Дата доставки продукта
 	PRIMARY KEY ("id"),
 	FOREIGN KEY ("order_id") REFERENCES "orders"("id"),
 	FOREIGN KEY ("product_id") REFERENCES "products"("id"),
@@ -211,7 +211,7 @@ ALTER TABLE orders
 ADD CONSTRAINT status_check CHECK (status IN ('awaiting_payment', 'paid', 'delivered', 'cancelled'));
 
 ALTER TABLE "products"
-ADD COLUMN "weight" real NOT NULL DEFAULT 0.0;
+    ADD COLUMN "weight" real NOT NULL DEFAULT 0.0;
 
 ALTER TABLE categories
 ADD COLUMN link_to text;
