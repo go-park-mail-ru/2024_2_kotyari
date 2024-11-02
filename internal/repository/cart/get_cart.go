@@ -16,8 +16,8 @@ func (cs *CartsStore) GetCart(ctx context.Context, deliveryDate time.Time) (mode
 	userID := utils.GetContextSessionUserID(ctx)
 
 	const query = `
-		select c.id, p.id, title, price, image_url, original_price, discount, p.count from products p
-		join carts c on p.id = c.product_id where user_id=$1;
+		select c.id, p.id, title, price, image_url, original_price, discount, c.count from products p
+		join carts c on p.id = c.product_id where user_id=$1 and c.is_deleted = false;
 	`
 
 	var cart model.Cart
@@ -45,7 +45,8 @@ func (cs *CartsStore) GetCart(ctx context.Context, deliveryDate time.Time) (mode
 			&product.ImageURL,
 			&product.OriginalPrice,
 			&product.Discount,
-			&product.Count)
+			&product.Count,
+			&product.IsSelected)
 		if err != nil {
 			cs.log.Error("[CartStore.GetCart] Error parsing rows: ", slog.String("error", err.Error()))
 

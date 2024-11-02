@@ -33,6 +33,10 @@ var (
 	ProductCountTooLow            = errors.New("товар закончился")
 	ProductNotFound               = errors.New("продукта не существует")
 	EmptyCart                     = errors.New("корзина пуста")
+	ParsingURLArg                 = errors.New("ошибка парсинга аргумента URL")
+	BadRequest                    = errors.New("неправильный запрос")
+	ProductNotInCart              = errors.New("этого продукта нет в корзине")
+	ProductAlreadyInCart          = errors.New("этот продукт уже находится в корзине")
 )
 
 type ErrorStore struct {
@@ -76,6 +80,10 @@ func NewErrorStore() *ErrorStore {
 			ProductCountTooLow:            http.StatusConflict,
 			ProductNotFound:               http.StatusNotFound,
 			EmptyCart:                     http.StatusNotFound,
+			ParsingURLArg:                 http.StatusBadRequest,
+			BadRequest:                    http.StatusBadRequest,
+			ProductNotInCart:              http.StatusNotFound,
+			ProductAlreadyInCart:          http.StatusConflict,
 		},
 	}
 }

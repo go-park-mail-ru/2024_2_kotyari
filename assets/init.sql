@@ -145,7 +145,8 @@ CREATE TABLE IF NOT EXISTS "carts" (
    "user_id" bigint NOT NULL,
    "product_id" bigint NOT NULL,
    "count" integer NOT NULL,
-   "is_selected" boolean DEFAULT false,
+   "is_selected" boolean DEFAULT true NOT NULL,
+   "is_deleted" boolean DEFAULT false NOT NULL,
    "created_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
    "updated_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
    "delivery_date" timestamp with time zone,  -- Дата доставки для товара в корзине

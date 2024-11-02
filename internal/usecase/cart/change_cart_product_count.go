@@ -2,31 +2,47 @@ package cartServiceLib
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"log/slog"
+
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 )
 
-func (am *CartManager) ChangeCartProductCount(ctx context.Context, productID uint32, count int32) error {
-	cartProductCount, err := am.cartRepository.GetCartProductCount(ctx, productID)
+func (cm *CartManager) ChangeCartProductCount(ctx context.Context, productID uint32, count int32, userID uint32) error {
+	product, err := cm.cartRepository.GetCartProduct(ctx, productID, userID)
 	if err != nil {
-		am.log.Error("[CartManager.ChangeCartProductCount] Error getting cartProductCount count", slog.String("error", err.Error()))
+		cm.log.Error("[CartManager.ChangeCartProductCount] Error getting product count", slog.String("error", err.Error()))
 
 		return err
 	}
 
-	productCount, err := am.cartRepository.GetProductCount(ctx, productID)
+	if product.IsDeleted {
+		return errs.ProductNotInCart
+	}
+
+	productCount, err := cm.productCountGetter.GetProductCount(ctx, productID)
 	if err != nil {
-		am.log.Error("[CartManager.ChangeCartProductCount] Error getting productCount count", slog.String("error", err.Error()))
+		cm.log.Error("[CartManager.ChangeCartProductCount] Error getting productCount count", slog.String("error", err.Error()))
 
 		return err
 	}
 
+	err = cm.validateCartProductCount(ctx, count, productCount, product.Count, productID, userID)
+	if err != nil {
+		cm.log.Error("[CartManager.ChangeCartProductCount] Error changing product count", slog.String("error", err.Error()))
+
+		return err
+	}
+
+	return nil
+}
+
+func (cm *CartManager) validateCartProductCount(ctx context.Context, count int32, productCount uint32, cartProductCount uint32, productID uint32, userID uint32) error {
 	switch {
 	case count > 0:
 		if int32(productCount)-count >= 0 {
-			err = am.cartRepository.ChangeCartProductCount(ctx, productID, count)
+			err := cm.cartRepository.ChangeCartProductCount(ctx, productID, count, userID)
 			if err != nil {
-				am.log.Error("[CartManager.ChangeCartProductCount] Error changing productCount count", slog.String("error", err.Error()))
+				cm.log.Error("[CartManager.validateCartProductCount] Error changing productCount count", slog.String("error", err.Error()))
 
 				return err
 			}
@@ -38,9 +54,9 @@ func (am *CartManager) ChangeCartProductCount(ctx context.Context, productID uin
 
 	case count < 0:
 		if int32(cartProductCount)+count >= 1 {
-			err = am.cartRepository.ChangeCartProductCount(ctx, productID, count)
+			err := cm.cartRepository.ChangeCartProductCount(ctx, productID, count, userID)
 			if err != nil {
-				am.log.Error("[CartManager.ChangeCartProductCount] Error changing productCount count", slog.String("error", err.Error()))
+				cm.log.Error("[CartManager.validateCartProductCount] Error changing productCount count", slog.String("error", err.Error()))
 
 				return err
 			}
@@ -49,9 +65,9 @@ func (am *CartManager) ChangeCartProductCount(ctx context.Context, productID uin
 		}
 
 		if int32(cartProductCount)+count == 0 {
-			err = am.cartRepository.RemoveCartProduct(ctx, productID, count)
+			err := cm.cartRepository.RemoveCartProduct(ctx, productID, count)
 			if err != nil {
-				am.log.Error("[CartManager.ChangeCartProductCount] Error removing cart", slog.String("error", err.Error()))
+				cm.log.Error("[CartManager.validateCartProductCount] Error removing cart", slog.String("error", err.Error()))
 
 				return err
 			}
@@ -60,5 +76,5 @@ func (am *CartManager) ChangeCartProductCount(ctx context.Context, productID uin
 		}
 	}
 
-	return errs.InternalServerError
+	return errs.BadRequest
 }

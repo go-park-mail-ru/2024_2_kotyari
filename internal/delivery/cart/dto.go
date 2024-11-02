@@ -14,17 +14,18 @@ func (r ChangeCartProductCountRequest) ToModel() int32 {
 	return r.Count
 }
 
-type CartResponse struct {
-	ID           uint32            `json:"id"`
-	DeliveryDate time.Time         `json:"delivery_date"`
-	Products     []ProductResponse `json:"products"`
+type GetCartResponse struct {
+	ID           uint32               `json:"id"`
+	DeliveryDate time.Time            `json:"delivery_date"`
+	Products     []GetProductResponse `json:"products"`
 }
 
-type ProductResponse struct {
+type GetProductResponse struct {
 	ID            uint32  `json:"id"`
 	Description   string  `json:"description"`
 	Count         uint32  `json:"count"`
 	ImageURL      string  `json:"image_url"`
+	IsSelected    bool    `json:"is_selected"`
 	Title         string  `json:"title"`
 	Price         uint32  `json:"price"`
 	OriginalPrice uint32  `json:"original_price"`
@@ -32,20 +33,21 @@ type ProductResponse struct {
 	Rating        float32 `json:"rating"`
 }
 
-func CartResponseFromModel(cart model.Cart, products []ProductResponse) CartResponse {
-	return CartResponse{
+func cartResponseFromModel(cart model.Cart, products []GetProductResponse) GetCartResponse {
+	return GetCartResponse{
 		ID:           cart.ID,
 		DeliveryDate: cart.DeliveryDate,
 		Products:     products,
 	}
 }
 
-func ProductResponseFromModel(cartProduct model.CartProduct) ProductResponse {
-	return ProductResponse{
+func productResponseFromModel(cartProduct model.CartProduct) GetProductResponse {
+	return GetProductResponse{
 		ID:            cartProduct.ID,
 		Description:   cartProduct.Description,
 		Count:         cartProduct.Count,
 		ImageURL:      cartProduct.ImageURL,
+		IsSelected:    cartProduct.IsSelected,
 		Title:         cartProduct.Title,
 		Price:         cartProduct.Price,
 		OriginalPrice: cartProduct.OriginalPrice,

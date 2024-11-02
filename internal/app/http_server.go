@@ -93,8 +93,8 @@ func NewServer() (*Server, error) {
 	pa := NewProductsApp(router, prodHandler)
 
 	cartRepo := cartRepoLib.NewCartsStore(dbPool, log)
-	cartService := cartServiceLib.NewCartManager(cartRepo, log)
-	cartHandler := cartDeliveryLib.NewCartHandler(cartService, cartRepo, log)
+	cartService := cartServiceLib.NewCartManager(cartRepo, prodRepo, log)
+	cartHandler := cartDeliveryLib.NewCartHandler(cartService, cartRepo, errResolver, log)
 
 	cartApp := NewCartApp(router, cartHandler)
 

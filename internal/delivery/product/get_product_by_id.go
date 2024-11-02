@@ -20,7 +20,7 @@ func (pd *ProductsDelivery) GetProductById(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	byID, err := pd.repo.GetProductByID(r.Context(), id)
+	byID, err := pd.repo.GetProductCardByID(r.Context(), id)
 	if err != nil {
 		err, code := pd.errResolver.Get(err)
 		utils.WriteErrorJSON(w, code, err)

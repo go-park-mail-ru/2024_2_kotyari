@@ -8,25 +8,21 @@ import (
 )
 
 func (ch *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
-	cart, err := ch.cartGetter.GetCart(r.Context(), time.Now())
+	cart, err := ch.cartManipulator.GetCart(r.Context(), time.Now())
 	if err != nil {
-		/// TODO: Change code type
-		utils.WriteErrorJSON(w, http.StatusBadRequest, err)
+		err, code := ch.errResolver.Get(err)
+		utils.WriteErrorJSON(w, code, err)
 
 		return
 	}
 
-	if len(cart.Products) == 0 {
-
-	}
-
-	var cartResp CartResponse
-	productResp := make([]ProductResponse, 0, len(cart.Products))
+	var cartResp GetCartResponse
+	productResp := make([]GetProductResponse, 0, len(cart.Products))
 
 	for _, cartProduct := range cart.Products {
-		productResp = append(productResp, ProductResponseFromModel(cartProduct))
+		productResp = append(productResp, productResponseFromModel(cartProduct))
 	}
 
-	cartResp = CartResponseFromModel(cart, productResp)
+	cartResp = cartResponseFromModel(cart, productResp)
 	utils.WriteJSON(w, http.StatusOK, cartResp)
 }

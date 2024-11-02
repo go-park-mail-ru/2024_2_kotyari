@@ -11,8 +11,8 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func (ps *ProductsStore) GetProductByID(ctx context.Context, productID uint64) (model.ProductCard, error) {
-	ps.log.Debug("[ ProductsStore.GetProductByID ] is running")
+func (ps *ProductsStore) GetProductCardByID(ctx context.Context, productID uint64) (model.ProductCard, error) {
+	ps.log.Debug("[ ProductsStore.GetProductCardByID ] is running")
 
 	card, err := ps.getProductInfo(ctx, productID)
 	if err != nil {
@@ -41,7 +41,7 @@ func (ps *ProductsStore) GetProductByID(ctx context.Context, productID uint64) (
 	card.Images = images
 	card.ReviewCount = 0
 
-	ps.log.Debug("[ ProductsStore.GetProductByID ] ProductBase successfully retrieved")
+	ps.log.Debug("[ ProductsStore.GetProductCardByID ] ProductBase successfully retrieved")
 
 	return card, nil
 }
@@ -74,18 +74,18 @@ func (ps *ProductsStore) getProductInfo(ctx context.Context, productID uint64) (
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			ps.log.Error("[ ProductsStore.GetProductByID ] ProductBase not found", slog.Uint64("productID", productID))
+			ps.log.Error("[ ProductsStore.GetProductCardByID ] ProductBase not found", slog.Uint64("productID", productID))
 			return model.ProductCard{}, errs.ProductsDoesNotExists
 		}
 
-		ps.log.Error("[ ProductsStore.GetProductByID ] Error scanning row", slog.String("error", err.Error()))
+		ps.log.Error("[ ProductsStore.GetProductCardByID ] Error scanning row", slog.String("error", err.Error()))
 
 		return model.ProductCard{}, err
 	}
 
 	err = json.Unmarshal(characteristicsJSON, &card.Characteristics)
 	if err != nil {
-		ps.log.Error("[ ProductsStore.GetProductByID ] Error decoding characteristics", slog.String("error", err.Error()))
+		ps.log.Error("[ ProductsStore.GetProductCardByID ] Error decoding characteristics", slog.String("error", err.Error()))
 
 		return model.ProductCard{}, err
 	}
