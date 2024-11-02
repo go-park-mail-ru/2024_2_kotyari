@@ -109,7 +109,6 @@ CREATE TABLE IF NOT EXISTS "orders" (
 	"stock_address_id" bigint,  -- Ссылка на таблицу стоковых адресов
 	"total_price" integer NOT NULL CHECK ("total_price" > 0),
 	"status" order_status DEFAULT 'awaiting_payment',
-    "delivery_date" timestamp with time zone NOT NULL,
 	"created_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	"updated_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY ("id"),
@@ -148,6 +147,7 @@ CREATE TABLE IF NOT EXISTS "product_orders" (
     "id" UUID,
 	"order_id" UUID NOT NULL,
 	"product_id" bigint NOT NULL,
+    "delivery_date" timestamp with time zone NOT NULL,
     "option_id" bigint,  -- Ссылка на опцию
 	"count" integer NOT NULL DEFAULT '1' CHECK (count > 0),
 	PRIMARY KEY ("id"),
