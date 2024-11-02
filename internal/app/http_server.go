@@ -8,6 +8,7 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/logger"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/postgres"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/redis"
+	categoryDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/category"
 	cartDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/cart"
 	fileDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/file"
 	productDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/product"
@@ -16,6 +17,7 @@ import (
 	errResolveLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/middlewares"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	categoryRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/category"
 	cartRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/cart"
 	fileRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/file"
 	productRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/product"
@@ -26,6 +28,10 @@ import (
 	userServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/user"
 	"github.com/gorilla/mux"
 )
+
+type categoryApp interface {
+	InitCategoriesRoutes()
+}
 
 type filesDelivery interface {
 	GetImage(w http.ResponseWriter, r *http.Request)
@@ -51,6 +57,7 @@ type Server struct {
 	sessions SessionDelivery
 	auth     usersDelivery
 	product  productsApp
+	category categoryApp
 	cfg      config
 	log      *slog.Logger
 	files    filesDelivery
@@ -90,7 +97,11 @@ func NewServer() (*Server, error) {
 	userService := userServiceLib.NewUserService(userRepo, sessionsService)
 	userHandler := userDeliveryLib.NewUsersHandler(userService, errResolver)
 
+	categoryRepo := categoryRepoLib.NewCategoriesStore(dbPool, log)
+	categoryDelivery := categoryDeliveryLib.NewCategoriesDelivery(categoryRepo, log, errResolver)
+
 	pa := NewProductsApp(router, prodHandler)
+	ca := NewCategoryApp(router, categoryDelivery)
 
 	cartRepo := cartRepoLib.NewCartsStore(dbPool, log)
 	cartService := cartServiceLib.NewCartManager(cartRepo, prodRepo, log)
@@ -103,6 +114,7 @@ func NewServer() (*Server, error) {
 		r:        router,
 		auth:     userHandler,
 		product:  pa,
+		category: ca,
 		cfg:      initServer(),
 		log:      log,
 		sessions: sessionsDelivery,
@@ -115,6 +127,8 @@ func (s *Server) setupRoutes() {
 	errResolver := errResolveLib.NewErrorStore()
 
 	s.product.InitProductsRoutes()
+	s.category.InitCategoriesRoutes()
+
 	sub := s.cart.InitCartRoutes()
 	sub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 	s.r.HandleFunc("/login", s.auth.LoginUser).Methods(http.MethodPost)
@@ -123,7 +137,7 @@ func (s *Server) setupRoutes() {
 
 	s.r.HandleFunc("/files/{name}", s.files.GetImage).Methods(http.MethodGet)
 
-	getUnimplemented := s.r.Methods(http.MethodGet).Subrouter()
+	getUnimplemented := s.r.Methods(http.MethodGet, http.MethodPost).Subrouter()
 	getUnimplemented.HandleFunc("/cart", func(w http.ResponseWriter, r *http.Request) {
 
 	})
@@ -135,7 +149,6 @@ func (s *Server) setupRoutes() {
 	})
 	getUnimplemented.HandleFunc("/account", func(w http.ResponseWriter, r *http.Request) {})
 
-	})
 	s.r.HandleFunc("/", s.auth.GetUserById).Methods(http.MethodGet)
 	getUnimplemented.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 }

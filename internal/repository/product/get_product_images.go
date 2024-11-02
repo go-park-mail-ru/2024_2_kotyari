@@ -3,6 +3,7 @@ package product
 import (
 	"context"
 
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
@@ -14,27 +15,27 @@ const queryGetImagesProduct = `
 `
 
 func (ps *ProductsStore) getProductImages(ctx context.Context, productID uint64) ([]model.Image, error) {
-	rowsImages, err := ps.db.Query(ctx, queryGetImagesProduct, productID)
+	rows, err := ps.db.Query(ctx, queryGetImagesProduct, productID)
 	if err != nil {
-		ps.log.Error("[ ProductsStore.GetProductCardByID ] Error executing images query", "error", err.Error())
+		ps.log.Error("[ ProductsStore.getProductImages ] ошибка выполнения запроса", "error", err.Error())
 		return nil, err
 	}
-	defer rowsImages.Close()
+	defer rows.Close()
 
 	var images []model.Image
 
-	for rowsImages.Next() {
+	for rows.Next() {
 		var image model.Image
-		if err = rowsImages.Scan(&image.Url); err != nil {
-			ps.log.Error("[ ProductsStore.GetProductCardByID ] Error scanning image", "error", err.Error())
+		if err = rows.Scan(&image.Url); err != nil {
+			ps.log.Error("[ ProductsStore.getProductImages ] ошибка чтения", "error", err.Error())
 			return nil, err
 		}
+
 		images = append(images, image)
 	}
 
-	if rowsImages.Err() != nil {
-		ps.log.Error("[ ProductsStore.GetProductCardByID ] Error iterating over images rows", "error", rowsImages.Err().Error())
-		return nil, rowsImages.Err()
+	if len(images) == 0 {
+		return nil, errs.ImagesDoesNotExists
 	}
 
 	return images, nil
