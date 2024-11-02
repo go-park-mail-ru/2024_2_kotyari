@@ -9,7 +9,6 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/logger"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/postgres"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/redis"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/db"
 	addressDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/address"
 	profileDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/profile"
 	cartDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/cart"
@@ -19,14 +18,13 @@ import (
 	sessionsDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/sessions"
 	userDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/user"
 	errResolveLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/handlers"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/middlewares"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	cartRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/cart"
 	categoryRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/category"
+	addressRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/address"
 	fileRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/file"
 	productRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/product"
-	addressRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/address"
 	profileRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/profile"
 	sessionsRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/sessions"
 	userRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/user"
@@ -122,13 +120,13 @@ func NewServer() (*Server, error) {
 	categoryRepo := categoryRepoLib.NewCategoriesStore(dbPool, log)
 	categoryDelivery := categoryDeliveryLib.NewCategoriesDelivery(categoryRepo, log, errResolver)
 
-	profileRepo := profileRepoLib.NewProfileRepo(dbPool, logger)
-	profileService := profileServiceLib.NewProfileService(profileRepo, logger)
-	profileHandler := profileDeliveryLib.NewProfilesHandler(profileService, logger)
+	profileRepo := profileRepoLib.NewProfileRepo(dbPool, log)
+	profileService := profileServiceLib.NewProfileService(profileRepo, log)
+	profileHandler := profileDeliveryLib.NewProfilesHandler(profileService, log)
 
-	addressRepo := addressRepoLib.NewAddressRepo(dbPool, logger)
-	addressService := addressServiceLib.NewAddressService(addressRepo, logger)
-	addressHandler := addressDeliveryLib.NewAddressHandler(addressService, logger)
+	addressRepo := addressRepoLib.NewAddressRepo(dbPool, log)
+	addressService := addressServiceLib.NewAddressService(addressRepo, log)
+	addressHandler := addressDeliveryLib.NewAddressHandler(addressService, log)
 
 	pa := NewProductsApp(router, prodHandler)
 	ca := NewCategoryApp(router, categoryDelivery)
@@ -175,7 +173,7 @@ func (s *Server) setupRoutes() {
 	getUnimplemented.HandleFunc("/address", s.address.GetAddress).Methods(http.MethodGet)
 	getUnimplemented.HandleFunc("/address", s.address.UpdateAddressData).Methods(http.MethodPut)
 	getUnimplemented.HandleFunc("/address", s.address.UpdateAddressData).Methods(http.MethodPost)
-	getUnimplemented := s.r.Methods(http.MethodGet, http.MethodPost).Subrouter()
+	getUnimplemented = s.r.Methods(http.MethodGet, http.MethodPost).Subrouter()
 	getUnimplemented.HandleFunc("/cart", func(w http.ResponseWriter, r *http.Request) {
 
 	})

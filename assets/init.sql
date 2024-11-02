@@ -214,3 +214,5 @@ ALTER TABLE categories
 ADD COLUMN link_to text;
 ALTER TABLE addresses
 ADD CONSTRAINT unique_user_id UNIQUE (user_id);
+ALTER TABLE users
+ALTER COLUMN "avatar_url" SET DEFAULT 'files/default';
