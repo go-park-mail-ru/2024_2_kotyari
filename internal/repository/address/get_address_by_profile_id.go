@@ -3,11 +3,10 @@ package address
 import (
 	"context"
 	"errors"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/jackc/pgx/v5"
 	"log/slog"
 
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
-	"github.com/jackc/pgx/v5"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
 func (ar *AddressStore) GetAddressByProfileID(ctx context.Context, profileID uint32) (model.AddressDTO, error) {
@@ -32,7 +31,13 @@ func (ar *AddressStore) GetAddressByProfileID(ctx context.Context, profileID uin
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			ar.log.Warn("[ AddressStore.GetAddressByProfileID ] Адрес не найден для данного профиля", slog.String("error", err.Error()))
-			return model.AddressDTO{}, errs.AddressNotFound
+			return model.AddressDTO{
+				Id:     0,
+				City:   "",
+				Street: "",
+				House:  "",
+				Flat:   new(string),
+			}, nil
 		}
 		ar.log.Error("[ AddressStore.GetAddressByProfileID ] Ошибка при получении адреса", slog.String("error", err.Error()))
 		return model.AddressDTO{}, err

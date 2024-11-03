@@ -47,12 +47,16 @@ func (pr *ProfilesStore) GetProfile(ctx context.Context, id uint32) (model.Profi
 	address, err := addressStore.GetAddressByProfileID(ctx, profile.ID)
 	if err != nil {
 		if errors.Is(err, errs.AddressNotFound) {
-			pr.log.Warn("Адрес не найден для пользователя", slog.String("error", err.Error()))
+			pr.log.Warn("[ ProfilesStore.GetProfile ] Адрес не найден для пользователя", slog.String("error", err.Error()))
 			return model.Profile{}, nil
 		}
 
-		pr.log.Error("Ошибка при получении адреса", slog.String("error", err.Error()))
+		pr.log.Error("[ ProfilesStore.GetProfile ] Ошибка при получении адреса", slog.String("error", err.Error()))
 		return model.Profile{}, err
+	}
+
+	if address.Flat == nil {
+		*address.Flat = ""
 	}
 
 	profile.Address = address

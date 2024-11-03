@@ -2,6 +2,7 @@ package profile
 
 import (
 	"context"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/image"
 	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
@@ -13,13 +14,15 @@ type profileRepository interface {
 }
 
 type ProfilesService struct {
-	profileRepo profileRepository
-	log         *slog.Logger
+	imagesUsecase *image.ImagesUsecase
+	profileRepo   profileRepository
+	log           *slog.Logger
 }
 
-func NewProfileService(profileRepository profileRepository, logger *slog.Logger) *ProfilesService {
+func NewProfileService(imagesUsecase *image.ImagesUsecase, profileRepository profileRepository, logger *slog.Logger) *ProfilesService {
 	return &ProfilesService{
-		profileRepo: profileRepository,
-		log:         logger,
+		imagesUsecase: imagesUsecase,
+		profileRepo:   profileRepository,
+		log:           logger,
 	}
 }

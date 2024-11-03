@@ -170,6 +170,7 @@ func (s *Server) setupRoutes() {
 	getUnimplemented := s.r.Methods(http.MethodGet, http.MethodPost, http.MethodPut).Subrouter()
 	getUnimplemented.HandleFunc("/account", s.profile.GetProfile).Methods(http.MethodGet)
 	getUnimplemented.HandleFunc("/account", s.profile.UpdateProfileData).Methods(http.MethodPut)
+	getUnimplemented.HandleFunc("/account/avatar", s.profile.UpdateProfileAvatar).Methods(http.MethodPut)
 	getUnimplemented.HandleFunc("/address", s.address.GetAddress).Methods(http.MethodGet)
 	getUnimplemented.HandleFunc("/address", s.address.UpdateAddressData).Methods(http.MethodPut)
 	getUnimplemented.HandleFunc("/address", s.address.UpdateAddressData).Methods(http.MethodPost)

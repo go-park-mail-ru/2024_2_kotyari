@@ -21,16 +21,9 @@ func (h *AddressDelivery) UpdateAddressData(writer http.ResponseWriter, request 
 		return
 	}
 
-	oldAddressData, err := h.addressManager.GetAddressByProfileID(request.Context(), uint32(id))
-	if err != nil {
-		h.log.Warn("[ AddressDelivery.UpdateAddressData ] Не удалось получить старый адрес профиля", slog.String("error", err.Error()))
-		utils.WriteJSON(writer, http.StatusNotFound, &errs.HTTPErrorResponse{ErrorMessage: errs.UserDoesNotExist.Error()})
-		return
-	}
-
 	newAddressData := req.ToModel()
 
-	if err := h.addressManager.UpdateUsersAddress(request.Context(), oldAddressData.Id, newAddressData); err != nil {
+	if err := h.addressManager.UpdateUsersAddress(request.Context(), id, newAddressData); err != nil {
 		h.log.Warn("[ AddressDelivery.UpdateAddressData ] Не удалось обновить данные профиля", slog.String("error", err.Error()))
 
 		switch err {

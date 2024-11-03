@@ -10,10 +10,9 @@ type Address struct {
 }
 
 type AddressDTO struct {
-	Id        uint32
-	ProfileId uint32
-	City      string
-	Street    string
-	House     string
-	Flat      *string
+	Id     uint32
+	City   string
+	Street string
+	House  string
+	Flat   *string
 }
