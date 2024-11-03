@@ -11,6 +11,7 @@ import (
 type profileRepository interface {
 	GetProfile(ctx context.Context, Id uint32) (model.Profile, error)
 	UpdateProfile(ctx context.Context, profileID uint32, profileModel model.Profile) error
+	UpdateProfileAvatar(ctx context.Context, profileID uint32, filePath string) error
 }
 
 type ProfilesService struct {

@@ -30,6 +30,8 @@ import (
 	userRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/user"
 	cartServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/cart"
 	addressServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/address"
+	fileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/file"
+	imageServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/image"
 	profileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/profile"
 	sessionsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
 	userServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/user"
@@ -54,6 +56,7 @@ type usersDelivery interface {
 type profilesDelivery interface {
 	GetProfile(writer http.ResponseWriter, request *http.Request)
 	UpdateProfileData(writer http.ResponseWriter, request *http.Request)
+	UpdateProfileAvatar(writer http.ResponseWriter, request *http.Request)
 }
 
 type addressesDelivery interface {
@@ -103,8 +106,9 @@ func NewServer() (*Server, error) {
 		return nil, err
 	}
 
-	//fileService := fileServiceLib.NewFilesUsecase(fileRepo, log)
-	//imageService := image.NewImagesUsecase(fileService)
+	fileService := fileServiceLib.NewFilesUsecase(fileRepo, log)
+
+	imageService := imageServiceLib.NewImagesUsecase(fileService)
 
 	sessionsRepo := sessionsRepoLib.NewSessionRepo(redisClient)
 	sessionsService := sessionsServiceLib.NewSessionService(sessionsRepo)
@@ -121,7 +125,7 @@ func NewServer() (*Server, error) {
 	categoryDelivery := categoryDeliveryLib.NewCategoriesDelivery(categoryRepo, log, errResolver)
 
 	profileRepo := profileRepoLib.NewProfileRepo(dbPool, log)
-	profileService := profileServiceLib.NewProfileService(profileRepo, log)
+	profileService := profileServiceLib.NewProfileService(imageService, profileRepo, log)
 	profileHandler := profileDeliveryLib.NewProfilesHandler(profileService, log)
 
 	addressRepo := addressRepoLib.NewAddressRepo(dbPool, log)

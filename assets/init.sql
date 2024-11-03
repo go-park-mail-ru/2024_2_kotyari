@@ -216,3 +216,5 @@ ALTER TABLE addresses
 ADD CONSTRAINT unique_user_id UNIQUE (user_id);
 ALTER TABLE users
 ALTER COLUMN "avatar_url" SET DEFAULT 'files/default.jpeg';
+ALTER TABLE "users"
+ALTER COLUMN "age" SET DEFAULT 18;
