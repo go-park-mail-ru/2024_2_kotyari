@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -10,26 +9,26 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/postgres"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/redis"
 	addressDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/address"
-	profileDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/profile"
 	cartDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/cart"
 	categoryDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/category"
 	fileDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/file"
 	productDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/product"
+	profileDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/profile"
 	sessionsDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/sessions"
 	userDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/user"
 	errResolveLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/middlewares"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	addressRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/address"
 	cartRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/cart"
 	categoryRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/category"
-	addressRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/address"
 	fileRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/file"
 	productRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/product"
 	profileRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/profile"
 	sessionsRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/sessions"
 	userRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/user"
-	cartServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/cart"
 	addressServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/address"
+	cartServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/cart"
 	fileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/file"
 	imageServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/image"
 	profileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/profile"
@@ -177,8 +176,6 @@ func (s *Server) setupRoutes() {
 	getUnimplemented.HandleFunc("/account/avatar", s.profile.UpdateProfileAvatar).Methods(http.MethodPut)
 	getUnimplemented.HandleFunc("/address", s.address.GetAddress).Methods(http.MethodGet)
 	getUnimplemented.HandleFunc("/address", s.address.UpdateAddressData).Methods(http.MethodPut)
-	getUnimplemented.HandleFunc("/address", s.address.UpdateAddressData).Methods(http.MethodPost)
-	getUnimplemented = s.r.Methods(http.MethodGet, http.MethodPost).Subrouter()
 	getUnimplemented.HandleFunc("/cart", func(w http.ResponseWriter, r *http.Request) {
 
 	})
@@ -188,9 +185,7 @@ func (s *Server) setupRoutes() {
 	getUnimplemented.HandleFunc("/favorite", func(w http.ResponseWriter, r *http.Request) {
 
 	})
-	getUnimplemented.HandleFunc("/account", func(w http.ResponseWriter, r *http.Request) {})
 
-	})
 	s.r.HandleFunc("/", s.auth.GetUserById).Methods(http.MethodGet)
 	getUnimplemented.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 }
