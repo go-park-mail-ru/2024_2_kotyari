@@ -39,3 +39,7 @@ type UpdateProfileRequest struct {
 	Username string `json:"username"`
 	Gender   string `json:"gender"`
 }
+
+type AvatarResponse struct {
+	AvatarUrl string `json:"avatar_url"`
+}

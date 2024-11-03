@@ -14,7 +14,7 @@ func (h *ProfilesDelivery) UpdateProfileAvatar(writer http.ResponseWriter, reque
 
 	id := utils.GetContextSessionUserID(request.Context())
 
-	file, header, err := request.FormFile("file")
+	file, header, err := request.FormFile("avatar")
 
 	if err != nil {
 		http.Error(writer, "Не удалось прочитать файл", http.StatusBadRequest)
@@ -46,12 +46,17 @@ func (h *ProfilesDelivery) UpdateProfileAvatar(writer http.ResponseWriter, reque
 		return
 	}
 
-	err = h.profileManager.UpdateProfileAvatar(request.Context(), id, tempFile)
+	filepath, err := h.profileManager.UpdateProfileAvatar(request.Context(), id, tempFile)
 
 	if err != nil {
 		h.log.Error("[ ProfilesDelivery.UpdateProfileAvatar ]", slog.String("error", err.Error()))
-
+		http.Error(writer, "Не удалось обновить аватар профиля", http.StatusInternalServerError)
 		return
 	}
 
+	avatarResponse := AvatarResponse{
+		AvatarUrl: filepath,
+	}
+
+	utils.WriteJSON(writer, http.StatusOK, avatarResponse)
 }
