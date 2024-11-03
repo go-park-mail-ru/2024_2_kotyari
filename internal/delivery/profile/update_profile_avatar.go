@@ -17,6 +17,7 @@ func (h *ProfilesDelivery) UpdateProfileAvatar(writer http.ResponseWriter, reque
 	file, header, err := request.FormFile("avatar")
 
 	if err != nil {
+		h.log.Error("[ ProfilesDelivery.UpdateProfileAvatar ] Не удалось прочитать файл", slog.String("error", err.Error()))
 		http.Error(writer, "Не удалось прочитать файл", http.StatusBadRequest)
 		return
 	}
@@ -24,12 +25,14 @@ func (h *ProfilesDelivery) UpdateProfileAvatar(writer http.ResponseWriter, reque
 	defer file.Close()
 
 	if header.Size > maxUploadSize {
+		h.log.Error("[ ProfilesDelivery.UpdateProfileAvatar ] Размер файла превышает 10 МБ", slog.String("error", err.Error()))
 		http.Error(writer, "Размер файла превышает 10 МБ", http.StatusBadRequest)
 		return
 	}
 
 	tempFile, err := os.CreateTemp("", "avatar-*")
 	if err != nil {
+		h.log.Error("[ ProfilesDelivery.UpdateProfileAvatar ] Не удалось создать временный файл", slog.String("error", err.Error()))
 		http.Error(writer, "Не удалось создать временный файл", http.StatusInternalServerError)
 		return
 	}
@@ -37,11 +40,13 @@ func (h *ProfilesDelivery) UpdateProfileAvatar(writer http.ResponseWriter, reque
 
 	_, err = io.Copy(tempFile, file)
 	if err != nil {
+		h.log.Error("[ ProfilesDelivery.UpdateProfileAvatar ]Не удалось сохранить файл", slog.String("error", err.Error()))
 		http.Error(writer, "Не удалось сохранить файл", http.StatusInternalServerError)
 		return
 	}
 
 	if _, err = tempFile.Seek(0, 0); err != nil {
+		h.log.Error("[ ProfilesDelivery.UpdateProfileAvatar ] Не удалось сбросить указатель файла", slog.String("error", err.Error()))
 		http.Error(writer, "Не удалось сбросить указатель файла", http.StatusInternalServerError)
 		return
 	}

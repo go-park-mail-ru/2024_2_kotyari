@@ -12,12 +12,13 @@ func (ps *ProfilesService) UpdateProfileAvatar(ctx context.Context, id uint32, f
 	filepath, err := ps.imagesUsecase.SaveImage(file.Name(), file)
 
 	if err != nil {
-		return "", fmt.Errorf("failed to save profile avatar: %w", err)
+		ps.log.Error("[ ProfilesService.UpdateProfileAvatar ] Не удалось сохранить аватар профиля", slog.String("error", err.Error()))
+		return "", fmt.Errorf("Не удалось сохранить аватар профиля: %w", err)
 	}
 
 	err = ps.profileRepo.UpdateProfileAvatar(ctx, id, filepath)
 	if err != nil {
-		ps.log.Error("[ ProfilesService.UpdateProfile ] Не удалось обновить профиль", slog.String("error", err.Error()))
+		ps.log.Error("[ ProfilesService.UpdateProfileAvatar ] Не удалось обновить профиль", slog.String("error", err.Error()))
 		return "", err
 	}
 
