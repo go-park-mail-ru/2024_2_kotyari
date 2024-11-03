@@ -30,7 +30,7 @@ func WriteJSON(w http.ResponseWriter, status int, data interface{}) {
 	}
 }
 
-func WriteErrorJSON(w http.ResponseWriter, err error, status int) {
+func WriteErrorJSON(w http.ResponseWriter, status int, err error) {
 	res := errs.HTTPErrorResponse{
 		ErrorMessage: err.Error(),
 	}

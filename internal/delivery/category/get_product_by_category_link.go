@@ -16,7 +16,7 @@ func (cd *CategoriesDelivery) GetProductsByCategoryLink(w http.ResponseWriter, r
 		err, i := cd.errResolver.Get(err)
 
 		cd.log.Error("GetProductsByCategoryLink", "err", err, "response", i)
-		utils.WriteErrorJSON(w, err, i)
+		utils.WriteErrorJSON(w, i, err)
 		return
 	}
 

@@ -10,7 +10,7 @@ import (
 
 type productsRepo interface {
 	GetAllProducts(ctx context.Context) ([]model.ProductCatalog, error)
-	GetProductCardByID(ctx context.Context, productID uint64) (model.ProductCard, error)
+	GetProductByID(ctx context.Context, productID uint64) (model.ProductCard, error)
 }
 
 type ProductsDelivery struct {

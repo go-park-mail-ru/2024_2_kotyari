@@ -11,7 +11,7 @@ func (cd *CategoriesDelivery) GetAllCategories(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		err, i := cd.errResolver.Get(err)
 
-		utils.WriteErrorJSON(w, err, i)
+		utils.WriteErrorJSON(w, i, err)
 	}
 
 	dtoCategories := make([]dtoCategory, 0, len(categories))
