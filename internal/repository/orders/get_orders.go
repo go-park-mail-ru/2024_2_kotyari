@@ -2,7 +2,6 @@ package rorders
 
 import (
 	"context"
-	"fmt"
 	"github.com/jackc/pgx/v5"
 	"log/slog"
 )
@@ -21,7 +20,7 @@ func (r *OrdersRepo) GetOrders(ctx context.Context, userID uint32) (pgx.Rows, er
 	rows, err := r.db.Query(ctx, query, userID)
 	if err != nil {
 		r.logger.Error("[OrdersRepo.GetOrders] failed to query orders", slog.String("error", err.Error()))
-		return nil, fmt.Errorf("[OrdersRepo.GetOrders] failed to query orders: %w", err)
+		return nil, err
 	}
 	return rows, nil
 }

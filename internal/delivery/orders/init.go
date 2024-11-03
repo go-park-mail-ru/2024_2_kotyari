@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	order "github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
@@ -13,16 +14,19 @@ type ordersManager interface {
 	GetOrders(ctx context.Context) ([]order.Order, error)
 	GetOrderById(ctx context.Context, id uuid.UUID, deliveryDate time.Time) (*order.Order, error)
 	CreateOrderFromCart(ctx context.Context, address string) (*order.Order, error)
+	GetNearestDeliveryDate(ctx context.Context) (time.Time, error)
 }
 
 type OrdersHandler struct {
 	ordersManager ordersManager
 	logger        *slog.Logger
+	errResolver   errs.GetErrorCode
 }
 
-func NewOrdersHandler(manager ordersManager, logger *slog.Logger) *OrdersHandler {
+func NewOrdersHandler(manager ordersManager, logger *slog.Logger, errResolver errs.GetErrorCode) *OrdersHandler {
 	return &OrdersHandler{
 		ordersManager: manager,
 		logger:        logger,
+		errResolver:   errResolver,
 	}
 }

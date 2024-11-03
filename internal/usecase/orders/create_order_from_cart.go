@@ -2,13 +2,58 @@ package morders
 
 import (
 	"context"
+	"errors"
+	"github.com/google/uuid"
+	"log/slog"
+	"strconv"
+	"time"
+
 	order "github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
 func (m *OrdersManager) CreateOrderFromCart(ctx context.Context, address string) (*order.Order, error) {
-	var userID uint32 = 1
+	userID := utils.GetContextSessionUserID(ctx)
 
-	return m.repo.CreateOrderFromCart(ctx, userID, address)
+	orderID := uuid.New()
+	orderDate := time.Now()
+	deliveryDate := orderDate.Add(72 * time.Hour)
+
+	// Используем заглушку для получения содержимого корзины
+	cartItems, err := m.repo.GetCartItems(ctx, userID)
+	if err != nil {
+		m.logger.Error("[OrdersManager.CreateOrderFromCart] failed to fetch cart items", slog.String("error", err.Error()), slog.Uint64("user_id", uint64(userID)))
+		return nil, err
+	}
+
+	if len(cartItems) == 0 {
+		m.logger.Error("[OrdersManager.CreateOrderFromCart] cart is empty for user: ", slog.Uint64("user_id", uint64(userID)))
+		return nil, errors.New("cart is empty for user: " + strconv.Itoa(int(userID)))
+	}
+
+	var totalPrice uint16
+	productOrders := make([]order.ProductOrder, 0, len(cartItems))
+
+	for _, item := range cartItems {
+		totalPrice += item.Cost * item.Count
+		productOrders = append(productOrders, item)
+	}
+
+	orderData := &order.OrderFromCart{
+		OrderID:      orderID,
+		UserID:       userID,
+		Address:      address,
+		TotalPrice:   totalPrice,
+		DeliveryDate: deliveryDate,
+		Products:     cartItems,
+	}
+
+	order, err := m.repo.CreateOrderFromCart(ctx, orderData)
+	if err != nil {
+		m.logger.Error("failed to create order in repo", slog.String("error", err.Error()), slog.Uint64("user_id", uint64(userID)))
+		return nil, err
+	}
+
+	m.logger.Info("CreateOrderFromCart completed successfully", slog.String("order_id", orderID.String()), slog.Uint64("user_id", uint64(userID)))
+	return order, nil
 }
-
-//TODO: при запросе спускать адрес для заполнения.

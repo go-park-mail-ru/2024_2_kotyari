@@ -2,7 +2,6 @@ package rorders
 
 import (
 	"context"
-	"fmt"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"log/slog"
@@ -28,7 +27,7 @@ func (r *OrdersRepo) GetOrderById(ctx context.Context, id uuid.UUID, userID uint
 	rows, err := r.db.Query(ctx, query, id, userID, startDate, endDate)
 	if err != nil {
 		r.logger.Error("[OrdersRepo.GetOrderById] failed to query order by ID", slog.String("error", err.Error()), slog.String("order_id", id.String()))
-		return nil, fmt.Errorf("[OrdersRepo.GetOrderById] failed to query order by ID: %w", err)
+		return nil, err
 	}
 
 	return rows, nil

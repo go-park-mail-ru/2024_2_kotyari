@@ -1,12 +1,15 @@
 package orders
 
 import (
+	"errors"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/jackc/pgx/v5"
 	"log/slog"
 	"net/http"
 	"time"
 
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
@@ -18,7 +21,7 @@ func (h *OrdersHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(idStr)
 	if err != nil {
 		h.logger.Error("[delivery.GetOrderById] Invalid order ID format", slog.String("orderID", idStr))
-		utils.WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid order ID format"})
+		utils.WriteErrorJSONByError(w, errs.ErrInvalidOrderIDFormat, h.errResolver)
 		return
 	}
 
@@ -26,15 +29,20 @@ func (h *OrdersHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
 	if deliveryDate, err = time.Parse("2006-01-02T15:04:05.000Z", deliveryDateStr); err != nil {
 		if deliveryDate, err = time.Parse("2006-01-02T15:04:05.000000Z", deliveryDateStr); err != nil {
 			h.logger.Error("[delivery.GetOrderById] Invalid delivery date format", slog.String("deliveryDate", deliveryDateStr))
-			utils.WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid delivery date format"})
+			utils.WriteErrorJSONByError(w, errs.ErrInvalidDeliveryDateFormat, h.errResolver)
 			return
 		}
 	}
 
 	order, err := h.ordersManager.GetOrderById(r.Context(), id, deliveryDate)
 	if err != nil {
-		h.logger.Error("[delivery.GetOrderById] Order not found", slog.String("orderID", id.String()))
-		utils.WriteJSON(w, http.StatusNotFound, map[string]string{"error": "Order not found"})
+		if errors.Is(err, pgx.ErrNoRows) {
+			h.logger.Warn("[delivery.GetOrderById] Order not found", slog.String("orderID", id.String()))
+			utils.WriteErrorJSONByError(w, errs.ErrOrderNotFound, h.errResolver)
+		} else {
+			h.logger.Error("[delivery.GetOrderById] Failed to retrieve order", slog.String("orderID", id.String()), slog.String("error", err.Error()))
+			utils.WriteErrorJSONByError(w, errs.ErrRetrieveOrder, h.errResolver)
+		}
 		return
 	}
 

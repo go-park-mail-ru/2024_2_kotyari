@@ -150,8 +150,8 @@ func NewServer() (*Server, error) {
 	log := logger.InitLogger()
 
 	ordersRepo := rorders.NewOrdersRepo(dbPool, log)
-	ordersManager := morders.NewOrdersManager(ordersRepo)
-	ordersHandler := orders.NewOrdersHandler(ordersManager, log)
+	ordersManager := morders.NewOrdersManager(ordersRepo, log)
+	ordersHandler := orders.NewOrdersHandler(ordersManager, log, errResolver)
 
 	return &Server{
 		r:        router,
@@ -198,13 +198,16 @@ func (s *Server) setupRoutes() {
 
 	})
 	getUnimplemented.HandleFunc("/favorite", func(w http.ResponseWriter, r *http.Request) {
-	s.r.HandleFunc("/orders", s.orders.GetOrders).Methods(http.MethodGet)
-	s.r.HandleFunc("/order/{id}", s.orders.GetOrderByID).Methods(http.MethodGet)
-	s.r.HandleFunc("/orders/create_from_cart", s.orders.CreateOrderFromCart).Methods(http.MethodPost)
 
 	})
 
 	s.r.HandleFunc("/", s.auth.GetUserById).Methods(http.MethodGet)
+
+	getUnimplemented.HandleFunc("/orders", s.orders.GetOrders).Methods(http.MethodGet)
+	getUnimplemented.HandleFunc("/order/{id}/{delivery_date}", s.orders.GetOrderByID).Methods(http.MethodGet)
+	getUnimplemented.HandleFunc("/orders", s.orders.CreateOrderFromCart).Methods(http.MethodPost)
+	getUnimplemented.HandleFunc("/orders/nearest", s.orders.GetNearestDeliveryDate).Methods(http.MethodGet)
+
 	getUnimplemented.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 
 }
