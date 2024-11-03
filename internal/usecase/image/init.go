@@ -1,8 +1,9 @@
 package image
 
 import (
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/file"
 	"os"
+
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/file"
 )
 
 type filesUsecase interface {

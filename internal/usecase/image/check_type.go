@@ -1,9 +1,10 @@
 package image
 
 import (
-	"github.com/disintegration/imaging"
 	"image/gif"
 	"os"
+
+	"github.com/disintegration/imaging"
 )
 
 func (iu *ImagesUsecase) isImageFile(file *os.File) bool {

@@ -20,6 +20,7 @@ COPY --from=build /var/backend/main /app/main
 COPY --from=build /var/backend/.env /app/.env
 
 RUN mkdir -p /app/files
+COPY files /app/files
 
 WORKDIR /app
 EXPOSE 8000

@@ -22,6 +22,18 @@ type dtoOptionBlock struct {
 	Options []dtoOption `json:"options"`
 }
 
+func (dto *dtoOptionBlock) ToModel() model.OptionsBlock {
+	options := make([]model.Option, len(dto.Options))
+	for i, opt := range dto.Options {
+		options[i] = opt.ToModel()
+	}
+	return model.OptionsBlock{
+		Title:   dto.Title,
+		Type:    dto.Type,
+		Options: options,
+	}
+}
+
 func optionToDTO(option model.Option) dtoOption {
 	return dtoOption{
 		Link:  option.Link,

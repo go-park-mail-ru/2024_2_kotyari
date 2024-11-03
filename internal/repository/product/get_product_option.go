@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log/slog"
 
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
@@ -16,47 +17,40 @@ const queryGetOptions = `
 `
 
 func (ps *ProductsStore) getProductOptions(ctx context.Context, productID uint64) (model.Options, error) {
-	rowsOptions, err := ps.db.Query(ctx, queryGetOptions, productID)
+	rows, err := ps.db.Query(ctx, queryGetOptions, productID)
 	if err != nil {
-		ps.log.Error("[ ProductsStore.GetProductCardByID ] Error executing options query", slog.String("error", err.Error()))
+		ps.log.Error("[ ProductsStore.getProductOptions ] ошибка выполнения запроса", slog.String("error", err.Error()))
 		return model.Options{}, err
 	}
-	defer rowsOptions.Close()
+	defer rows.Close()
 
 	var options model.Options
 
-	for rowsOptions.Next() {
+	for rows.Next() {
 		var optionValuesJSON []byte
 
-		err = rowsOptions.Scan(&optionValuesJSON)
+		err = rows.Scan(&optionValuesJSON)
 		if err != nil {
-			ps.log.Error("[ ProductsStore.GetProductCardByID ] Error scanning option", "error", slog.String("error", err.Error()))
+			ps.log.Error("[ ProductsStore.getProductOptions ] ошибка сканирования", "error", slog.String("error", err.Error()))
 			return model.Options{}, err
 		}
 
-		var opts dtoOptionBlock
-		err = json.Unmarshal(optionValuesJSON, &opts)
+		var dtoOptions []dtoOptionBlock
+		err = json.Unmarshal(optionValuesJSON, &dtoOptions)
 		if err != nil {
-			ps.log.Error("[ ProductsStore.GetProductCardByID ] Error decoding options", slog.String("error", err.Error()))
+			ps.log.Error("[ ProductsStore.getProductOptions ] ошибка unmarshal опции", slog.String("error", err.Error()))
 			return model.Options{}, err
 		}
 
-		optionsBlock := model.OptionsBlock{
-			Title: opts.Title,
-			Type:  opts.Type,
+		for _, dtoOpt := range dtoOptions {
+			optionsBlock := dtoOpt.ToModel()
+			options.Values = append(options.Values, optionsBlock)
 		}
-
-		for _, dtoOpt := range opts.Options {
-			option := dtoOpt.ToModel()
-			optionsBlock.Options = append(optionsBlock.Options, option)
-		}
-
-		options.Values = append(options.Values, optionsBlock)
 	}
 
-	if rowsOptions.Err() != nil {
-		ps.log.Error("[ ProductsStore.GetProductCardByID ] Error iterating over options rows", slog.String("error", rowsOptions.Err().Error()))
-		return model.Options{}, rowsOptions.Err()
+	if len(options.Values) == 0 {
+		ps.log.Warn("[ ProductsStore.getProductOptions ] не найдены опции ]")
+		return model.Options{}, errs.OptionsDoesNotExists
 	}
 
 	return options, nil

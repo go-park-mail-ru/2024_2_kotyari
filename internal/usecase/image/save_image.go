@@ -12,6 +12,6 @@ func (iu *ImagesUsecase) SaveImage(filename string, file *os.File) (string, erro
 		return imagePath, nil
 	}
 
-	_, err = iu.files.SaveFile(filename, file, iu.isGIFFile)
+	imagePath, err = iu.files.SaveFile(filename, file, iu.isGIFFile)
 	return imagePath, err
 }

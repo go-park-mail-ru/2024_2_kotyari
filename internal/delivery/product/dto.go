@@ -18,12 +18,6 @@ type dtoProduct struct {
 	Rating        float32 `json:"rating"`
 }
 
-type dtoCategory struct {
-	ID      uint32 `json:"id"`
-	Name    string `json:"name"`
-	Picture string `json:"picture"`
-}
-
 func newDTOProductCatalogFromModel(pc model.ProductCatalog) dtoProductCatalog {
 	return dtoProductCatalog{
 		dtoProduct: dtoProduct{

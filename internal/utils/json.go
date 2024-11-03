@@ -30,17 +30,10 @@ func WriteJSON(w http.ResponseWriter, status int, data interface{}) {
 	}
 }
 
-func WriteErrorJSON(w http.ResponseWriter, status int, errResponse error) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-
+func WriteErrorJSON(w http.ResponseWriter, err error, status int) {
 	res := errs.HTTPErrorResponse{
-		ErrorMessage: errResponse.Error(),
+		ErrorMessage: err.Error(),
 	}
 
-	err := json.NewEncoder(w).Encode(res)
-	if err != nil {
-		http.Error(w, errs.InternalServerError.Error(), http.StatusInternalServerError)
-		return
-	}
+	WriteJSON(w, status, res)
 }
