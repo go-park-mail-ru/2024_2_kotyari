@@ -13,6 +13,7 @@ type cartRepository interface {
 	RemoveCartProduct(ctx context.Context, productID uint32, count int32) error
 	AddProduct(ctx context.Context, productID uint32, userID uint32) error
 	ChangeCartProductDeletedState(ctx context.Context, productID uint32, userID uint32) error
+	ChangeCartProductSelectedState(ctx context.Context, productID uint32, userID uint32, isSelected bool) error
 }
 
 type productCountGetter interface {

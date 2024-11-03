@@ -8,7 +8,7 @@ import (
 )
 
 func (ch *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
-	cart, err := ch.cartManipulator.GetCart(r.Context(), time.Now())
+	cart, err := ch.cartManip.GetCart(r.Context(), time.Now())
 	if err != nil {
 		err, code := ch.errResolver.Get(err)
 		utils.WriteErrorJSON(w, code, err)

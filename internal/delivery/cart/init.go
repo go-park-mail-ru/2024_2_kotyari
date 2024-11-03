@@ -13,24 +13,26 @@ type cartManager interface {
 	ChangeCartProductCount(ctx context.Context, productID uint32, count int32, userID uint32) error
 	AddProduct(ctx context.Context, productID uint32, userID uint32) error
 	RemoveProduct(ctx context.Context, productID uint32, userID uint32) error
+	ChangeCartProductSelectedState(ctx context.Context, productID uint32, userID uint32, isSelected bool) error
 }
 
-type cartGetter interface {
+type cartManip interface {
 	GetCart(ctx context.Context, deliveryDate time.Time) (model.Cart, error)
+	ChangeAllCartProductsState(ctx context.Context, userID uint32, isSelected bool) error
 }
 
 type CartHandler struct {
-	cartManager     cartManager
-	cartManipulator cartGetter
-	errResolver     errs.GetErrorCode
-	log             *slog.Logger
+	cartManager cartManager
+	cartManip   cartManip
+	errResolver errs.GetErrorCode
+	log         *slog.Logger
 }
 
-func NewCartHandler(manager cartManager, getter cartGetter, errorHandler errs.GetErrorCode, logger *slog.Logger) *CartHandler {
+func NewCartHandler(manager cartManager, manip cartManip, errorHandler errs.GetErrorCode, logger *slog.Logger) *CartHandler {
 	return &CartHandler{
-		cartManager:     manager,
-		cartManipulator: getter,
-		errResolver:     errorHandler,
-		log:             logger,
+		cartManager: manager,
+		cartManip:   manip,
+		errResolver: errorHandler,
+		log:         logger,
 	}
 }
