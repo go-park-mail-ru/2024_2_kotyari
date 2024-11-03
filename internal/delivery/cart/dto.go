@@ -14,6 +14,14 @@ func (r ChangeCartProductCountRequest) ToModel() int32 {
 	return r.Count
 }
 
+type ChangeCartProductSelectedStateRequest struct {
+	IsSelected bool `json:"is_selected"`
+}
+
+func (r ChangeCartProductSelectedStateRequest) ToModel() bool {
+	return r.IsSelected
+}
+
 type GetCartResponse struct {
 	ID           uint32               `json:"id"`
 	DeliveryDate time.Time            `json:"delivery_date"`

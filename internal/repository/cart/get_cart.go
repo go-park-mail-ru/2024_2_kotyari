@@ -16,7 +16,7 @@ func (cs *CartsStore) GetCart(ctx context.Context, deliveryDate time.Time) (mode
 	userID := utils.GetContextSessionUserID(ctx)
 
 	const query = `
-		select c.id, p.id, title, price, image_url, original_price, discount, c.count from products p
+		select c.id, p.id, title, price, description, image_url, original_price, discount, c.count, c.is_selected from products p
 		join carts c on p.id = c.product_id where user_id=$1 and c.is_deleted = false;
 	`
 
@@ -42,6 +42,7 @@ func (cs *CartsStore) GetCart(ctx context.Context, deliveryDate time.Time) (mode
 			&product.ID,
 			&product.Title,
 			&product.Price,
+			&product.Description,
 			&product.ImageURL,
 			&product.OriginalPrice,
 			&product.Discount,
