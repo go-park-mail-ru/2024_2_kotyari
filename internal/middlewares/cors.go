@@ -20,7 +20,8 @@ func setupCORS(w http.ResponseWriter, req *http.Request, sessionLifetime string)
 		w.Header().Set("Access-Control-Allow-Origin", origin)
 	}
 
-	w.Header().Set("Access-Control-Allow-Methods", http.MethodPost+", "+http.MethodGet+", "+http.MethodOptions+", "+http.MethodPut+", "+http.MethodDelete)
+	w.Header().Set("Access-Control-Allow-Methods",
+		http.MethodPost+", "+http.MethodGet+", "+http.MethodOptions+", "+http.MethodPut+", "+http.MethodDelete+", "+http.MethodPatch)
 	w.Header().Set("Access-Control-Allow-Headers", "Accept, Accept-Language, Content-Type, Authorization, Access-Control-Allow-Origin")
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("Access-Control-Max-Age", sessionLifetime)
