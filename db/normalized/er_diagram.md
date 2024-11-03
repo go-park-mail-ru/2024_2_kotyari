@@ -3,7 +3,7 @@ erDiagram
 
     %% Таблица пользователей
     users {
-        id PK
+        bigint id PK
         email
         username
         city
