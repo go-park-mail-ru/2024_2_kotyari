@@ -13,6 +13,8 @@ func setupCORS(w http.ResponseWriter, req *http.Request, sessionLifetime string)
 		"94.139.246.241":             {},
 		"http://94.139.246.241:8000": {},
 		"http://94.139.246.241":      {},
+		"oxic.shop":                  {},
+		"http://oxic.shop":           {},
 	}
 
 	origin := req.Header.Get("Origin")
