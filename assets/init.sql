@@ -1,18 +1,37 @@
 -- Таблица пользователей, содержащая данные о зарегистрированных пользователях (почта, логин, пароль, аватар и др.)
 CREATE TABLE IF NOT EXISTS "users" (
-	"id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
-	"email" text UNIQUE NOT NULL,
-	"username" text NOT NULL,
-	"city" text NOT NULL DEFAULT 'Москва',
-	"age" smallint CHECK (age >= 0 AND age <= 120),
-	"avatar_url" text,
-	"password" text NOT NULL,
-	"blocked" boolean NOT NULL DEFAULT false,
-	"blocked_until" timestamp with time zone DEFAULT NULL,
-	"created_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	"updated_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	PRIMARY KEY ("id")
-);
+    "id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
+    "email" text UNIQUE NOT NULL,
+    "username" text NOT NULL,
+    "city" text NOT NULL DEFAULT 'Москва',
+-- "date_of_birth" date,
+    "age" smallint CHECK (age >= 0 AND age <= 120),
+    "avatar_url" text,
+    "password" text NOT NULL,
+    "gender" text CHECK ("gender" IN ('Мужской', 'Женский')) DEFAULT 'Мужской',
+    "blocked" boolean NOT NULL DEFAULT false,
+    "blocked_until" timestamp with time zone DEFAULT NULL,
+    "created_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+     PRIMARY KEY ("id")
+    );
+
+
+CREATE TABLE IF NOT EXISTS "addresses" (
+                                           "id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
+                                           "user_id" bigint UNIQUE NOT NULL,
+                                           "city" text NOT NULL DEFAULT 'Москва',
+                                           "street" text NOT NULL,
+                                           "house" text NOT NULL,
+                                           "flat" text,
+                                           "created_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                           "updated_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                           PRIMARY KEY ("id"),
+    FOREIGN KEY ("user_id") REFERENCES "users"("id")
+    );
+
+
+
 CREATE TYPE seller_type AS ENUM ('individual', 'company');
 
 -- Таблица продавцов, с указанием типа продавца (физическое лицо или компания), проверенности и рейтинга
@@ -193,3 +212,9 @@ ADD CONSTRAINT status_check CHECK (status IN ('awaiting_payment', 'paid', 'deliv
 
 ALTER TABLE categories
 ADD COLUMN link_to text;
+ALTER TABLE addresses
+ADD CONSTRAINT unique_user_id UNIQUE (user_id);
+ALTER TABLE users
+ALTER COLUMN "avatar_url" SET DEFAULT 'files/default.jpeg';
+ALTER TABLE "users"
+ALTER COLUMN "age" SET DEFAULT 18;
