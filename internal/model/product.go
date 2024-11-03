@@ -1,6 +1,6 @@
 package model
 
 type Product struct {
-	ProductBase
+	BaseProduct
 	Categories []Category
 }

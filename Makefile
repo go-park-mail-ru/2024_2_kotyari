@@ -57,11 +57,11 @@ redis-refresh:
 all-stop:
 	docker compose down
 
-pg-delete:
-	docker compose down pg_db -v
+recreate-pg:
+	docker compose down pg_db -v && docker compose up pg_db -d
 
-redis-delete:
-	docker compose down redis_service -v
+recreate-redis:
+	docker compose down redis_service -v && docker compose up redis_service -d
 
 all-delete:
 	docker compose down -v

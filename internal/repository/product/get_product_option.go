@@ -18,7 +18,7 @@ const queryGetOptions = `
 func (ps *ProductsStore) getProductOptions(ctx context.Context, productID uint64) (model.Options, error) {
 	rowsOptions, err := ps.db.Query(ctx, queryGetOptions, productID)
 	if err != nil {
-		ps.log.Error("[ ProductsStore.GetProductByID ] Error executing options query", slog.String("error", err.Error()))
+		ps.log.Error("[ ProductsStore.GetProductCardByID ] Error executing options query", slog.String("error", err.Error()))
 		return model.Options{}, err
 	}
 	defer rowsOptions.Close()
@@ -30,14 +30,14 @@ func (ps *ProductsStore) getProductOptions(ctx context.Context, productID uint64
 
 		err = rowsOptions.Scan(&optionValuesJSON)
 		if err != nil {
-			ps.log.Error("[ ProductsStore.GetProductByID ] Error scanning option", "error", slog.String("error", err.Error()))
+			ps.log.Error("[ ProductsStore.GetProductCardByID ] Error scanning option", "error", slog.String("error", err.Error()))
 			return model.Options{}, err
 		}
 
 		var opts dtoOptionBlock
 		err = json.Unmarshal(optionValuesJSON, &opts)
 		if err != nil {
-			ps.log.Error("[ ProductsStore.GetProductByID ] Error decoding options", slog.String("error", err.Error()))
+			ps.log.Error("[ ProductsStore.GetProductCardByID ] Error decoding options", slog.String("error", err.Error()))
 			return model.Options{}, err
 		}
 
@@ -55,7 +55,7 @@ func (ps *ProductsStore) getProductOptions(ctx context.Context, productID uint64
 	}
 
 	if rowsOptions.Err() != nil {
-		ps.log.Error("[ ProductsStore.GetProductByID ] Error iterating over options rows", slog.String("error", rowsOptions.Err().Error()))
+		ps.log.Error("[ ProductsStore.GetProductCardByID ] Error iterating over options rows", slog.String("error", rowsOptions.Err().Error()))
 		return model.Options{}, rowsOptions.Err()
 	}
 

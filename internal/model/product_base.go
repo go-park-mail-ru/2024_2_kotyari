@@ -1,6 +1,6 @@
 package model
 
-type ProductBase struct {
+type BaseProduct struct {
 	ID            uint32
 	Description   string
 	Count         uint32

@@ -15,15 +15,15 @@ func (pd *ProductsDelivery) GetProductById(w http.ResponseWriter, r *http.Reques
 	vars := mux.Vars(r)
 	id, err := strconv.ParseUint(vars["id"], 10, 32)
 	if err != nil {
-		utils.WriteErrorJSON(w, errs.InternalServerError, http.StatusInternalServerError)
+		utils.WriteErrorJSON(w, http.StatusInternalServerError, errs.InternalServerError)
 
 		return
 	}
 
-	byID, err := pd.repo.GetProductByID(r.Context(), id)
+	byID, err := pd.repo.GetProductCardByID(r.Context(), id)
 	if err != nil {
 		err, code := pd.errResolver.Get(err)
-		utils.WriteErrorJSON(w, err, code)
+		utils.WriteErrorJSON(w, code, err)
 
 		return
 	}
