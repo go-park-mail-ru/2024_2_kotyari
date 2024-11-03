@@ -18,7 +18,7 @@ erDiagram
 
     %% Таблица продавцов
     sellers {
-        id PK
+        bigint id PK
         name
         logo
         rating
@@ -28,7 +28,7 @@ erDiagram
 
     %% Таблица категорий
     categories {
-        id PK
+        bigint id PK
         name
         picture
         active
@@ -39,9 +39,9 @@ erDiagram
 
     %% Таблица товаров
     products {
-        id PK
-        seller_id FK
-        category_id FK
+        bigint id PK
+        bigint seller_id FK
+        bigint category_id FK
         count
         price
         original_price
@@ -57,7 +57,7 @@ erDiagram
 
     %% Таблица характеристик
     characteristics {
-        id PK
+        bigint id PK
         name
         created_at
         updated_at
@@ -65,8 +65,8 @@ erDiagram
 
     %% Связующая таблица товаров и характеристик
     product_characteristics {
-        product_id PK, FK
-        characteristic_id PK, FK
+        bigint product_id PK, FK
+        bigint characteristic_id PK, FK
         value
         created_at
         updated_at
@@ -74,7 +74,7 @@ erDiagram
 
     %% Таблица опций
     options {
-        id PK
+        bigint id PK
         name
         created_at
         updated_at
@@ -82,7 +82,7 @@ erDiagram
 
     %% Связующая таблица товаров и опций
     product_options {
-        id PK
+       bigint  id PK
         product_id FK
         option_id FK
         created_at
@@ -91,7 +91,7 @@ erDiagram
 
     %% Таблица значений опций
     product_option_values {
-        id PK
+        bigint id PK
         product_option_id FK
         value
         link
@@ -101,7 +101,7 @@ erDiagram
 
     %% Таблица избранных товаров
     favorites {
-        id PK
+        bigint id PK
         user_id FK
         product_id FK
         created_at
@@ -110,7 +110,7 @@ erDiagram
 
     %% Таблица изображений товаров
     product_images {
-        id PK
+        bigint id PK
         product_id FK
         image_url
         created_at
@@ -119,7 +119,7 @@ erDiagram
 
     %% Таблица складских адресов
     stock_address {
-        id PK
+        bigint id PK
         address
         city
         country
@@ -133,7 +133,7 @@ erDiagram
 
     %% Таблица заказов
     orders {
-        id PK
+        bigint id PK
         user_id FK
         address
         stock_address_id FK
@@ -145,7 +145,7 @@ erDiagram
 
     %% Таблица связей товаров и заказов
     product_orders {
-        id PK
+        bigint id PK
         order_id FK
         product_id FK
         option_value_id FK
@@ -157,7 +157,7 @@ erDiagram
 
     %% Таблица корзины
     carts {
-        id PK
+        bigint id PK
         user_id FK
         product_id FK
         option_value_id FK
@@ -170,7 +170,7 @@ erDiagram
 
     %% Таблица отзывов о товарах
     product_reviews {
-        id PK
+        bigint id PK
         product_id FK
         user_id FK
         rating
