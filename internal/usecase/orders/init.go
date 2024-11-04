@@ -3,7 +3,6 @@ package morders
 import (
 	"context"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 	"log/slog"
 	"time"
 
@@ -12,8 +11,8 @@ import (
 )
 
 type OrdersRepo interface {
-	GetOrders(ctx context.Context, userId uint32) (pgx.Rows, error)
-	GetOrderById(ctx context.Context, id uuid.UUID, userID uint32, deliveryDate time.Time) (pgx.Rows, error)
+	GetOrders(ctx context.Context, userId uint32) ([]order.Order, error)
+	GetOrderById(ctx context.Context, id uuid.UUID, userID uint32, deliveryDate time.Time) (*order.Order, error)
 	CreateOrderFromCart(ctx context.Context, orderData *order.OrderFromCart) (*order.Order, error)
 	GetCartItems(ctx context.Context, userID uint32) ([]order.ProductOrder, error)
 	GetNearestDeliveryDate(ctx context.Context, userID uint32) (time.Time, error)

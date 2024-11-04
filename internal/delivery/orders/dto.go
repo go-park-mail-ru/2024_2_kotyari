@@ -46,17 +46,17 @@ type productDTO struct {
 }
 
 func ToOrderDTO(o *order.Order) orderDTO {
-	products := make([]productDTO, len(o.Products))
+	products := make([]productDTO, 0, len(o.Products))
 
-	for i, p := range o.Products {
-		products[i] = productDTO{
+	for _, p := range o.Products {
+		products = append(products, productDTO{
 			ID:       p.ProductID,
 			ImageURL: p.ImageUrl,
 			Name:     p.Name,
 			Cost:     p.Cost,
 			Count:    p.Count,
 			Weight:   p.Weight,
-		}
+		})
 	}
 
 	return orderDTO{
@@ -71,27 +71,27 @@ func ToOrderDTO(o *order.Order) orderDTO {
 }
 
 func convertOrdersToDTOs(orders []order.Order) orderDTOs {
-	dtoOrders := make([]orderDTO, len(orders))
+	dtoOrders := make([]orderDTO, 0, len(orders))
 
-	for i, ord := range orders {
-		dtoOrders[i] = ToOrderDTO(&ord)
+	for _, ord := range orders {
+		dtoOrders = append(dtoOrders, ToOrderDTO(&ord))
 	}
 
 	return orderDTOs{Orders: dtoOrders}
 }
 
 func convertProductsToDTO(products []order.ProductOrder) []productDTO {
-	dto := make([]productDTO, len(products))
+	dto := make([]productDTO, 0, len(products))
 
-	for i, p := range products {
-		dto[i] = productDTO{
+	for _, p := range products {
+		dto = append(dto, productDTO{
 			ID:       p.ProductID,
 			Cost:     p.Cost,
 			Count:    p.Count,
 			ImageURL: p.ImageUrl,
 			Weight:   p.Weight,
 			Name:     p.Name,
-		}
+		})
 	}
 
 	return dto
