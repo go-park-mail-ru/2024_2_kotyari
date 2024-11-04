@@ -13,6 +13,7 @@ type getOrdersRow struct {
 	ProductName  string
 	ImageURL     string
 	TotalPrice   uint16
+	Status       string
 }
 
 type getOrderByIdRow struct {

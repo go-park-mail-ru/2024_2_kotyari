@@ -229,3 +229,5 @@ EXCEPTION
 END $$;
 
 ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "preferred_payment_method" payment_method DEFAULT 'Картой';
+
+ALTER TABLE "orders" ADD COLUMN IF NOT EXISTS "preferred_payment_method" payment_method DEFAULT 'Картой';

@@ -14,7 +14,7 @@ func (r *OrdersRepo) scanOrderRow(rows pgx.Row) (getOrdersRow, error) {
 	if err := rows.Scan(
 		&orderRow.OrderID, &orderRow.OrderDate, &orderRow.DeliveryDate,
 		&orderRow.ProductID, &orderRow.ImageURL, &orderRow.ProductName,
-		&orderRow.TotalPrice,
+		&orderRow.TotalPrice, &orderRow.Status,
 	); err != nil {
 		r.logger.Error("[OrdersManager.GetOrders] failed to scan order row", slog.String("error", err.Error()))
 		return orderRow, err
@@ -35,6 +35,7 @@ func (r *OrdersRepo) updateOrdersMap(ordersMap map[uuid.UUID]map[string]order.Or
 			OrderDate:    orderRow.OrderDate,
 			DeliveryDate: orderRow.DeliveryDate,
 			TotalPrice:   orderRow.TotalPrice,
+			Status:       orderRow.Status,
 			Products:     []order.ProductOrder{},
 		}
 	}

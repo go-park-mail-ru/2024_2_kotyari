@@ -9,7 +9,8 @@ import (
 func (r *OrdersRepo) GetOrdersRows(ctx context.Context, userID uint32) (pgx.Rows, error) {
 	const query = `
 		SELECT o.id::uuid, o.created_at AS order_date, po.delivery_date, 
-		       p.id::bigint AS product_id, p.image_url, p.title AS name, o.total_price
+		       p.id::bigint AS product_id, p.image_url, p.title AS name, 
+		       o.total_price, o.status
 		FROM orders o
 		JOIN product_orders po ON o.id = po.order_id
 		JOIN products p ON po.product_id = p.id
