@@ -8,7 +8,6 @@ import (
 	"time"
 
 	order "github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
 func (m *OrdersManager) processOrderRows(rows pgx.Rows) (*order.Order, error) {
@@ -57,9 +56,7 @@ func (m *OrdersManager) processOrderRows(rows pgx.Rows) (*order.Order, error) {
 	return ord, nil
 }
 
-func (m *OrdersManager) GetOrderById(ctx context.Context, id uuid.UUID, deliveryDate time.Time) (*order.Order, error) {
-	userID := utils.GetContextSessionUserID(ctx)
-
+func (m *OrdersManager) GetOrderById(ctx context.Context, id uuid.UUID, deliveryDate time.Time, userID uint32) (*order.Order, error) {
 	rows, err := m.repo.GetOrderById(ctx, id, userID, deliveryDate)
 	if err != nil {
 		return nil, err

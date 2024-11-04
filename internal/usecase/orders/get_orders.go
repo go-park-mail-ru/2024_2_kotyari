@@ -8,7 +8,6 @@ import (
 	"sort"
 
 	order "github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
 func (m *OrdersManager) processOrderRowsOfGetOrders(rows pgx.Rows) ([]order.Order, error) {
@@ -72,8 +71,7 @@ func (m *OrdersManager) processOrderRowsOfGetOrders(rows pgx.Rows) ([]order.Orde
 	return orders, nil
 }
 
-func (m *OrdersManager) GetOrders(ctx context.Context) ([]order.Order, error) {
-	userID := utils.GetContextSessionUserID(ctx)
+func (m *OrdersManager) GetOrders(ctx context.Context, userID uint32) ([]order.Order, error) {
 	m.logger.Info("get: ", slog.Uint64("u_id", uint64(userID)))
 
 	rows, err := m.repo.GetOrders(ctx, userID)

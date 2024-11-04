@@ -13,6 +13,8 @@ type cartDelivery interface {
 	RemoveProduct(w http.ResponseWriter, r *http.Request)
 	ChangeCartProductSelectedState(w http.ResponseWriter, r *http.Request)
 	ChangeAllCartProductsState(w http.ResponseWriter, r *http.Request)
+	GetSelectedFromCart(w http.ResponseWriter, r *http.Request)
+	UpdatePaymentMethod(w http.ResponseWriter, r *http.Request)
 }
 
 type CartApp struct {
@@ -34,8 +36,11 @@ func (c *CartApp) InitCartRoutes() *mux.Router {
 	sub.HandleFunc("/cart/product/{id}", c.delivery.AddProduct).Methods(http.MethodPost)
 	sub.HandleFunc("/cart/product/{id}", c.delivery.RemoveProduct).Methods(http.MethodDelete)
 
+	sub.HandleFunc("/cart/select/products", c.delivery.GetSelectedFromCart).Methods(http.MethodGet)
 	sub.HandleFunc("/cart/select/product/{id}", c.delivery.ChangeCartProductSelectedState).Methods(http.MethodPatch)
 	sub.HandleFunc("/cart/select/products", c.delivery.ChangeAllCartProductsState).Methods(http.MethodPatch)
 	sub.HandleFunc("/cart/select/products", c.delivery.ChangeAllCartProductsState).Methods(http.MethodDelete)
+
+	sub.HandleFunc("/cart/pay-method", c.delivery.UpdatePaymentMethod).Methods(http.MethodPatch)
 	return sub
 }

@@ -86,7 +86,7 @@ type Server struct {
 	log      *slog.Logger
 	files    filesDelivery
 	cart     CartApp
-	orders   *orders.OrdersHandler
+	order    OrderApp
 }
 
 func NewServer() (*Server, error) {
@@ -146,8 +146,10 @@ func NewServer() (*Server, error) {
 	fileDelivery := fileDeliveryLib.NewFilesDelivery(fileRepo)
 
 	ordersRepo := rorders.NewOrdersRepo(dbPool, log)
-	ordersManager := morders.NewOrdersManager(ordersRepo, log)
+	ordersManager := morders.NewOrdersManager(ordersRepo, log, cartRepo)
 	ordersHandler := orders.NewOrdersHandler(ordersManager, log, errResolver)
+
+	orderApp := NewOrderApp(router, ordersHandler)
 
 	return &Server{
 		r:        router,
@@ -161,7 +163,7 @@ func NewServer() (*Server, error) {
 		sessions: sessionsDelivery,
 		files:    fileDelivery,
 		cart:     cartApp,
-		orders:   ordersHandler,
+		order:    orderApp,
 	}, nil
 }
 
@@ -175,6 +177,8 @@ func (s *Server) setupRoutes() {
 
 	sub := s.cart.InitCartRoutes()
 	sub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
+	sub2 := s.order.InitOrderApp()
+	sub2.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 	s.r.HandleFunc("/login", s.auth.LoginUser).Methods(http.MethodPost)
 	s.r.HandleFunc("/logout", s.sessions.Delete).Methods(http.MethodPost)
 	s.r.HandleFunc("/signup", s.auth.CreateUser).Methods(http.MethodPost)
@@ -198,11 +202,6 @@ func (s *Server) setupRoutes() {
 	})
 
 	s.r.HandleFunc("/", s.auth.GetUserById).Methods(http.MethodGet)
-
-	getUnimplemented.HandleFunc("/orders", s.orders.GetOrders).Methods(http.MethodGet)
-	getUnimplemented.HandleFunc("/order/{id}/{delivery_date}", s.orders.GetOrderByID).Methods(http.MethodGet)
-	getUnimplemented.HandleFunc("/orders", s.orders.CreateOrderFromCart).Methods(http.MethodPost)
-	getUnimplemented.HandleFunc("/orders/nearest", s.orders.GetNearestDeliveryDate).Methods(http.MethodGet)
 
 	getUnimplemented.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 

@@ -10,6 +10,8 @@ import (
 )
 
 func (h *OrdersHandler) CreateOrderFromCart(w http.ResponseWriter, r *http.Request) {
+	userID := utils.GetContextSessionUserID(r.Context())
+
 	var request createOrderRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		h.logger.Error("[delivery.CreateOrderFromCart] Invalid request body", slog.String("error", err.Error()))
@@ -17,7 +19,7 @@ func (h *OrdersHandler) CreateOrderFromCart(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	order, err := h.ordersManager.CreateOrderFromCart(r.Context(), request.Address)
+	order, err := h.ordersManager.CreateOrderFromCart(r.Context(), request.Address, userID)
 	if err != nil {
 		h.logger.Error("[delivery.CreateOrderFromCart] Failed to create order from cart", slog.String("error", err.Error()))
 		utils.WriteErrorJSONByError(w, errs.InternalServerError, h.errResolver)

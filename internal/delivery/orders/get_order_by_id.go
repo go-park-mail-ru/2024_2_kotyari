@@ -14,6 +14,8 @@ import (
 )
 
 func (h *OrdersHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
+	userID := utils.GetContextSessionUserID(r.Context())
+
 	vars := mux.Vars(r)
 	idStr := vars["id"]
 	deliveryDateStr := vars["delivery_date"]
@@ -34,7 +36,7 @@ func (h *OrdersHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	order, err := h.ordersManager.GetOrderById(r.Context(), id, deliveryDate)
+	order, err := h.ordersManager.GetOrderById(r.Context(), id, deliveryDate, userID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			h.logger.Warn("[delivery.GetOrderById] Order not found", slog.String("orderID", id.String()))

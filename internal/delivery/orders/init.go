@@ -11,10 +11,10 @@ import (
 )
 
 type ordersManager interface {
-	GetOrders(ctx context.Context) ([]order.Order, error)
-	GetOrderById(ctx context.Context, id uuid.UUID, deliveryDate time.Time) (*order.Order, error)
-	CreateOrderFromCart(ctx context.Context, address string) (*order.Order, error)
-	GetNearestDeliveryDate(ctx context.Context) (time.Time, error)
+	GetOrders(ctx context.Context, userID uint32) ([]order.Order, error)
+	GetOrderById(ctx context.Context, id uuid.UUID, deliveryDate time.Time, userID uint32) (*order.Order, error)
+	CreateOrderFromCart(ctx context.Context, address string, userID uint32) (*order.Order, error)
+	GetNearestDeliveryDate(ctx context.Context, userID uint32) (time.Time, error)
 }
 
 type OrdersHandler struct {

@@ -21,12 +21,18 @@ type OrdersRepo interface {
 
 type OrdersManager struct {
 	repo   OrdersRepo
+	cart   cartGetter
 	logger *slog.Logger
 }
 
-func NewOrdersManager(repo *rorders.OrdersRepo, logger *slog.Logger) *OrdersManager {
+type cartGetter interface {
+	GetSelectedCartItems(ctx context.Context, userID uint32) ([]order.ProductOrder, error)
+}
+
+func NewOrdersManager(repo *rorders.OrdersRepo, logger *slog.Logger, cart cartGetter) *OrdersManager {
 	return &OrdersManager{
 		repo:   repo,
+		cart:   cart,
 		logger: logger,
 	}
 }

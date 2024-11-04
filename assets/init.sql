@@ -221,3 +221,11 @@ ALTER TABLE users
 ALTER COLUMN "avatar_url" SET DEFAULT 'files/default.jpeg';
 ALTER TABLE "users"
 ALTER COLUMN "age" SET DEFAULT 18;
+
+DO $$ BEGIN
+    CREATE TYPE payment_method AS ENUM ('Картой', 'Наличными');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "preferred_payment_method" payment_method DEFAULT 'Картой';

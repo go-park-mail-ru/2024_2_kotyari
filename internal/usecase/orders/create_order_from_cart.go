@@ -9,20 +9,16 @@ import (
 	"time"
 
 	order "github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
-func (m *OrdersManager) CreateOrderFromCart(ctx context.Context, address string) (*order.Order, error) {
-	userID := utils.GetContextSessionUserID(ctx)
-
+func (m *OrdersManager) CreateOrderFromCart(ctx context.Context, address string, userID uint32) (*order.Order, error) {
 	orderID := uuid.New()
 	orderDate := time.Now()
 	deliveryDate := orderDate.Add(72 * time.Hour)
 
-	// Используем заглушку для получения содержимого корзины
-	cartItems, err := m.repo.GetCartItems(ctx, userID)
+	cartItems, err := m.cart.GetSelectedCartItems(ctx, userID)
 	if err != nil {
-		m.logger.Error("[OrdersManager.CreateOrderFromCart] failed to fetch cart items", slog.String("error", err.Error()), slog.Uint64("user_id", uint64(userID)))
+		m.logger.Error("[OrdersManager.CreateOrderFromCart] failed to fetch selected cart items", slog.String("error", err.Error()), slog.Uint64("user_id", uint64(userID)))
 		return nil, err
 	}
 

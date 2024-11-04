@@ -7,10 +7,11 @@ import (
 
 type Order struct {
 	ID           uuid.UUID
-	Recipient    string
-	Address      string
-	OrderStatus  string
 	DeliveryDate time.Time
 	OrderDate    time.Time
-	Products     []OrderProduct
+	TotalPrice   uint16
+	Status       string
+	Recipient    string
+	Address      string
+	Products     []ProductOrder
 }

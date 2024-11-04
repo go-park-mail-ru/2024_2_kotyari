@@ -9,7 +9,9 @@ import (
 )
 
 func (h *OrdersHandler) GetNearestDeliveryDate(w http.ResponseWriter, r *http.Request) {
-	deliveryDate, err := h.ordersManager.GetNearestDeliveryDate(r.Context())
+	userID := utils.GetContextSessionUserID(r.Context())
+
+	deliveryDate, err := h.ordersManager.GetNearestDeliveryDate(r.Context(), userID)
 	if err != nil {
 		h.logger.Error("[delivery.GetNearestDeliveryDate] Failed to fetch nearest delivery date", slog.String("error", err.Error()))
 		utils.WriteErrorJSONByError(w, errs.ErrGetNearestDeliveryDate, h.errResolver)

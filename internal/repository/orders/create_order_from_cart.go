@@ -13,18 +13,19 @@ import (
 const defaultStatus = "awaiting_payment"
 
 func (r *OrdersRepo) CreateOrderFromCart(ctx context.Context, orderData *order.OrderFromCart) (*order.Order, error) {
-	tx, err := r.db.Begin(ctx)
+	tx, err := r.db.BeginTx(ctx, pgx.TxOptions{AccessMode: pgx.ReadWrite})
 	if err != nil {
-		r.logger.Error("[OrdersRepo.CreateOrderFromCart] failed to begin transaction", slog.String("error", err.Error()))
+		r.logger.Error("[OrdersRepo.RemoveSelectedCartItems] Failed to start transaction", slog.String("error", err.Error()))
 		return nil, err
 	}
 
-	defer func(tx pgx.Tx, ctx context.Context) {
-		err := tx.Rollback(ctx)
-		if err != nil {
-
+	defer func() {
+		if p := recover(); p != nil || err != nil {
+			tx.Rollback(ctx)
+		} else {
+			tx.Commit(ctx)
 		}
-	}(tx, ctx)
+	}()
 
 	const createOrderQuery = `
 		INSERT INTO orders (id, user_id, total_price, address, created_at, updated_at)
@@ -54,8 +55,15 @@ func (r *OrdersRepo) CreateOrderFromCart(ctx context.Context, orderData *order.O
 		}
 	}
 
-	if err := tx.Commit(ctx); err != nil {
-		r.logger.Error("[OrdersRepo.CreateOrderFromCart] failed to commit transaction", slog.String("error", err.Error()))
+	const removeCartItemsQuery = `
+		UPDATE carts
+		SET count = 0, is_deleted = true
+		WHERE user_id = $1 AND is_selected = true AND is_deleted = false;
+	`
+
+	_, err = tx.Exec(ctx, removeCartItemsQuery, orderData.UserID)
+	if err != nil {
+		r.logger.Error("[OrdersRepo.CreateOrderFromCart] failed to remove selected cart items", slog.String("error", err.Error()), slog.Uint64("user_id", uint64(orderData.UserID)))
 		return nil, err
 	}
 

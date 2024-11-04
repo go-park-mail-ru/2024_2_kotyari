@@ -63,3 +63,43 @@ func productResponseFromModel(cartProduct model.CartProduct) GetProductResponse 
 		Rating:        cartProduct.Rating,
 	}
 }
+
+type orderData struct {
+	TotalItems     uint16             `json:"total_items"`
+	TotalWeight    float32            `json:"total_weight"`
+	FinalPrice     float32            `json:"final_price"`
+	Currency       string             `json:"currency"`
+	PaymentMethods []paymentMethod    `json:"payment_methods"`
+	Recipient      recipientInfo      `json:"recipient"`
+	DeliveryDates  []deliveryDateInfo `json:"delivery_dates"`
+}
+
+type paymentMethod struct {
+	Method     string `json:"method"`
+	Icon       string `json:"icon"`
+	IsSelected bool   `json:"is_selected"`
+}
+
+type recipientInfo struct {
+	Address       string `json:"address"`
+	RecipientName string `json:"recipient_name"`
+}
+
+type deliveryDateInfo struct {
+	Date   time.Time         `json:"date"`
+	Weight float32           `json:"weight"`
+	Items  []productResponse `json:"items"`
+}
+
+type productResponse struct {
+	Title    string  `json:"product_name"`
+	Price    float32 `json:"product_price"`
+	Quantity uint16  `json:"quantity"`
+	Image    string  `json:"product_image"`
+	Weight   float32 `json:"weight"`
+	URL      string  `json:"url"`
+}
+
+type requestPaymentMethod struct {
+	PaymentMethod string `json:"payment_method"`
+}

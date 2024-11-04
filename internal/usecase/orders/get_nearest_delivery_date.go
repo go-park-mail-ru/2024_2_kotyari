@@ -5,12 +5,9 @@ import (
 	"errors"
 	"log/slog"
 	"time"
-
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
-func (m *OrdersManager) GetNearestDeliveryDate(ctx context.Context) (time.Time, error) {
-	userID := utils.GetContextSessionUserID(ctx)
+func (m *OrdersManager) GetNearestDeliveryDate(ctx context.Context, userID uint32) (time.Time, error) {
 	m.logger.Info("GetNearestDeliveryDate called", slog.Uint64("user_id", uint64(userID)))
 
 	deliveryDate, err := m.repo.GetNearestDeliveryDate(ctx, userID)
