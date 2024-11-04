@@ -37,3 +37,8 @@ func WriteErrorJSON(w http.ResponseWriter, status int, err error) {
 
 	WriteJSON(w, status, res)
 }
+
+func WriteErrorJSONByError(w http.ResponseWriter, err error, globalErrorResponder errs.GetErrorCode) {
+	errMsg, statusCode := globalErrorResponder.Get(err)
+	WriteErrorJSON(w, statusCode, errMsg)
+}

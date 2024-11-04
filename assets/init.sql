@@ -103,9 +103,9 @@ CREATE TABLE IF NOT EXISTS "stock_address" (
 CREATE TYPE order_status AS ENUM ('awaiting_payment', 'paid', 'delivered', 'cancelled');
 -- Таблица заказов, связанная с пользователями и складскими адресами
 CREATE TABLE IF NOT EXISTS "orders" (
-	"id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
+	"id" UUID,
 	"user_id" bigint NOT NULL,
-	"address" text NOT NULL DEFAULT NULL,  -- Адрес доставки (если не используется стоковый адрес)
+	"address" text NOT NULL DEFAULT '',  -- Адрес доставки (если не используется стоковый адрес)
 	"stock_address_id" bigint,  -- Ссылка на таблицу стоковых адресов
 	"total_price" integer NOT NULL CHECK ("total_price" > 0),
 	"status" order_status DEFAULT 'awaiting_payment',
@@ -144,8 +144,8 @@ CREATE TABLE IF NOT EXISTS "product_options" (
 
 -- Таблица связывает продукты с заказами, хранит количество и дату доставки продукта в заказе
 CREATE TABLE IF NOT EXISTS "product_orders" (
-	"id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
-	"order_id" bigint NOT NULL,
+	"id" UUID,
+	"order_id" UUID NOT NULL,
 	"product_id" bigint NOT NULL,
     "option_id" bigint,  -- Ссылка на опцию
 	"count" integer NOT NULL DEFAULT '1' CHECK (count > 0),
@@ -210,6 +210,9 @@ CREATE INDEX idx_product_characteristics ON products USING gin (characteristics)
 ALTER TABLE orders
 ADD CONSTRAINT status_check CHECK (status IN ('awaiting_payment', 'paid', 'delivered', 'cancelled'));
 
+ALTER TABLE "products"
+    ADD COLUMN "weight" real NOT NULL DEFAULT 0.0;
+
 ALTER TABLE categories
 ADD COLUMN link_to text;
 ALTER TABLE addresses
@@ -218,3 +221,13 @@ ALTER TABLE users
 ALTER COLUMN "avatar_url" SET DEFAULT 'files/default.jpeg';
 ALTER TABLE "users"
 ALTER COLUMN "age" SET DEFAULT 18;
+
+DO $$ BEGIN
+    CREATE TYPE payment_method AS ENUM ('Картой', 'Наличными');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "preferred_payment_method" payment_method DEFAULT 'Картой';
+
+ALTER TABLE "orders" ADD COLUMN IF NOT EXISTS "preferred_payment_method" payment_method DEFAULT 'Картой';

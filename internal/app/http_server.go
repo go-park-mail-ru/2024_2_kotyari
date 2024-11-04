@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"github.com/gorilla/mux"
 	"log/slog"
 	"net/http"
 
@@ -12,6 +13,7 @@ import (
 	cartDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/cart"
 	categoryDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/category"
 	fileDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/file"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/orders"
 	productDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/product"
 	profileDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/profile"
 	sessionsDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/sessions"
@@ -23,19 +25,19 @@ import (
 	cartRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/cart"
 	categoryRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/category"
 	fileRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/file"
+	rorders "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/orders"
 	productRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/product"
 	profileRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/profile"
 	sessionsRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/sessions"
 	userRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/user"
 	addressServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/address"
 	cartServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/cart"
+	morders "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders"
 	fileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/file"
 	imageServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/image"
 	profileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/profile"
 	sessionsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
 	userServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/user"
-
-	"github.com/gorilla/mux"
 )
 
 type categoryApp interface {
@@ -84,6 +86,7 @@ type Server struct {
 	log      *slog.Logger
 	files    filesDelivery
 	cart     CartApp
+	order    OrderApp
 }
 
 func NewServer() (*Server, error) {
@@ -141,6 +144,13 @@ func NewServer() (*Server, error) {
 	pa := NewProductsApp(router, prodHandler)
 
 	fileDelivery := fileDeliveryLib.NewFilesDelivery(fileRepo)
+
+	ordersRepo := rorders.NewOrdersRepo(dbPool, log)
+	ordersManager := morders.NewOrdersManager(ordersRepo, log, cartRepo)
+	ordersHandler := orders.NewOrdersHandler(ordersManager, log, errResolver)
+
+	orderApp := NewOrderApp(router, ordersHandler)
+
 	return &Server{
 		r:        router,
 		auth:     userHandler,
@@ -153,6 +163,7 @@ func NewServer() (*Server, error) {
 		sessions: sessionsDelivery,
 		files:    fileDelivery,
 		cart:     cartApp,
+		order:    orderApp,
 	}, nil
 }
 
@@ -166,6 +177,8 @@ func (s *Server) setupRoutes() {
 
 	sub := s.cart.InitCartRoutes()
 	sub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
+	sub2 := s.order.InitOrderApp()
+	sub2.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 	s.r.HandleFunc("/login", s.auth.LoginUser).Methods(http.MethodPost)
 	s.r.HandleFunc("/logout", s.sessions.Delete).Methods(http.MethodPost)
 	s.r.HandleFunc("/signup", s.auth.CreateUser).Methods(http.MethodPost)
@@ -189,7 +202,9 @@ func (s *Server) setupRoutes() {
 	})
 
 	s.r.HandleFunc("/", s.auth.GetUserById).Methods(http.MethodGet)
+
 	getUnimplemented.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
+
 }
 
 func (s *Server) Run() error {

@@ -14,11 +14,13 @@ type cartManager interface {
 	AddProduct(ctx context.Context, productID uint32, userID uint32) error
 	RemoveProduct(ctx context.Context, productID uint32, userID uint32) error
 	ChangeCartProductSelectedState(ctx context.Context, productID uint32, userID uint32, isSelected bool) error
+	GetSelectedFromCart(ctx context.Context, userID uint32) (model.CartForOrder, error)
 }
 
 type cartManip interface {
 	GetCart(ctx context.Context, userID uint32, deliveryDate time.Time) (model.Cart, error)
 	ChangeAllCartProductsState(ctx context.Context, userID uint32, isSelected bool) error
+	UpdatePaymentMethod(ctx context.Context, userID uint32, method string) error
 }
 
 type CartHandler struct {
