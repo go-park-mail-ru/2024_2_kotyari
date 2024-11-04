@@ -2,17 +2,19 @@ package rorders
 
 import (
 	"context"
-	order "github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"log/slog"
+
+	order "github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
-func (r *OrdersRepo) scanOrderRow(rows pgx.Row) (order.GetOrdersRow, error) {
-	var orderRow order.GetOrdersRow
+func (r *OrdersRepo) scanOrderRow(rows pgx.Row) (getOrdersRow, error) {
+	var orderRow getOrdersRow
 	if err := rows.Scan(
 		&orderRow.OrderID, &orderRow.OrderDate, &orderRow.DeliveryDate,
 		&orderRow.ProductID, &orderRow.ImageURL, &orderRow.ProductName,
+		&orderRow.TotalPrice,
 	); err != nil {
 		r.logger.Error("[OrdersManager.GetOrders] failed to scan order row", slog.String("error", err.Error()))
 		return orderRow, err
@@ -20,7 +22,7 @@ func (r *OrdersRepo) scanOrderRow(rows pgx.Row) (order.GetOrdersRow, error) {
 	return orderRow, nil
 }
 
-func (r *OrdersRepo) updateOrdersMap(ordersMap map[uuid.UUID]map[string]order.Order, orderRow order.GetOrdersRow) {
+func (r *OrdersRepo) updateOrdersMap(ordersMap map[uuid.UUID]map[string]order.Order, orderRow getOrdersRow) {
 	deliveryKey := orderRow.DeliveryDate.Format("2024-01-01")
 
 	if _, exists := ordersMap[orderRow.OrderID]; !exists {
@@ -32,6 +34,7 @@ func (r *OrdersRepo) updateOrdersMap(ordersMap map[uuid.UUID]map[string]order.Or
 			ID:           orderRow.OrderID,
 			OrderDate:    orderRow.OrderDate,
 			DeliveryDate: orderRow.DeliveryDate,
+			TotalPrice:   orderRow.TotalPrice,
 			Products:     []order.ProductOrder{},
 		}
 	}

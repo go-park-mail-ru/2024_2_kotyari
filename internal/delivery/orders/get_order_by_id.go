@@ -14,7 +14,10 @@ import (
 )
 
 func (h *OrdersHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
-	userID := utils.GetContextSessionUserID(r.Context())
+	userID, ok := utils.GetContextSessionUserID(r.Context())
+	if !ok {
+		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)
+	}
 
 	vars := mux.Vars(r)
 	idStr := vars["id"]
@@ -48,14 +51,14 @@ func (h *OrdersHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := orderDTOMax{
+	response := OrderMaxResponse{
 		ID:           order.ID,
 		Recipient:    order.Recipient,
 		Address:      order.Address,
 		Status:       order.Status,
 		OrderDate:    order.OrderDate,
 		DeliveryDate: order.DeliveryDate,
-		Products:     convertProductsToDTO(order.Products),
+		Products:     ConvertProductsToDTO(order.Products),
 	}
 
 	h.logger.Info("[delivery.GetOrderById] Order retrieved successfully", slog.String("orderID", id.String()))

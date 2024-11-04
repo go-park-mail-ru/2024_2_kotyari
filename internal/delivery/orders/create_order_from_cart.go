@@ -10,9 +10,12 @@ import (
 )
 
 func (h *OrdersHandler) CreateOrderFromCart(w http.ResponseWriter, r *http.Request) {
-	userID := utils.GetContextSessionUserID(r.Context())
+	userID, ok := utils.GetContextSessionUserID(r.Context())
+	if !ok {
+		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)
+	}
 
-	var request createOrderRequest
+	var request CreateOrderRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		h.logger.Error("[delivery.CreateOrderFromCart] Invalid request body", slog.String("error", err.Error()))
 		utils.WriteErrorJSONByError(w, errs.InvalidJSONFormat, h.errResolver)
@@ -26,7 +29,7 @@ func (h *OrdersHandler) CreateOrderFromCart(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	orderDTO := ToOrderDTO(order)
+	orderDTO := ToOrderResponse(order)
 	h.logger.Info("[delivery.CreateOrderFromCart] Order created from cart", slog.String("orderID", orderDTO.ID.String()))
 
 	utils.WriteJSON(w, http.StatusOK, orderDTO)

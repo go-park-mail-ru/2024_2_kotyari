@@ -2,10 +2,11 @@ package rorders
 
 import (
 	"context"
-	order "github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	"github.com/google/uuid"
 	"log/slog"
 	"time"
+
+	order "github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
 func (r *OrdersRepo) GetOrderById(ctx context.Context, id uuid.UUID, userID uint32, deliveryDate time.Time) (*order.Order, error) {
@@ -18,7 +19,7 @@ func (r *OrdersRepo) GetOrderById(ctx context.Context, id uuid.UUID, userID uint
 
 	var ord *order.Order
 	for rows.Next() {
-		var orderRow order.GetOrderByIdRow
+		var orderRow getOrderByIdRow
 
 		err := rows.Scan(
 			&orderRow.OrderID, &orderRow.Address, &orderRow.Status, &orderRow.OrderDate,

@@ -9,7 +9,10 @@ import (
 )
 
 func (h *OrdersHandler) GetNearestDeliveryDate(w http.ResponseWriter, r *http.Request) {
-	userID := utils.GetContextSessionUserID(r.Context())
+	userID, ok := utils.GetContextSessionUserID(r.Context())
+	if !ok {
+		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)
+	}
 
 	deliveryDate, err := h.ordersManager.GetNearestDeliveryDate(r.Context(), userID)
 	if err != nil {

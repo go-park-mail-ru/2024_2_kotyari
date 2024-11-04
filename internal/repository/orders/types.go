@@ -5,16 +5,17 @@ import (
 	"time"
 )
 
-type GetOrdersRow struct {
+type getOrdersRow struct {
 	OrderID      uuid.UUID
 	OrderDate    time.Time
 	DeliveryDate time.Time
 	ProductID    uint32
 	ProductName  string
 	ImageURL     string
+	TotalPrice   uint16
 }
 
-type GetOrderByIdRow struct {
+type getOrderByIdRow struct {
 	OrderID   uuid.UUID
 	OrderDate time.Time
 	Date      time.Time

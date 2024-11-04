@@ -2,12 +2,17 @@ package cart
 
 import (
 	"encoding/json"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"net/http"
+
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
 func (ch *CartHandler) UpdatePaymentMethod(w http.ResponseWriter, r *http.Request) {
-	userID := utils.GetContextSessionUserID(r.Context())
+	userID, ok := utils.GetContextSessionUserID(r.Context())
+	if !ok {
+		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)
+	}
 
 	var requestPaymentMethod requestPaymentMethod
 
