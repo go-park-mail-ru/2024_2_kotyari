@@ -2,11 +2,11 @@ package profile
 
 import (
 	"errors"
-	"fmt"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"io"
 	"log/slog"
+	"mime/multipart"
 	"net/http"
 	"os"
 )
@@ -17,20 +17,29 @@ func (h *ProfilesDelivery) UpdateProfileAvatar(writer http.ResponseWriter, reque
 	userID, ok := utils.GetContextSessionUserID(request.Context())
 	if !ok {
 		utils.WriteErrorJSON(writer, http.StatusUnauthorized, errs.UserNotAuthorized)
+
+		return
 	}
 
 	file, header, err := request.FormFile("avatar")
 	if err != nil {
 		h.log.Error("[ ProfilesDelivery.UpdateProfileAvatar ] Не удалось прочитать файл", slog.String("error", err.Error()))
-		utils.WriteErrorJSON(writer, http.StatusBadRequest,
-			errors.New("не удалось прочитать файл, попробуйте позже"))
+		utils.WriteErrorJSON(writer, http.StatusBadRequest, errors.New("не удалось прочитать файл, попробуйте позже"))
+
 		return
 	}
-	defer file.Close()
+
+	defer func(f multipart.File) {
+		closeErr := f.Close()
+		if closeErr != nil {
+			h.log.Error("Ошибка закрытия multipart file", slog.String("error", closeErr.Error()))
+		}
+	}(file)
 
 	if header.Size > maxUploadSize {
-		h.log.Error("[ ProfilesDelivery.UpdateProfileAvatar ] Размер файла превышает 10 МБ", slog.String("error", err.Error()))
-		http.Error(writer, "Размер файла превышает 10 МБ", http.StatusBadRequest)
+		h.log.Error("[ ProfilesDelivery.UpdateProfileAvatar ] Размер файла превышает 10 МБ")
+		utils.WriteErrorJSON(writer, http.StatusBadRequest, errors.New("размер файла превышает 10 МБ"))
+
 		return
 	}
 
@@ -41,14 +50,13 @@ func (h *ProfilesDelivery) UpdateProfileAvatar(writer http.ResponseWriter, reque
 
 		return
 	}
+
 	defer func(name string) {
-		err = os.Remove(name)
-		if err != nil {
-			fmt.Printf("ошибка удаления temp, %s", err.Error())
+		removeErr := os.Remove(name)
+		if removeErr != nil {
+			h.log.Error("[ ProfilesDelivery.UpdateProfileAvatar ] ошибка удаления temp файла", slog.String("error", removeErr.Error()))
 		}
 	}(tempFile.Name())
-
-	fmt.Println("tempFile", tempFile.Name())
 
 	_, err = io.Copy(tempFile, file)
 	if err != nil {
