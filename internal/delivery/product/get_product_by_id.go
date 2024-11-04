@@ -29,6 +29,15 @@ func (pd *ProductsDelivery) GetProductById(w http.ResponseWriter, r *http.Reques
 	}
 
 	dtoProductByid := newDTOProductCardFromModel(byID)
+	userId, ok := utils.GetContextSessionUserID(r.Context())
+	if ok {
+		flag, err := pd.checker.ProductInCart(r.Context(), userId, uint32(id))
+		if err != nil {
+			return
+		}
+
+		dtoProductByid.InCart = flag
+	}
 
 	utils.WriteJSON(w, http.StatusOK, dtoProductByid)
 }

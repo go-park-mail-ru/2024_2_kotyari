@@ -17,7 +17,7 @@ type cartManager interface {
 }
 
 type cartManip interface {
-	GetCart(ctx context.Context, deliveryDate time.Time) (model.Cart, error)
+	GetCart(ctx context.Context, userID uint32, deliveryDate time.Time) (model.Cart, error)
 	ChangeAllCartProductsState(ctx context.Context, userID uint32, isSelected bool) error
 }
 

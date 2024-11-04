@@ -1,6 +1,7 @@
 package cart
 
 import (
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"net/http"
 	"time"
 
@@ -8,7 +9,12 @@ import (
 )
 
 func (ch *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
-	cart, err := ch.cartManip.GetCart(r.Context(), time.Now())
+	userID, ok := utils.GetContextSessionUserID(r.Context())
+	if !ok {
+		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)
+	}
+
+	cart, err := ch.cartManip.GetCart(r.Context(), userID, time.Now())
 	if err != nil {
 		err, code := ch.errResolver.Get(err)
 		utils.WriteErrorJSON(w, code, err)

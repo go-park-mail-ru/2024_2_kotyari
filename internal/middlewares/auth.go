@@ -20,27 +20,23 @@ func AuthMiddleware(sessionGetter sessionGetter, errResolver errs.GetErrorCode) 
 			cookie, err := r.Cookie(utils.SessionName)
 			if err != nil {
 				if errors.Is(err, http.ErrNoCookie) {
-					utils.WriteJSON(w, http.StatusUnauthorized, errs.HTTPErrorResponse{
-						ErrorMessage: errs.UserNotAuthorized.Error(),
-					})
-
+					next.ServeHTTP(w, r)
 					return
 				}
 
-				utils.WriteJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
-					ErrorMessage: errs.InternalServerError.Error(),
-				})
-
+				utils.WriteErrorJSON(w, http.StatusInternalServerError, errs.InternalServerError)
 				return
 			}
 
 			session, err := sessionGetter.Get(r.Context(), cookie.Value)
 			if err != nil {
-				err, code := errResolver.Get(err)
-				utils.WriteJSON(w, code, errs.HTTPErrorResponse{
-					ErrorMessage: err.Error(),
-				})
+				if errors.Is(err, errs.SessionNotFound) {
+					next.ServeHTTP(w, r)
+					return
+				}
 
+				err, code := errResolver.Get(err)
+				utils.WriteErrorJSON(w, code, err)
 				return
 			}
 

@@ -2,6 +2,7 @@ package address
 
 import (
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -10,30 +11,36 @@ import (
 )
 
 func (h *AddressDelivery) UpdateAddressData(writer http.ResponseWriter, request *http.Request) {
-
-	id := utils.GetContextSessionUserID(request.Context())
+	userID, ok := utils.GetContextSessionUserID(request.Context())
+	if !ok {
+		utils.WriteErrorJSON(writer, http.StatusUnauthorized, errs.UserNotAuthorized)
+	}
 
 	var req UpdateAddressRequest
 
 	if err := json.NewDecoder(request.Body).Decode(&req); err != nil {
-		h.log.Error("[ AddressDelivery.UpdateAddressData ] Ошибка десериализации запроса", slog.String("error", err.Error()))
-		utils.WriteJSON(writer, http.StatusBadRequest, &errs.HTTPErrorResponse{ErrorMessage: errs.InvalidJSONFormat.Error()})
+		h.log.Error("[ AddressDelivery.UpdateAddressData ] Ошибка десериализации запроса",
+			slog.String("error", err.Error()),
+		)
+
+		utils.WriteErrorJSON(writer, http.StatusBadRequest, errs.InvalidJSONFormat)
 		return
 	}
 
 	newAddressData := req.ToModel()
 
-	if err := h.addressManager.UpdateUsersAddress(request.Context(), id, newAddressData); err != nil {
+	if err := h.addressManager.UpdateUsersAddress(request.Context(), userID, newAddressData); err != nil {
 		h.log.Warn("[ AddressDelivery.UpdateAddressData ] Не удалось обновить данные профиля", slog.String("error", err.Error()))
 
-		switch err {
-		case errs.InvalidEmailFormat:
-			utils.WriteJSON(writer, http.StatusBadRequest, &errs.HTTPErrorResponse{ErrorMessage: err.Error()})
-		case errs.InvalidUsernameFormat:
-			utils.WriteJSON(writer, http.StatusBadRequest, &errs.HTTPErrorResponse{ErrorMessage: err.Error()})
+		switch {
+		case errors.Is(err, errs.InvalidEmailFormat):
+			utils.WriteErrorJSON(writer, http.StatusBadRequest, err)
+		case errors.Is(err, errs.InvalidUsernameFormat):
+			utils.WriteErrorJSON(writer, http.StatusBadRequest, err)
 		default:
-			utils.WriteJSON(writer, http.StatusInternalServerError, &errs.HTTPErrorResponse{ErrorMessage: errs.InternalServerError.Error()})
+			utils.WriteErrorJSON(writer, http.StatusInternalServerError, errs.InternalServerError)
 		}
+
 		return
 	}
 

@@ -37,10 +37,11 @@ var (
 	BadRequest                    = errors.New("неправильный запрос")
 	ProductNotInCart              = errors.New("этого продукта нет в корзине")
 	ProductAlreadyInCart          = errors.New("этот продукт уже находится в корзине")
-	CategoriesDoesNotExits = errors.New("нет категорий")
-	OptionsDoesNotExists   = errors.New("не найдены опции")
-	ImagesDoesNotExists    = errors.New("нет картинок")
-	AddressNotFound       = errors.New("адрес не найден")
+	CategoriesDoesNotExits        = errors.New("нет категорий")
+	OptionsDoesNotExists          = errors.New("не найдены опции")
+	ImagesDoesNotExists           = errors.New("нет картинок")
+	AddressNotFound               = errors.New("адрес не найден")
+	ErrFileTypeNotAllowed         = errors.New("тип файла не допустим")
 )
 
 type ErrorStore struct {
@@ -64,24 +65,24 @@ func NewErrorStore() *ErrorStore {
 	return &ErrorStore{
 		mux: sync.RWMutex{},
 		errorCodes: map[error]int{
-			InvalidJSONFormat:      http.StatusBadRequest,
-			InvalidUsernameFormat:  http.StatusBadRequest,
-			InvalidEmailFormat:     http.StatusBadRequest,
-			InvalidPasswordFormat:  http.StatusBadRequest,
-			UserAlreadyExists:      http.StatusConflict,
-			InternalServerError:    http.StatusInternalServerError,
-			SessionCreationError:   http.StatusInternalServerError,
-			SessionSaveError:       http.StatusInternalServerError,
-			SessionNotFound:        http.StatusUnauthorized,
-			WrongCredentials:       http.StatusUnauthorized,
-			UserNotAuthorized:      http.StatusUnauthorized,
-			LogoutError:            http.StatusInternalServerError,
-			PasswordsDoNotMatch:    http.StatusBadRequest,
-			UserDoesNotExist:       http.StatusNotFound,
-			ProductsDoesNotExists:  http.StatusNotFound,
-			CategoriesDoesNotExits: http.StatusNotFound,
-			OptionsDoesNotExists:   http.StatusNotFound,
-			ImagesDoesNotExists:    http.StatusNotFound,
+			InvalidJSONFormat:             http.StatusBadRequest,
+			InvalidUsernameFormat:         http.StatusBadRequest,
+			InvalidEmailFormat:            http.StatusBadRequest,
+			InvalidPasswordFormat:         http.StatusBadRequest,
+			UserAlreadyExists:             http.StatusConflict,
+			InternalServerError:           http.StatusInternalServerError,
+			SessionCreationError:          http.StatusInternalServerError,
+			SessionSaveError:              http.StatusInternalServerError,
+			SessionNotFound:               http.StatusUnauthorized,
+			WrongCredentials:              http.StatusUnauthorized,
+			UserNotAuthorized:             http.StatusUnauthorized,
+			LogoutError:                   http.StatusInternalServerError,
+			PasswordsDoNotMatch:           http.StatusBadRequest,
+			UserDoesNotExist:              http.StatusNotFound,
+			ProductsDoesNotExists:         http.StatusNotFound,
+			CategoriesDoesNotExits:        http.StatusNotFound,
+			OptionsDoesNotExists:          http.StatusNotFound,
+			ImagesDoesNotExists:           http.StatusNotFound,
 			ProductToModifyNotFoundInCart: http.StatusNotFound,
 			ProductCountTooLow:            http.StatusConflict,
 			ProductNotFound:               http.StatusNotFound,
@@ -90,6 +91,7 @@ func NewErrorStore() *ErrorStore {
 			BadRequest:                    http.StatusBadRequest,
 			ProductNotInCart:              http.StatusNotFound,
 			ProductAlreadyInCart:          http.StatusConflict,
+			ErrFileTypeNotAllowed:         http.StatusBadRequest,
 		},
 	}
 }
