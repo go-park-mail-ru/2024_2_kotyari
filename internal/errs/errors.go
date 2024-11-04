@@ -37,15 +37,15 @@ var (
 	BadRequest                    = errors.New("неправильный запрос")
 	ProductNotInCart              = errors.New("этого продукта нет в корзине")
 	ProductAlreadyInCart          = errors.New("этот продукт уже находится в корзине")
-	CategoriesDoesNotExits = errors.New("нет категорий")
-	OptionsDoesNotExists   = errors.New("не найдены опции")
-	ImagesDoesNotExists    = errors.New("нет картинок")
-	AddressNotFound       = errors.New("адрес не найден")
-	ErrInvalidOrderIDFormat      = errors.New("неверный формат id")
-	ErrInvalidDeliveryDateFormat = errors.New("неферный формат даты доставки")
-	ErrOrderNotFound             = errors.New("заказ не найден")
-	ErrRetrieveOrder             = errors.New("не удалось получить заказ")
-	ErrGetNearestDeliveryDate    = errors.New("нет заказов в процесе доставки")
+	CategoriesDoesNotExits        = errors.New("нет категорий")
+	OptionsDoesNotExists          = errors.New("не найдены опции")
+	ImagesDoesNotExists           = errors.New("нет картинок")
+	AddressNotFound               = errors.New("адрес не найден")
+	ErrInvalidOrderIDFormat       = errors.New("неверный формат id")
+	ErrInvalidDeliveryDateFormat  = errors.New("неферный формат даты доставки")
+	ErrOrderNotFound              = errors.New("заказ не найден")
+	ErrRetrieveOrder              = errors.New("не удалось получить заказ")
+	ErrGetNearestDeliveryDate     = errors.New("нет заказов в процесе доставки")
 	ErrFileTypeNotAllowed         = errors.New("тип файла не допустим")
 )
 
@@ -97,11 +97,11 @@ func NewErrorStore() *ErrorStore {
 			ProductNotInCart:              http.StatusNotFound,
 			ProductAlreadyInCart:          http.StatusConflict,
 			ErrFileTypeNotAllowed:         http.StatusBadRequest,
-			ErrInvalidOrderIDFormat:      http.StatusBadRequest,
-			ErrInvalidDeliveryDateFormat: http.StatusBadRequest,
-			ErrOrderNotFound:             http.StatusNotFound,
-			ErrRetrieveOrder:             http.StatusInternalServerError,
-			ErrGetNearestDeliveryDate:    http.StatusInternalServerError,
+			ErrInvalidOrderIDFormat:       http.StatusBadRequest,
+			ErrInvalidDeliveryDateFormat:  http.StatusBadRequest,
+			ErrOrderNotFound:              http.StatusNotFound,
+			ErrRetrieveOrder:              http.StatusNotFound,
+			ErrGetNearestDeliveryDate:     http.StatusNotFound,
 		},
 	}
 }
