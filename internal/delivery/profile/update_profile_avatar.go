@@ -1,6 +1,8 @@
 package profile
 
 import (
+	"errors"
+	"fmt"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"io"
@@ -18,13 +20,12 @@ func (h *ProfilesDelivery) UpdateProfileAvatar(writer http.ResponseWriter, reque
 	}
 
 	file, header, err := request.FormFile("avatar")
-
 	if err != nil {
 		h.log.Error("[ ProfilesDelivery.UpdateProfileAvatar ] Не удалось прочитать файл", slog.String("error", err.Error()))
-		http.Error(writer, "Не удалось прочитать файл", http.StatusBadRequest)
+		utils.WriteErrorJSON(writer, http.StatusBadRequest,
+			errors.New("не удалось прочитать файл, попробуйте позже"))
 		return
 	}
-
 	defer file.Close()
 
 	if header.Size > maxUploadSize {
@@ -36,29 +37,44 @@ func (h *ProfilesDelivery) UpdateProfileAvatar(writer http.ResponseWriter, reque
 	tempFile, err := os.CreateTemp("", "avatar-*")
 	if err != nil {
 		h.log.Error("[ ProfilesDelivery.UpdateProfileAvatar ] Не удалось создать временный файл", slog.String("error", err.Error()))
-		http.Error(writer, "Не удалось создать временный файл", http.StatusInternalServerError)
+		utils.WriteErrorJSON(writer, http.StatusInternalServerError, errors.New("внутренняя ошибка сервера, попробуйте позже"))
+
 		return
 	}
-	defer os.Remove(tempFile.Name())
+	defer func(name string) {
+		err = os.Remove(name)
+		if err != nil {
+			fmt.Printf("ошибка удаления temp, %s", err.Error())
+		}
+	}(tempFile.Name())
+
+	fmt.Println("tempFile", tempFile.Name())
 
 	_, err = io.Copy(tempFile, file)
 	if err != nil {
 		h.log.Error("[ ProfilesDelivery.UpdateProfileAvatar ]Не удалось сохранить файл", slog.String("error", err.Error()))
-		http.Error(writer, "Не удалось сохранить файл", http.StatusInternalServerError)
+		utils.WriteErrorJSON(writer, http.StatusInternalServerError, errors.New("внутренняя ошибка сервера, попробуйте позже"))
+
 		return
 	}
 
 	if _, err = tempFile.Seek(0, 0); err != nil {
 		h.log.Error("[ ProfilesDelivery.UpdateProfileAvatar ] Не удалось сбросить указатель файла", slog.String("error", err.Error()))
-		http.Error(writer, "Не удалось сбросить указатель файла", http.StatusInternalServerError)
+		utils.WriteErrorJSON(writer, http.StatusInternalServerError, errors.New("внутренняя ошибка сервера, попробуйте позже"))
+
 		return
 	}
 
 	filepath, err := h.profileManager.UpdateProfileAvatar(request.Context(), userID, tempFile)
-
 	if err != nil {
 		h.log.Error("[ ProfilesDelivery.UpdateProfileAvatar ]", slog.String("error", err.Error()))
-		http.Error(writer, "Не удалось обновить аватар профиля", http.StatusInternalServerError)
+		if errors.Is(err, errs.ErrFileTypeNotAllowed) {
+			utils.WriteErrorJSON(writer, http.StatusBadRequest, errs.ErrFileTypeNotAllowed)
+
+			return
+		}
+
+		utils.WriteErrorJSON(writer, http.StatusInternalServerError, errors.New("не удалось обновить аватар профиля, попробуйте позже"))
 		return
 	}
 

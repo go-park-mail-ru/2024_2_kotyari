@@ -17,9 +17,10 @@ func (iu *ImagesUsecase) isImageFile(file *os.File) bool {
 }
 
 func (iu *ImagesUsecase) isGIFFile(file *os.File) bool {
-	_, err := gif.Decode(file)
+	gifImage, err := gif.Decode(file)
 	if err != nil {
 		return false
 	}
-	return true
+
+	return gifImage != nil
 }
