@@ -4,9 +4,9 @@
 
 **Функциональные зависимости:**
 
-- `{id} -> email, username, city, age, avatar_url, password, blocked, blocked_until, created_at, updated_at`
-- `{email} -> id, username, city, age, avatar_url, password, blocked, blocked_until, created_at, updated_at`
-- `{username} -> id, email, city, age, avatar_url, password, blocked, blocked_until, created_at, updated_at`
+- `{id} -> email, username, city, age, avatar_url, hashed_password, blocked, blocked_until, created_at, updated_at`
+- `{email} -> id, username, city, age, avatar_url, hashed_password, blocked, blocked_until, created_at, updated_at`
+- `{username} -> id, email, city, age, avatar_url, hashed_password, blocked, blocked_until, created_at, updated_at`
 
 **Объяснение нормализации:**
 
