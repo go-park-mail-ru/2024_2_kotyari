@@ -7,4 +7,5 @@ type CartForOrder struct {
 	DeliveryDates          []DeliveryDateForOrder
 	UserName               string
 	PreferredPaymentMethod string
+	Address                AddressInfo
 }

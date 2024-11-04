@@ -41,6 +41,7 @@ func (cm *CartManager) GetSelectedFromCart(ctx context.Context, userID uint32) (
 
 	cart.UserName = products.UserName
 	cart.PreferredPaymentMethod = products.PreferredPaymentMethod
+	cart.Address = products.Address
 
 	return cart, nil
 }

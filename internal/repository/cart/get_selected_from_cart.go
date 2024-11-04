@@ -40,10 +40,12 @@ func mapRowToCartProduct(
 
 func (cs *CartsStore) GetSelectedFromCart(ctx context.Context, userID uint32) (*model.CartProductsForOrderWithUser, error) {
 	const query = `
-		SELECT p.id, p.title, p.price, p.image_url, p.weight, c.count, c.delivery_date, u.username, u.preferred_payment_method
+		SELECT p.id, p.title, p.price, p.image_url, p.weight, c.count, c.delivery_date, u.username, u.preferred_payment_method,
+           a.city, a.street, a.house, a.flat
 		FROM users u
 			LEFT JOIN carts c ON u.id = c.user_id AND c.is_deleted = false
 			LEFT JOIN products p ON p.id = c.product_id
+			LEFT JOIN addresses a ON u.id = a.user_id
 		WHERE u.id=$1;
 	`
 
@@ -57,8 +59,11 @@ func (cs *CartsStore) GetSelectedFromCart(ctx context.Context, userID uint32) (*
 		return nil, err
 	}
 
-	var username string
-	var preferredPaymentMethod string
+	var (
+		username                  string
+		preferredPaymentMethod    string
+		city, street, house, flat pgtype.Text
+	)
 
 	var products []model.CartProductForOrder
 	for rows.Next() {
@@ -82,6 +87,10 @@ func (cs *CartsStore) GetSelectedFromCart(ctx context.Context, userID uint32) (*
 			&deliveryDate,
 			&username,
 			&preferredPaymentMethod,
+			&city,
+			&street,
+			&house,
+			&flat,
 		)
 		if err != nil {
 			cs.log.Error("[CartStore.GetCartProducts] Error scanning row")
@@ -96,6 +105,12 @@ func (cs *CartsStore) GetSelectedFromCart(ctx context.Context, userID uint32) (*
 		UserName:               username,
 		PreferredPaymentMethod: preferredPaymentMethod,
 		Items:                  products,
+		Address: model.AddressInfo{
+			City:   city.String,
+			Street: street.String,
+			House:  house.String,
+			Flat:   flat.String,
+		},
 	}
 
 	return &cart, nil
