@@ -3,6 +3,7 @@ package profile
 import (
 	"context"
 	"errors"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/address"
 	"github.com/jackc/pgx/v5"
 	"log/slog"
 
@@ -43,7 +44,7 @@ func (pr *ProfilesStore) GetProfile(ctx context.Context, id uint32) (model.Profi
 		return model.Profile{}, err
 	}
 
-	addressStore := AddressStore{db: pr.db, log: pr.log}
+	addressStore := address.AddressStore{Db: pr.db, Log: pr.log}
 	address, err := addressStore.GetAddressByProfileID(ctx, profile.ID)
 	if err != nil {
 		if errors.Is(err, errs.AddressNotFound) {

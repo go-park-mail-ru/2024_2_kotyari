@@ -7,13 +7,13 @@ import (
 )
 
 type AddressStore struct {
-	db  *pgxpool.Pool
-	log *slog.Logger
+	Db  *pgxpool.Pool
+	Log *slog.Logger
 }
 
 func NewAddressRepo(db *pgxpool.Pool, logger *slog.Logger) *AddressStore {
 	return &AddressStore{
-		db:  db,
-		log: logger,
+		Db:  db,
+		Log: logger,
 	}
 }

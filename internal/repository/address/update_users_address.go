@@ -28,7 +28,7 @@ func (ar *AddressStore) UpdateUsersAddress(ctx context.Context, addressID uint32
 		WHERE users.id = upsert_address.user_id;
 `
 
-	_, err := ar.db.Exec(ctx, query,
+	_, err := ar.Db.Exec(ctx, query,
 		addressID,
 		addressModel.City,
 		addressModel.Street,
@@ -37,7 +37,7 @@ func (ar *AddressStore) UpdateUsersAddress(ctx context.Context, addressID uint32
 
 	if err != nil {
 		fmt.Println(addressModel, addressID)
-		ar.log.Error("[ AddressStore.UpdateUsersAddress ]Ошибка при обновлении адреса", slog.String("error", err.Error()))
+		ar.Log.Error("[ AddressStore.UpdateUsersAddress ]Ошибка при обновлении адреса", slog.String("error", err.Error()))
 		return err
 	}
 
