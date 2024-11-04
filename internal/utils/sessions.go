@@ -38,6 +38,8 @@ func SetContextSessionUserID(parentCtx context.Context, userID uint32) context.C
 	return context.WithValue(parentCtx, UserSessionID, userID)
 }
 
-func GetContextSessionUserID(ctx context.Context) uint32 {
-	return ctx.Value(UserSessionID).(uint32)
+func GetContextSessionUserID(ctx context.Context) (uint32, bool) {
+	userId, ok := ctx.Value(UserSessionID).(uint32)
+
+	return userId, ok
 }

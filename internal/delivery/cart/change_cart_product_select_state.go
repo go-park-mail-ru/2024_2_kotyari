@@ -18,7 +18,10 @@ func (ch *CartHandler) ChangeCartProductSelectedState(w http.ResponseWriter, r *
 		return
 	}
 
-	userID := utils.GetContextSessionUserID(r.Context())
+	userID, ok := utils.GetContextSessionUserID(r.Context())
+	if !ok {
+		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)
+	}
 
 	var req ChangeCartProductSelectedStateRequest
 

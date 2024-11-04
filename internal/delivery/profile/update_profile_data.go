@@ -11,8 +11,10 @@ import (
 )
 
 func (h *ProfilesDelivery) UpdateProfileData(writer http.ResponseWriter, request *http.Request) {
-
-	id := utils.GetContextSessionUserID(request.Context())
+	userID, ok := utils.GetContextSessionUserID(request.Context())
+	if !ok {
+		utils.WriteErrorJSON(writer, http.StatusUnauthorized, errs.UserNotAuthorized)
+	}
 
 	var req UpdateProfileRequest
 
@@ -22,7 +24,7 @@ func (h *ProfilesDelivery) UpdateProfileData(writer http.ResponseWriter, request
 		return
 	}
 
-	oldProfileData, err := h.profileManager.GetProfile(request.Context(), uint32(id))
+	oldProfileData, err := h.profileManager.GetProfile(request.Context(), uint32(userID))
 	if err != nil {
 		h.log.Warn("[ ProfilesDelivery.UpdateProfileData ] Не удалось получить старые данные профиля", slog.String("error", err.Error()))
 		utils.WriteJSON(writer, http.StatusNotFound, &errs.HTTPErrorResponse{ErrorMessage: errs.UserDoesNotExist.Error()})

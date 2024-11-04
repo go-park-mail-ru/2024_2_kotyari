@@ -65,6 +65,7 @@ type dtoProductCard struct {
 	Options         dtoOptions        `json:"options"`
 	Characteristics map[string]string `json:"characteristics"`
 	Seller          dtoSeller         `json:"seller"`
+	InCart          bool              `json:"in_cart"`
 }
 
 func newDTOProductCardFromModel(pc model.ProductCard) dtoProductCard {
@@ -89,7 +90,6 @@ func newDTOProductCardFromModel(pc model.ProductCard) dtoProductCard {
 		}
 	}
 
-	// Конвертация продавца и характеристик
 	return dtoProductCard{
 		dtoProduct: dtoProduct{
 			ID:            pc.ID,
@@ -109,5 +109,6 @@ func newDTOProductCardFromModel(pc model.ProductCard) dtoProductCard {
 			Name: pc.Seller.Name,
 			Logo: pc.Seller.Logo,
 		},
+		InCart: false,
 	}
 }

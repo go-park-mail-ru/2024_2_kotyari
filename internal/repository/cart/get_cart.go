@@ -8,13 +8,10 @@ import (
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"github.com/jackc/pgx/v5"
 )
 
-func (cs *CartsStore) GetCart(ctx context.Context, deliveryDate time.Time) (model.Cart, error) {
-	userID := utils.GetContextSessionUserID(ctx)
-
+func (cs *CartsStore) GetCart(ctx context.Context, userID uint32, deliveryDate time.Time) (model.Cart, error) {
 	const query = `
 		select c.id, p.id, title, price, description, image_url, original_price, discount, c.count, c.is_selected from products p
 		join carts c on p.id = c.product_id where user_id=$1 and c.is_deleted = false;

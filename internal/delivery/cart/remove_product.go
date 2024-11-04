@@ -17,7 +17,10 @@ func (ch *CartHandler) RemoveProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID := utils.GetContextSessionUserID(r.Context())
+	userID, ok := utils.GetContextSessionUserID(r.Context())
+	if !ok {
+		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)
+	}
 
 	err = ch.cartManager.RemoveProduct(r.Context(), productID, userID)
 	if err != nil {

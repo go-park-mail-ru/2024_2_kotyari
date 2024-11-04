@@ -69,7 +69,7 @@ type SessionDelivery interface {
 }
 
 type productsApp interface {
-	InitProductsRoutes()
+	InitProductsRoutes() *mux.Router
 }
 
 type Server struct {
@@ -113,9 +113,6 @@ func NewServer() (*Server, error) {
 	sessionsService := sessionsServiceLib.NewSessionService(sessionsRepo)
 	sessionsDelivery := sessionsDeliveryLib.NewSessionDelivery(sessionsRepo, errResolver)
 
-	prodRepo := productRepoLib.NewProductsStore(dbPool, log)
-	prodHandler := productDeliveryLib.NewProductHandler(errResolver, prodRepo, log)
-
 	userRepo := userRepoLib.NewUsersStore(dbPool)
 	userService := userServiceLib.NewUserService(userRepo, sessionsService)
 	userHandler := userDeliveryLib.NewUsersHandler(userService, errResolver)
@@ -130,8 +127,8 @@ func NewServer() (*Server, error) {
 	addressRepo := addressRepoLib.NewAddressRepo(dbPool, log)
 	addressService := addressServiceLib.NewAddressService(addressRepo, log)
 	addressHandler := addressDeliveryLib.NewAddressHandler(addressService, log)
+	prodRepo := productRepoLib.NewProductsStore(dbPool, log)
 
-	pa := NewProductsApp(router, prodHandler)
 	ca := NewCategoryApp(router, categoryDelivery)
 
 	cartRepo := cartRepoLib.NewCartsStore(dbPool, log)
@@ -139,6 +136,9 @@ func NewServer() (*Server, error) {
 	cartHandler := cartDeliveryLib.NewCartHandler(cartService, cartRepo, errResolver, log)
 
 	cartApp := NewCartApp(router, cartHandler)
+
+	prodHandler := productDeliveryLib.NewProductHandler(errResolver, prodRepo, log, cartRepo)
+	pa := NewProductsApp(router, prodHandler)
 
 	fileDelivery := fileDeliveryLib.NewFilesDelivery(fileRepo)
 	return &Server{
@@ -159,7 +159,9 @@ func NewServer() (*Server, error) {
 func (s *Server) setupRoutes() {
 	errResolver := errResolveLib.NewErrorStore()
 
-	s.product.InitProductsRoutes()
+	subProd := s.product.InitProductsRoutes()
+	subProd.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
+
 	s.category.InitCategoriesRoutes()
 
 	sub := s.cart.InitCartRoutes()

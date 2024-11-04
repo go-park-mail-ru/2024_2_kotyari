@@ -1,6 +1,7 @@
 package profile
 
 import (
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"io"
 	"log/slog"
@@ -11,8 +12,10 @@ import (
 const maxUploadSize = 1024 * 1024 * 10
 
 func (h *ProfilesDelivery) UpdateProfileAvatar(writer http.ResponseWriter, request *http.Request) {
-
-	id := utils.GetContextSessionUserID(request.Context())
+	userID, ok := utils.GetContextSessionUserID(request.Context())
+	if !ok {
+		utils.WriteErrorJSON(writer, http.StatusUnauthorized, errs.UserNotAuthorized)
+	}
 
 	file, header, err := request.FormFile("avatar")
 
@@ -51,7 +54,7 @@ func (h *ProfilesDelivery) UpdateProfileAvatar(writer http.ResponseWriter, reque
 		return
 	}
 
-	filepath, err := h.profileManager.UpdateProfileAvatar(request.Context(), id, tempFile)
+	filepath, err := h.profileManager.UpdateProfileAvatar(request.Context(), userID, tempFile)
 
 	if err != nil {
 		h.log.Error("[ ProfilesDelivery.UpdateProfileAvatar ]", slog.String("error", err.Error()))

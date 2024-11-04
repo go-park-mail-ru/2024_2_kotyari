@@ -1,13 +1,17 @@
 package cart
 
 import (
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
 func (ch *CartHandler) ChangeAllCartProductsState(w http.ResponseWriter, r *http.Request) {
-	userID := utils.GetContextSessionUserID(r.Context())
+	userID, ok := utils.GetContextSessionUserID(r.Context())
+	if !ok {
+		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)
+	}
 
 	var selectState bool
 
