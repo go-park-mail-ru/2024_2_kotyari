@@ -8,7 +8,7 @@ import (
 )
 
 type addressManager interface {
-	GetAddressByProfileID(ctx context.Context, userID uint32) (model.AddressDTO, error)
+	GetAddressByProfileID(ctx context.Context, userID uint32) (model.Address, error)
 	UpdateUsersAddress(ctx context.Context, addressID uint32, newAddress model.Address) error
 }
 

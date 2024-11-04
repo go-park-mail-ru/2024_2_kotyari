@@ -6,13 +6,5 @@ type Address struct {
 	City      string
 	Street    string
 	House     string
-	Flat      string
-}
-
-type AddressDTO struct {
-	Id     uint32
-	City   string
-	Street string
-	House  string
-	Flat   *string
+	Flat      *string
 }

@@ -25,11 +25,11 @@ func (a *UpdateAddressRequest) ToModel() model.Address {
 		City:   a.City,
 		Street: a.Street,
 		House:  a.House,
-		Flat:   a.Flat,
+		Flat:   &a.Flat,
 	}
 }
 
-func FromModel(address model.AddressDTO) AddressResponse {
+func FromModel(address model.Address) AddressResponse {
 	return AddressResponse{
 		ID:     address.Id,
 		City:   address.City,
