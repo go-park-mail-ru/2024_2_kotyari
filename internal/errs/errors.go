@@ -47,6 +47,7 @@ var (
 	ErrRetrieveOrder              = errors.New("не удалось получить заказ")
 	ErrGetNearestDeliveryDate     = errors.New("нет заказов в процесе доставки")
 	ErrFileTypeNotAllowed         = errors.New("тип файла не допустим")
+	RequestIDNotFound             = errors.New("не удалось получить request-id")
 )
 
 type ErrorStore struct {
@@ -102,6 +103,7 @@ func NewErrorStore() *ErrorStore {
 			ErrOrderNotFound:              http.StatusNotFound,
 			ErrRetrieveOrder:              http.StatusNotFound,
 			ErrGetNearestDeliveryDate:     http.StatusNotFound,
+			RequestIDNotFound:             http.StatusBadRequest,
 		},
 	}
 }

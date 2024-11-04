@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
 type profileManager interface {
@@ -16,12 +17,14 @@ type profileManager interface {
 
 type ProfilesDelivery struct {
 	profileManager profileManager
+	inputValidator *utils.InputValidator
 	log            *slog.Logger
 }
 
-func NewProfilesHandler(profileManager profileManager, logger *slog.Logger) *ProfilesDelivery {
+func NewProfilesHandler(profileManager profileManager, inputValidator *utils.InputValidator, logger *slog.Logger) *ProfilesDelivery {
 	return &ProfilesDelivery{
 		profileManager: profileManager,
+		inputValidator: inputValidator,
 		log:            logger,
 	}
 }

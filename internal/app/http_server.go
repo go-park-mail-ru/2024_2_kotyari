@@ -32,12 +32,13 @@ import (
 	userRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/user"
 	addressServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/address"
 	cartServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/cart"
-	morders "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders"
 	fileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/file"
 	imageServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/image"
+	morders "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders"
 	profileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/profile"
 	sessionsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
 	userServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/user"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
 type categoryApp interface {
@@ -97,6 +98,8 @@ func NewServer() (*Server, error) {
 		return nil, err
 	}
 
+	inputValidator := utils.NewInputValidator()
+
 	errResolver := errResolveLib.NewErrorStore()
 	redisClient, err := redis.LoadRedisClient()
 	if err != nil {
@@ -118,14 +121,14 @@ func NewServer() (*Server, error) {
 
 	userRepo := userRepoLib.NewUsersStore(dbPool)
 	userService := userServiceLib.NewUserService(userRepo, sessionsService)
-	userHandler := userDeliveryLib.NewUsersHandler(userService, errResolver)
+	userHandler := userDeliveryLib.NewUsersHandler(userService, inputValidator, errResolver)
 
 	categoryRepo := categoryRepoLib.NewCategoriesStore(dbPool, log)
 	categoryDelivery := categoryDeliveryLib.NewCategoriesDelivery(categoryRepo, log, errResolver)
 
 	profileRepo := profileRepoLib.NewProfileRepo(dbPool, log)
 	profileService := profileServiceLib.NewProfileService(imageService, profileRepo, log)
-	profileHandler := profileDeliveryLib.NewProfilesHandler(profileService, log)
+	profileHandler := profileDeliveryLib.NewProfilesHandler(profileService, inputValidator, log)
 
 	addressRepo := addressRepoLib.NewAddressRepo(dbPool, log)
 	addressService := addressServiceLib.NewAddressService(addressRepo, log)
@@ -170,15 +173,20 @@ func NewServer() (*Server, error) {
 func (s *Server) setupRoutes() {
 	errResolver := errResolveLib.NewErrorStore()
 
-	subProd := s.product.InitProductsRoutes()
-	subProd.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
+	prodSub := s.product.InitProductsRoutes()
+	prodSub.Use(middlewares.RequestIDMiddleware)
+	prodSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 
 	s.category.InitCategoriesRoutes()
 
-	sub := s.cart.InitCartRoutes()
-	sub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
-	sub2 := s.order.InitOrderApp()
-	sub2.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
+	cartSub := s.cart.InitCartRoutes()
+	cartSub.Use(middlewares.RequestIDMiddleware)
+	cartSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
+
+	orderSub := s.order.InitOrderApp()
+	orderSub.Use(middlewares.RequestIDMiddleware)
+	orderSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
+
 	s.r.HandleFunc("/login", s.auth.LoginUser).Methods(http.MethodPost)
 	s.r.HandleFunc("/logout", s.sessions.Delete).Methods(http.MethodPost)
 	s.r.HandleFunc("/signup", s.auth.CreateUser).Methods(http.MethodPost)
@@ -203,6 +211,7 @@ func (s *Server) setupRoutes() {
 
 	s.r.HandleFunc("/", s.auth.GetUserById).Methods(http.MethodGet)
 
+	getUnimplemented.Use(middlewares.RequestIDMiddleware)
 	getUnimplemented.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 
 }
