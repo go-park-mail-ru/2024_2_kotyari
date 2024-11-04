@@ -33,7 +33,7 @@ func (ar *AddressStore) UpdateUsersAddress(ctx context.Context, addressID uint32
 		addressModel.City,
 		addressModel.Street,
 		addressModel.House,
-		addressModel.Flat)
+		*addressModel.Flat)
 
 	if err != nil {
 		fmt.Println(addressModel, addressID)

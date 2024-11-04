@@ -9,7 +9,7 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
-func (ar *AddressStore) GetAddressByProfileID(ctx context.Context, profileID uint32) (model.AddressDTO, error) {
+func (ar *AddressStore) GetAddressByProfileID(ctx context.Context, profileID uint32) (model.Address, error) {
 
 	const query = `
 		SELECT id, 
@@ -21,7 +21,7 @@ func (ar *AddressStore) GetAddressByProfileID(ctx context.Context, profileID uin
 		WHERE addresses.user_id = $1;
 	`
 
-	var address model.AddressDTO
+	var address model.Address
 	err := ar.db.QueryRow(ctx, query, profileID).Scan(&address.Id,
 		&address.City,
 		&address.Street,
@@ -31,7 +31,7 @@ func (ar *AddressStore) GetAddressByProfileID(ctx context.Context, profileID uin
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			ar.log.Warn("[ AddressStore.GetAddressByProfileID ] Адрес не найден для данного профиля", slog.String("error", err.Error()))
-			return model.AddressDTO{
+			return model.Address{
 				Id:     0,
 				City:   "",
 				Street: "",
@@ -40,7 +40,7 @@ func (ar *AddressStore) GetAddressByProfileID(ctx context.Context, profileID uin
 			}, nil
 		}
 		ar.log.Error("[ AddressStore.GetAddressByProfileID ] Ошибка при получении адреса", slog.String("error", err.Error()))
-		return model.AddressDTO{}, err
+		return model.Address{}, err
 	}
 
 	return address, nil
