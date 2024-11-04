@@ -198,3 +198,6 @@ CREATE TABLE IF NOT EXISTS product_reviews (
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (product_id, user_id)
 );
+
+alter table public.users
+    rename column password to hashed_password;
