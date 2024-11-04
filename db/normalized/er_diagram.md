@@ -10,7 +10,7 @@ erDiagram
         TEXT city
         SMALLINT age
         TEXT avatar_url
-        TEXT password
+        TEXT hashed_password
         BOOLEAN blocked
         TIMESTAMP blocked_until
         TIMESTAMP created_at
