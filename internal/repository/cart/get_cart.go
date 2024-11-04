@@ -14,7 +14,7 @@ import (
 func (cs *CartsStore) GetCart(ctx context.Context, userID uint32, deliveryDate time.Time) (model.Cart, error) {
 	const query = `
 		select c.id, p.id, title, price, description, image_url, original_price, discount, c.count, c.is_selected from products p
-		join carts c on p.id = c.product_id where user_id=$1 and c.is_deleted = false;
+		join carts c on p.id = c.product_id where user_id=$1 and c.is_deleted = false and c.count>0;
 	`
 
 	var cart model.Cart
