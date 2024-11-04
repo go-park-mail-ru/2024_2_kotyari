@@ -22,7 +22,7 @@ func (ar *AddressStore) GetAddressByProfileID(ctx context.Context, profileID uin
 	`
 
 	var address model.Address
-	err := ar.db.QueryRow(ctx, query, profileID).Scan(&address.Id,
+	err := ar.Db.QueryRow(ctx, query, profileID).Scan(&address.Id,
 		&address.City,
 		&address.Street,
 		&address.House,
@@ -30,7 +30,7 @@ func (ar *AddressStore) GetAddressByProfileID(ctx context.Context, profileID uin
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			ar.log.Warn("[ AddressStore.GetAddressByProfileID ] Адрес не найден для данного профиля", slog.String("error", err.Error()))
+			ar.Log.Warn("[ AddressStore.GetAddressByProfileID ] Адрес не найден для данного профиля", slog.String("error", err.Error()))
 			return model.Address{
 				Id:     0,
 				City:   "",
@@ -39,7 +39,7 @@ func (ar *AddressStore) GetAddressByProfileID(ctx context.Context, profileID uin
 				Flat:   new(string),
 			}, nil
 		}
-		ar.log.Error("[ AddressStore.GetAddressByProfileID ] Ошибка при получении адреса", slog.String("error", err.Error()))
+		ar.Log.Error("[ AddressStore.GetAddressByProfileID ] Ошибка при получении адреса", slog.String("error", err.Error()))
 		return model.Address{}, err
 	}
 
