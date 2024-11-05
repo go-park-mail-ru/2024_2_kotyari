@@ -8,7 +8,7 @@ import (
 type ProductOrder struct {
 	ID           uint32
 	ProductID    uint32
-	OptionID     uint32
+	OptionID     *uint32
 	Count        uint16
 	Weight       uint16
 	Cost         uint16
