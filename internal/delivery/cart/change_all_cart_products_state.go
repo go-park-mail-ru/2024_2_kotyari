@@ -30,5 +30,5 @@ func (ch *CartHandler) ChangeAllCartProductsState(w http.ResponseWriter, r *http
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, nil)
+	utils.WriteJSON(w, http.StatusNoContent, nil)
 }
