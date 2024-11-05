@@ -41,7 +41,7 @@ func (c *CartApp) InitCartRoutes() *mux.Router {
 	sub.HandleFunc("/cart/select/product/{id}", c.delivery.ChangeCartProductSelectedState).Methods(http.MethodPatch)
 	sub.HandleFunc("/cart/select/products", c.delivery.ChangeAllCartProductsState).Methods(http.MethodPatch)
 	sub.HandleFunc("/cart/select/products", c.delivery.ChangeAllCartProductsState).Methods(http.MethodDelete)
-	sub.HandleFunc("/cart/select/remove_selected", c.delivery.RemoveSelected).Methods(http.MethodDelete)
+	sub.HandleFunc("/cart/selected", c.delivery.RemoveSelected).Methods(http.MethodDelete)
 
 	sub.HandleFunc("/cart/pay-method", c.delivery.UpdatePaymentMethod).Methods(http.MethodPatch)
 	return sub
