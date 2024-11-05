@@ -143,7 +143,7 @@ func NewServer() (*Server, error) {
 
 	cartApp := NewCartApp(router, cartHandler)
 
-	prodHandler := productDeliveryLib.NewProductHandler(errResolver, prodRepo, log, cartRepo)
+	prodHandler := productDeliveryLib.NewProductHandler(errResolver, prodRepo, log, cartRepo, imageService)
 	pa := NewProductsApp(router, prodHandler)
 
 	fileDelivery := fileDeliveryLib.NewFilesDelivery(fileRepo)
@@ -218,7 +218,6 @@ func (s *Server) setupRoutes() {
 	getUnimplemented.Use(middlewares.RequestIDMiddleware)
 	getUnimplemented.Use(middlewares.AccessLogMiddleware(log))
 	getUnimplemented.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
-
 }
 
 func (s *Server) Run() error {
