@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"github.com/gorilla/mux"
 	"log/slog"
 	"net/http"
 
@@ -39,6 +38,7 @@ import (
 	sessionsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
 	userServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/user"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
+	"github.com/gorilla/mux"
 )
 
 type categoryApp interface {
@@ -172,19 +172,23 @@ func NewServer() (*Server, error) {
 
 func (s *Server) setupRoutes() {
 	errResolver := errResolveLib.NewErrorStore()
+	log := logger.InitLogger()
 
 	prodSub := s.product.InitProductsRoutes()
 	prodSub.Use(middlewares.RequestIDMiddleware)
+	prodSub.Use(middlewares.AccessLogMiddleware(log))
 	prodSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 
 	s.category.InitCategoriesRoutes()
 
 	cartSub := s.cart.InitCartRoutes()
 	cartSub.Use(middlewares.RequestIDMiddleware)
+	cartSub.Use(middlewares.AccessLogMiddleware(log))
 	cartSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 
 	orderSub := s.order.InitOrderApp()
 	orderSub.Use(middlewares.RequestIDMiddleware)
+	orderSub.Use(middlewares.AccessLogMiddleware(log))
 	orderSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 
 	s.r.HandleFunc("/login", s.auth.LoginUser).Methods(http.MethodPost)
@@ -212,6 +216,7 @@ func (s *Server) setupRoutes() {
 	s.r.HandleFunc("/", s.auth.GetUserById).Methods(http.MethodGet)
 
 	getUnimplemented.Use(middlewares.RequestIDMiddleware)
+	getUnimplemented.Use(middlewares.AccessLogMiddleware(log))
 	getUnimplemented.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 
 }
