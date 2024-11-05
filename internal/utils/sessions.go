@@ -19,7 +19,7 @@ func SetSessionCookie(cookieValue string) *http.Cookie {
 		MaxAge:   int(DefaultSessionLifetime.Seconds()),
 		Secure:   false,
 		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
+		SameSite: http.SameSiteStrictMode,
 		Value:    cookieValue,
 	}
 }
@@ -30,7 +30,7 @@ func RemoveSessionCookie() *http.Cookie {
 		MaxAge:   deleteSessionLifetime,
 		Secure:   false,
 		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
+		SameSite: http.SameSiteStrictMode,
 	}
 }
 
