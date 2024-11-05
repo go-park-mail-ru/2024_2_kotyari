@@ -147,13 +147,12 @@ CREATE TABLE IF NOT EXISTS "product_orders" (
 	"id" UUID,
 	"order_id" UUID NOT NULL,
 	"product_id" bigint NOT NULL,
-    "option_id" bigint,  -- Ссылка на опцию
-	"count" integer NOT NULL DEFAULT '1' CHECK (count > 0),
+    "option_id" bigint default 0,  -- Ссылка на опцию
+	"count" integer NOT NULL DEFAULT 1,
 	"delivery_date" timestamp with time zone NOT NULL,  -- Дата доставки продукта
 	PRIMARY KEY ("id"),
 	FOREIGN KEY ("order_id") REFERENCES "orders"("id"),
-	FOREIGN KEY ("product_id") REFERENCES "products"("id"),
-    FOREIGN KEY ("option_id") REFERENCES "product_options"("id")
+	FOREIGN KEY ("product_id") REFERENCES "products"("id")
 );
 
 CREATE UNIQUE INDEX unique_order_index ON product_orders(order_id, product_id, COALESCE(option_id, -1));
@@ -231,3 +230,6 @@ END $$;
 ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "preferred_payment_method" payment_method DEFAULT 'Картой';
 
 ALTER TABLE "orders" ADD COLUMN IF NOT EXISTS "preferred_payment_method" payment_method DEFAULT 'Картой';
+
+ALTER TABLE "products"
+    ADD COLUMN "weight" real NOT NULL DEFAULT 1.0;
