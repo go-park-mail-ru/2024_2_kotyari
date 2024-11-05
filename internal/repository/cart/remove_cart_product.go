@@ -54,7 +54,7 @@ func (cs *CartsStore) RemoveCartProduct(ctx context.Context, productID uint32, c
 func (cs *CartsStore) deleteCartProduct(ctx context.Context, productID uint32) error {
 	const deleteQuery = `
 		update carts
-		set count = 0, is_deleted = true
+		set count = 0, is_deleted = true, is_selected = false
 		where product_id = $1;
 	`
 

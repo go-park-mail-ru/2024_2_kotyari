@@ -15,6 +15,7 @@ type cartManager interface {
 	RemoveProduct(ctx context.Context, productID uint32, userID uint32) error
 	ChangeCartProductSelectedState(ctx context.Context, productID uint32, userID uint32, isSelected bool) error
 	GetSelectedFromCart(ctx context.Context, userID uint32) (model.CartForOrder, error)
+	RemoveSelected(ctx context.Context, userID uint32) error
 }
 
 type cartManip interface {

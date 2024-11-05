@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
 type usersManager interface {
@@ -14,13 +15,15 @@ type usersManager interface {
 }
 
 type UsersHandler struct {
-	userManager usersManager
-	errResolver errs.GetErrorCode
+	userManager    usersManager
+	inputValidator *utils.InputValidator
+	errResolver    errs.GetErrorCode
 }
 
-func NewUsersHandler(userManager usersManager, errResolver errs.GetErrorCode) *UsersHandler {
+func NewUsersHandler(userManager usersManager, inputValidator *utils.InputValidator, errResolver errs.GetErrorCode) *UsersHandler {
 	return &UsersHandler{
-		userManager: userManager,
-		errResolver: errResolver,
+		userManager:    userManager,
+		inputValidator: inputValidator,
+		errResolver:    errResolver,
 	}
 }

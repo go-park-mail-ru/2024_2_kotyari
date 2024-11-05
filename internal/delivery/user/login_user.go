@@ -20,6 +20,9 @@ func (d *UsersHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	req.Email = d.inputValidator.SanitizeString(req.Email)
+	req.Password = d.inputValidator.SanitizeString(req.Password)
+
 	sessionID, user, err := d.userManager.LoginUser(r.Context(), req.ToModel())
 	if err != nil {
 		err, code := d.errResolver.Get(err)

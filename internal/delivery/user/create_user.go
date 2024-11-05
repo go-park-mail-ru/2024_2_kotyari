@@ -20,6 +20,11 @@ func (d *UsersHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	req.Username = d.inputValidator.SanitizeString(req.Username)
+	req.Email = d.inputValidator.SanitizeString(req.Email)
+	req.Password = d.inputValidator.SanitizeString(req.Password)
+	req.RepeatPassword = d.inputValidator.SanitizeString(req.RepeatPassword)
+
 	if err = utils.ValidateRegistration(req.Email, req.Username, req.Password, req.RepeatPassword); err != nil {
 		err, code := d.errResolver.Get(err)
 		utils.WriteJSON(w, code, errs.HTTPErrorResponse{

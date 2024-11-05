@@ -15,6 +15,7 @@ type cartRepository interface {
 	ChangeCartProductDeletedState(ctx context.Context, productID uint32, userID uint32) error
 	ChangeCartProductSelectedState(ctx context.Context, productID uint32, userID uint32, isSelected bool) error
 	GetSelectedFromCart(ctx context.Context, userID uint32) (*model.CartProductsForOrderWithUser, error)
+	GetSelectedCartItems(ctx context.Context, userID uint32) ([]model.ProductOrder, error)
 }
 
 type productCountGetter interface {
