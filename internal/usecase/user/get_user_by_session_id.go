@@ -7,7 +7,7 @@ import (
 )
 
 func (us *UsersService) GetUserBySessionID(ctx context.Context, sessionID string) (model.User, error) {
-	session, err := us.sessionService.SessionRepo.Get(ctx, sessionID)
+	session, err := us.sessionGetter.Get(ctx, sessionID)
 	if err != nil {
 		return model.User{}, err
 	}

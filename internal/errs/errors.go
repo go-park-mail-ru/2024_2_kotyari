@@ -37,6 +37,7 @@ var (
 	BadRequest                    = errors.New("неправильный запрос")
 	ProductNotInCart              = errors.New("этого продукта нет в корзине")
 	ProductAlreadyInCart          = errors.New("этот продукт уже находится в корзине")
+	ProductAlreadyRemoved         = errors.New("продукт уже удален")
 	CategoriesDoesNotExits        = errors.New("нет категорий")
 	OptionsDoesNotExists          = errors.New("не найдены опции")
 	ImagesDoesNotExists           = errors.New("нет картинок")
@@ -114,6 +115,7 @@ func NewErrorStore() *ErrorStore {
 			ReviewNotFound:                http.StatusNotFound,
 			ReviewAlreadyExists:           http.StatusConflict,
 			NoTitlesToSuggest:             http.StatusNotFound,
+			ProductAlreadyRemoved:         http.StatusBadRequest,
 		},
 	}
 }

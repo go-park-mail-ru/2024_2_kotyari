@@ -65,11 +65,11 @@ func TestOrdersManager_GetOrderById(t *testing.T) {
 
 		// Настроить возвращаемое значение мока
 		repoMock.EXPECT().
-			GetOrderById(ctx, orderID, userID, deliveryDate).
+			GetOrderById(ctx, orderID, userID).
 			Return(generatedOrder, nil).
 			Times(1)
 
-		order, err := ordersManager.GetOrderById(ctx, orderID, deliveryDate, userID)
+		order, err := ordersManager.GetOrderById(ctx, orderID, userID)
 		assert.NoError(t, err)
 		assert.NotNil(t, order)
 		assert.Equal(t, generatedOrder.ID, order.ID)
@@ -82,15 +82,14 @@ func TestOrdersManager_GetOrderById(t *testing.T) {
 		orderID := uuid.New()
 		var userID uint32
 		faker.FakeData(&userID)
-		deliveryDate := time.Now().UTC().Truncate(time.Millisecond)
 
 		// Настроить мок так, чтобы он возвращал pgx.ErrNoRows
 		repoMock.EXPECT().
-			GetOrderById(ctx, orderID, userID, deliveryDate).
+			GetOrderById(ctx, orderID, userID).
 			Return(nil, pgx.ErrNoRows).
 			Times(1)
 
-		order, err := ordersManager.GetOrderById(ctx, orderID, deliveryDate, userID)
+		order, err := ordersManager.GetOrderById(ctx, orderID, userID)
 		assert.Error(t, err)
 		assert.Nil(t, order)
 		assert.Equal(t, pgx.ErrNoRows, err)

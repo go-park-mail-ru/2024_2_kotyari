@@ -2,11 +2,11 @@ package rorders
 
 import (
 	"context"
-	"github.com/bxcodec/faker/v4"
 	"log/slog"
 	"testing"
 	"time"
 
+	"github.com/go-faker/faker/v4"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	"github.com/google/uuid"
 	"github.com/pashagolub/pgxmock/v3"

@@ -3,6 +3,8 @@ package cart
 import (
 	"context"
 	"log/slog"
+
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 )
 
 func (cm *CartManager) RemoveProduct(ctx context.Context, productID uint32, userID uint32) error {
@@ -11,6 +13,10 @@ func (cm *CartManager) RemoveProduct(ctx context.Context, productID uint32, user
 		cm.log.Error("[CartManager.RemoveProduct] Error retrieving product", slog.String("error", err.Error()))
 
 		return err
+	}
+
+	if product.IsDeleted {
+		return errs.ProductAlreadyRemoved
 	}
 
 	err = cm.cartRepository.RemoveCartProduct(ctx, productID, -int32(product.Count), userID)

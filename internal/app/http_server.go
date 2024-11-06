@@ -134,7 +134,7 @@ func NewServer() (*Server, error) {
 	sessionsDelivery := sessionsDeliveryLib.NewSessionDelivery(sessionsRepo, errResolver)
 
 	userRepo := userRepoLib.NewUsersStore(dbPool)
-	userService := userServiceLib.NewUserService(userRepo, sessionsService)
+	userService := userServiceLib.NewUserService(userRepo, sessionsRepo, sessionsService)
 	userHandler := userDeliveryLib.NewUsersHandler(userService, inputValidator, errResolver)
 
 	categoryRepo := categoryRepoLib.NewCategoriesStore(dbPool, log)

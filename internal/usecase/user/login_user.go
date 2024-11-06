@@ -18,7 +18,7 @@ func (us *UsersService) LoginUser(ctx context.Context, user model.User) (string,
 		return "", model.User{}, errs.WrongCredentials
 	}
 
-	sessionID, err := us.sessionService.Create(ctx, dbUser.ID)
+	sessionID, err := us.sessionCreator.Create(ctx, dbUser.ID)
 	if err != nil {
 		return "", model.User{}, err
 	}

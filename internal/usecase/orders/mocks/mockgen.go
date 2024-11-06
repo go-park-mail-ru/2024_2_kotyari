@@ -74,18 +74,18 @@ func (mr *MockOrdersRepoMockRecorder) GetNearestDeliveryDate(ctx, userID any) *g
 }
 
 // GetOrderById mocks base method.
-func (m *MockOrdersRepo) GetOrderById(ctx context.Context, id uuid.UUID, userID uint32, deliveryDate time.Time) (*model.Order, error) {
+func (m *MockOrdersRepo) GetOrderById(ctx context.Context, id uuid.UUID, userID uint32) (*model.Order, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetOrderById", ctx, id, userID, deliveryDate)
+	ret := m.ctrl.Call(m, "GetOrderById", ctx, id, userID)
 	ret0, _ := ret[0].(*model.Order)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetOrderById indicates an expected call of GetOrderById.
-func (mr *MockOrdersRepoMockRecorder) GetOrderById(ctx, id, userID, deliveryDate any) *gomock.Call {
+func (mr *MockOrdersRepoMockRecorder) GetOrderById(ctx, id, userID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderById", reflect.TypeOf((*MockOrdersRepo)(nil).GetOrderById), ctx, id, userID, deliveryDate)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderById", reflect.TypeOf((*MockOrdersRepo)(nil).GetOrderById), ctx, id, userID)
 }
 
 // GetOrders mocks base method.

@@ -3,7 +3,6 @@ module github.com/go-park-mail-ru/2024_2_kotyari
 go 1.23
 
 require (
-	github.com/bxcodec/faker/v4 v4.0.0-beta.3
 	github.com/caarlos0/env v3.5.0+incompatible
 	github.com/disintegration/imaging v1.6.2
 	github.com/go-faker/faker/v4 v4.5.0
