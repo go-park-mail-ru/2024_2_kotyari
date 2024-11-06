@@ -2,6 +2,7 @@ package orders
 
 import (
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -13,12 +14,17 @@ func (h *OrdersHandler) CreateOrderFromCart(w http.ResponseWriter, r *http.Reque
 	userID, ok := utils.GetContextSessionUserID(r.Context())
 	if !ok {
 		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)
+
+		return
 	}
+
+	fmt.Println(userID)
 
 	var request CreateOrderRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		h.logger.Error("[delivery.CreateOrderFromCart] Invalid request body", slog.String("error", err.Error()))
 		utils.WriteErrorJSONByError(w, errs.InvalidJSONFormat, h.errResolver)
+
 		return
 	}
 
@@ -26,6 +32,7 @@ func (h *OrdersHandler) CreateOrderFromCart(w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		h.logger.Error("[delivery.CreateOrderFromCart] Failed to create order from cart", slog.String("error", err.Error()))
 		utils.WriteErrorJSONByError(w, errs.InternalServerError, h.errResolver)
+
 		return
 	}
 
