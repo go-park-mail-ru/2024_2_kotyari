@@ -27,6 +27,7 @@ func setupCORS(w http.ResponseWriter, req *http.Request, sessionLifetime string)
 	w.Header().Set("Access-Control-Allow-Headers", "Accept, Accept-Language, Content-Type, Authorization, Access-Control-Allow-Origin")
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("Access-Control-Max-Age", sessionLifetime)
+	w.Header().Set("Access-Control-Expose-Headers", "X-CSRF-Token")
 }
 
 func CorsMiddleware(next http.Handler, sessionLifetime string) http.Handler {

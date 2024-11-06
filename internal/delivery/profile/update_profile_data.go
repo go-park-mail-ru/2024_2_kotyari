@@ -18,6 +18,10 @@ func (h *ProfilesDelivery) UpdateProfileData(writer http.ResponseWriter, request
 
 	var req UpdateProfileRequest
 
+	req.Email = h.inputValidator.SanitizeString(req.Email)
+	req.Username = h.inputValidator.SanitizeString(req.Username)
+	req.Gender = h.inputValidator.SanitizeString(req.Gender)
+
 	if err := json.NewDecoder(request.Body).Decode(&req); err != nil {
 		h.log.Error("[ ProfilesDelivery.UpdateProfileData ] Ошибка десериализации запроса", slog.String("error", err.Error()))
 		utils.WriteJSON(writer, http.StatusBadRequest, &errs.HTTPErrorResponse{ErrorMessage: errs.InvalidJSONFormat.Error()})
