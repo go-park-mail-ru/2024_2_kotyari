@@ -23,7 +23,7 @@ type getOrderByIdRow struct {
 	ProductID uint32
 	Cost      uint16
 	Count     uint16
-	Weight    uint16
+	Weight    float32
 	Status    string
 	Address   string
 	Username  string

@@ -10,7 +10,7 @@ type ProductOrder struct {
 	ProductID    uint32
 	OptionID     *uint32
 	Count        uint16
-	Weight       uint16
+	Weight       float32
 	Cost         uint16
 	OrderID      uuid.UUID
 	DeliveryDate time.Time

@@ -37,12 +37,12 @@ type OrderMaxResponse struct {
 }
 
 type ProductDTO struct {
-	ID       uint32 `json:"id"`
-	Cost     uint16 `json:"cost,omitempty"`
-	Count    uint16 `json:"count,omitempty"`
-	Weight   uint16 `json:"weight,omitempty"`
-	ImageURL string `json:"image_url"`
-	Name     string `json:"name"`
+	ID       uint32  `json:"id"`
+	Cost     uint16  `json:"cost,omitempty"`
+	Count    uint16  `json:"count,omitempty"`
+	Weight   float32 `json:"weight,omitempty"`
+	ImageURL string  `json:"image_url"`
+	Name     string  `json:"name"`
 }
 
 func ToOrderResponse(o *order.Order) OrderResponse {
