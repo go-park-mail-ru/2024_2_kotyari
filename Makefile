@@ -9,8 +9,14 @@ help:
 	@echo 'run - Running an app (with build and clean)'
 	@echo 'clean - Explicitly running go clean and removing binary'
 	@echo 'test - Running go test for all files'
-	@echo 'test-coverage: - Running go test for all files with coverage, showing total % in console, opening report in browser'
+	@echo 'test-coverage - Running go test for all files with coverage, showing total % in console, opening report in browser'
 	@echo 'fmt - Running go fmt for all files'
+	@echo 'go-build - Building Docker image for Go application'
+	@echo 'all-run - Running Docker containers in detached mode'
+	@echo 'back-refresh - Refreshing Go application container'
+	@echo 'pg-refresh - Refreshing PostgreSQL database container'
+	@echo 'all-refresh - Refreshing both Go application and PostgreSQL database containers'
+	@echo 'all-stop - Stop all docker containers'
 
 build:
 	go build -o ${BINARY_NAME} ./cmd/main.go
@@ -33,13 +39,33 @@ test-coverage:
 fmt:
 	go fmt ./...
 
-docker-build:
+go-build:
 	docker build -t back-go-image:latest .
 
-docker-run:
+all-run:
 	docker compose up -d
 
-docker-refresh:
-	docker stop back-go && docker rm back-go && docker rmi back-go-image && docker compose up -d
+back-refresh:
+	docker stop back_go && docker rm back_go && docker rmi back-go-image && docker compose up -d
+
+pg-refresh:
+	docker stop pg_db && docker rm pg_db && docker compose up -d
+
+redis-refresh:
+	docker stop redis_service && docker rm redis_service && docker compose up -d
+
+all-stop:
+	docker compose down
+
+recreate-pg:
+	docker compose down pg_db -v && docker compose up pg_db -d
+
+recreate-redis:
+	docker compose down redis_service -v && docker compose up redis_service -d
+
+all-delete:
+	docker compose down -v
+
+all-refresh: back-refresh pg-refresh redis-refresh
 
 .PHONY: clean build

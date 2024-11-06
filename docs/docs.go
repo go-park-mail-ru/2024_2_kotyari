@@ -27,7 +27,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Product ID",
+                        "description": "ProductBase ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -37,7 +37,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/db.Product"
+                            "$ref": "#/definitions/db.ProductBase"
                         }
                     },
                     "404": {
@@ -71,7 +71,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
-                                "$ref": "#/definitions/db.Product"
+                                "$ref": "#/definitions/db.ProductBase"
                             }
                         }
                     },
@@ -203,10 +203,10 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "Signup a new user",
+                "summary": "SignUp a new user",
                 "parameters": [
                     {
-                        "description": "Signup Request Body",
+                        "description": "SignUp Request Body",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -245,7 +245,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "db.Product": {
+        "db.ProductBase": {
             "type": "object",
             "properties": {
                 "currency": {

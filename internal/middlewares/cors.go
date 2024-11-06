@@ -13,6 +13,8 @@ func setupCORS(w http.ResponseWriter, req *http.Request, sessionLifetime string)
 		"94.139.246.241":             {},
 		"http://94.139.246.241:8000": {},
 		"http://94.139.246.241":      {},
+		"oxic.shop":                  {},
+		"http://oxic.shop":           {},
 	}
 
 	origin := req.Header.Get("Origin")
@@ -20,10 +22,12 @@ func setupCORS(w http.ResponseWriter, req *http.Request, sessionLifetime string)
 		w.Header().Set("Access-Control-Allow-Origin", origin)
 	}
 
-	w.Header().Set("Access-Control-Allow-Methods", http.MethodPost+", "+http.MethodGet+", "+http.MethodOptions+", "+http.MethodPut+", "+http.MethodDelete)
+	w.Header().Set("Access-Control-Allow-Methods",
+		http.MethodPost+", "+http.MethodGet+", "+http.MethodOptions+", "+http.MethodPut+", "+http.MethodDelete+", "+http.MethodPatch)
 	w.Header().Set("Access-Control-Allow-Headers", "Accept, Accept-Language, Content-Type, Authorization, Access-Control-Allow-Origin")
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("Access-Control-Max-Age", sessionLifetime)
+	w.Header().Set("Access-Control-Expose-Headers", "X-CSRF-Token")
 }
 
 func CorsMiddleware(next http.Handler, sessionLifetime string) http.Handler {
