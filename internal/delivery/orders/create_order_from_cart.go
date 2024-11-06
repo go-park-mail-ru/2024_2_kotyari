@@ -2,7 +2,6 @@ package orders
 
 import (
 	"encoding/json"
-	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -12,13 +11,11 @@ import (
 
 func (h *OrdersHandler) CreateOrderFromCart(w http.ResponseWriter, r *http.Request) {
 	userID, ok := utils.GetContextSessionUserID(r.Context())
-	if !ok {
+	if !ok || userID == 0 {
 		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)
 
 		return
 	}
-
-	fmt.Println(userID)
 
 	var request CreateOrderRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {

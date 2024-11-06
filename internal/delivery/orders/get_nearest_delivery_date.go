@@ -12,6 +12,8 @@ func (h *OrdersHandler) GetNearestDeliveryDate(w http.ResponseWriter, r *http.Re
 	userID, ok := utils.GetContextSessionUserID(r.Context())
 	if !ok {
 		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)
+
+		return
 	}
 
 	deliveryDate, err := h.ordersManager.GetNearestDeliveryDate(r.Context(), userID)

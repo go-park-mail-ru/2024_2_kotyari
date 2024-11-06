@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/google/uuid"
+	"log"
 	"log/slog"
 	"strconv"
 	"time"
@@ -34,6 +35,8 @@ func (m *OrdersManager) CreateOrderFromCart(ctx context.Context, address string,
 		totalPrice += item.Cost * item.Count
 		productOrders = append(productOrders, item)
 	}
+
+	log.Printf("\t userid %d", userID)
 
 	orderData := &order.OrderFromCart{
 		OrderID:      orderID,

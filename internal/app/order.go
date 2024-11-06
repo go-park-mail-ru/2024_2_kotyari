@@ -26,6 +26,7 @@ func NewOrderApp(r *mux.Router, delivery orderDelivery) OrderApp {
 }
 
 func (o *OrderApp) InitOrderApp() *mux.Router {
+
 	sub := o.router.Methods(http.MethodGet, http.MethodPost).Subrouter()
 	sub.HandleFunc("/orders", o.delivery.GetOrders).Methods(http.MethodGet)
 	sub.HandleFunc("/order/{id}/{delivery_date}", o.delivery.GetOrderByID).Methods(http.MethodGet)

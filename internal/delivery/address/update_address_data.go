@@ -14,6 +14,8 @@ func (h *AddressDelivery) UpdateAddressData(writer http.ResponseWriter, request 
 	userID, ok := utils.GetContextSessionUserID(request.Context())
 	if !ok {
 		utils.WriteErrorJSON(writer, http.StatusUnauthorized, errs.UserNotAuthorized)
+
+		return
 	}
 
 	var req UpdateAddressRequest
