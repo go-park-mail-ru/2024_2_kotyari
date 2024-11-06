@@ -65,7 +65,7 @@ func productResponseFromModel(cartProduct model.CartProduct) GetProductResponse 
 }
 
 type orderData struct {
-	TotalItems     uint16             `json:"total_items"`
+	TotalItems     uint32             `json:"total_items"`
 	TotalWeight    float32            `json:"total_weight"`
 	FinalPrice     float32            `json:"final_price"`
 	Currency       string             `json:"currency"`
@@ -94,7 +94,7 @@ type deliveryDateInfo struct {
 type productResponse struct {
 	Title    string  `json:"product_name"`
 	Price    float32 `json:"product_price"`
-	Quantity uint16  `json:"quantity"`
+	Quantity uint32  `json:"quantity"`
 	Image    string  `json:"product_image"`
 	Weight   float32 `json:"weight"`
 	URL      string  `json:"url"`

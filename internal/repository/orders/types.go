@@ -12,7 +12,7 @@ type getOrdersRow struct {
 	ProductID    uint32
 	ProductName  string
 	ImageURL     string
-	TotalPrice   uint16
+	TotalPrice   uint32
 	Status       string
 }
 
@@ -21,8 +21,8 @@ type getOrderByIdRow struct {
 	OrderDate time.Time
 	Date      time.Time
 	ProductID uint32
-	Cost      uint16
-	Count     uint16
+	Cost      uint32
+	Count     uint32
 	Weight    float32
 	Status    string
 	Address   string

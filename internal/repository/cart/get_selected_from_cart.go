@@ -32,7 +32,7 @@ func mapRowToCartProduct(
 	product.Price = float32(price.Float64)
 	product.Image = image.String
 	product.Weight = float32(weight.Float64)
-	product.Quantity = uint16(quantity.Int32)
+	product.Quantity = uint32(quantity.Int32)
 	product.DeliveryDate = time.Now().Add(72 * time.Hour)
 
 	return product

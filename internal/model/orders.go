@@ -9,7 +9,7 @@ type Order struct {
 	ID           uuid.UUID
 	DeliveryDate time.Time
 	OrderDate    time.Time
-	TotalPrice   uint16
+	TotalPrice   uint32
 	Status       string
 	Recipient    string
 	Address      string
