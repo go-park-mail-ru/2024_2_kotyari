@@ -1,19 +1,19 @@
-package morders
+package orders
 
 import (
 	"context"
 	"errors"
-	"github.com/bxcodec/faker/v4"
+	"log/slog"
 	"os"
 	"testing"
 	"time"
 
+	"github.com/go-faker/faker/v4"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders/mocks"
-	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
-	"log/slog"
+	"go.uber.org/mock/gomock"
 )
 
 func TestOrdersManager_CreateOrderFromCart(t *testing.T) {
@@ -33,7 +33,7 @@ func TestOrdersManager_CreateOrderFromCart(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to generate random total price: %v", err)
 	}
-	totalPrice := uint16(totalPriceSlice[0])
+	totalPrice := uint32(totalPriceSlice[0])
 
 	var optionID uint32
 	faker.FakeData(&optionID)
@@ -47,25 +47,25 @@ func TestOrdersManager_CreateOrderFromCart(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to generate random count: %v", err)
 	}
-	count1 := uint16(countSlice1[0])
+	count1 := uint32(countSlice1[0])
 
 	countSlice2, err := faker.RandomInt(100, 2000)
 	if err != nil {
 		t.Fatalf("failed to generate random second count: %v", err)
 	}
-	count2 := uint16(countSlice2[0])
+	count2 := uint32(countSlice2[0])
 
 	costSlice1, err := faker.RandomInt(100, 2000)
 	if err != nil {
 		t.Fatalf("failed to generate random cost: %v", err)
 	}
-	cost1 := uint16(costSlice1[0])
+	cost1 := uint32(costSlice1[0])
 
 	costSlice2, err := faker.RandomInt(100, 2000)
 	if err != nil {
 		t.Fatalf("failed to generate random second cost: %v", err)
 	}
-	cost2 := uint16(costSlice2[0])
+	cost2 := uint32(costSlice2[0])
 
 	cartItems := []model.ProductOrder{
 		{ID: ID1, Count: count1, Cost: cost1},

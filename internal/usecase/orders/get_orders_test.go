@@ -1,19 +1,19 @@
-package morders
+package orders
 
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"os"
 	"testing"
 	"time"
 
-	"github.com/bxcodec/faker/v4"
+	"github.com/go-faker/faker/v4"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders/mocks"
-	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
-	"log/slog"
+	"go.uber.org/mock/gomock"
 )
 
 func TestOrdersManager_GetOrders(t *testing.T) {
@@ -39,7 +39,7 @@ func TestOrdersManager_GetOrders(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to generate random total price: %v", err)
 	}
-	totalPrice := uint16(totalPriceSlice[0])
+	totalPrice := uint32(totalPriceSlice[0])
 
 	productIDSlice, err := faker.RandomInt(1, 100)
 	if err != nil {

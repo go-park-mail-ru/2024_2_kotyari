@@ -1,4 +1,4 @@
-package morders
+package orders
 
 import (
 	"context"

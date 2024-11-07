@@ -1,19 +1,19 @@
-package morders
+package orders
 
 import (
 	"context"
-	"github.com/bxcodec/faker/v4"
-	"github.com/golang/mock/gomock"
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
-	"github.com/stretchr/testify/assert"
 	"log/slog"
 	"os"
 	"testing"
 	"time"
 
+	"github.com/go-faker/faker/v4"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders/mocks"
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
+	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 )
 
 func TestOrdersManager_GetOrderById(t *testing.T) {
@@ -35,12 +35,12 @@ func TestOrdersManager_GetOrderById(t *testing.T) {
 
 		var productId uint32
 		faker.FakeData(&productId)
-		var count uint16
+		var count uint32
 		faker.FakeData(&count)
 
-		var cost uint16
+		var cost uint32
 		faker.FakeData(&cost)
-		var weight uint16
+		var weight float32
 		faker.FakeData(&weight)
 
 		// Сгенерировать случайный заказ с помощью Faker

@@ -1,15 +1,16 @@
 package model
 
 import (
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type OrderFromCart struct {
 	OrderID      uuid.UUID
 	UserID       uint32
 	Address      string
-	TotalPrice   uint16
+	TotalPrice   uint32
 	DeliveryDate time.Time
 	CreatedAt    time.Time
 	Products     []ProductOrder
