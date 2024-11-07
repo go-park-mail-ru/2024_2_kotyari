@@ -13,7 +13,7 @@ func (cm *CartManager) RemoveProduct(ctx context.Context, productID uint32, user
 		return err
 	}
 
-	err = cm.cartRepository.RemoveCartProduct(ctx, productID, -int32(product.Count))
+	err = cm.cartRepository.RemoveCartProduct(ctx, productID, -int32(product.Count), userID)
 	if err != nil {
 		cm.log.Error("[CartManager.RemoveProduct] Error removing product", slog.String("error", err.Error()))
 
