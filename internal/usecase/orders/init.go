@@ -11,7 +11,7 @@ import (
 
 type OrdersRepo interface {
 	GetOrders(ctx context.Context, userId uint32) ([]order.Order, error)
-	GetOrderById(ctx context.Context, id uuid.UUID, userID uint32, deliveryDate time.Time) (*order.Order, error)
+	GetOrderById(ctx context.Context, id uuid.UUID, userID uint32) (*order.Order, error)
 	CreateOrderFromCart(ctx context.Context, orderData *order.OrderFromCart) (*order.Order, error)
 	GetNearestDeliveryDate(ctx context.Context, userID uint32) (time.Time, error)
 }

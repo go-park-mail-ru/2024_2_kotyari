@@ -2,11 +2,15 @@ package profile
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/image"
 	"log/slog"
+	"os"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
+
+type imageSaver interface {
+	SaveImage(filename string, file *os.File) (string, error)
+}
 
 type profileRepository interface {
 	GetProfile(ctx context.Context, Id uint32) (model.Profile, error)
@@ -15,12 +19,12 @@ type profileRepository interface {
 }
 
 type ProfilesService struct {
-	imagesUsecase *image.ImagesUsecase
+	imagesUsecase imageSaver
 	profileRepo   profileRepository
 	log           *slog.Logger
 }
 
-func NewProfileService(imagesUsecase *image.ImagesUsecase, profileRepository profileRepository, logger *slog.Logger) *ProfilesService {
+func NewProfileService(imagesUsecase imageSaver, profileRepository profileRepository, logger *slog.Logger) *ProfilesService {
 	return &ProfilesService{
 		imagesUsecase: imagesUsecase,
 		profileRepo:   profileRepository,

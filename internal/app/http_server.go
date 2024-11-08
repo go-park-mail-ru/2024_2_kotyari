@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	orders2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders"
 	"log/slog"
 	"net/http"
 
@@ -11,6 +12,7 @@ import (
 	addressDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/address"
 	cartDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/cart"
 	categoryDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/category"
+	csrf2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/csrf"
 	fileDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/file"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/orders"
 	productDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/product"
@@ -31,9 +33,9 @@ import (
 	userRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/user"
 	addressServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/address"
 	cartServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/cart"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/csrf"
 	fileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/file"
 	imageServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/image"
-	morders "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders"
 	profileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/profile"
 	sessionsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
 	userServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/user"
@@ -88,11 +90,17 @@ type Server struct {
 	files    filesDelivery
 	cart     CartApp
 	order    OrderApp
+	csrf     csrfDelivery
+}
+
+type csrfDelivery interface {
+	GetCsrf(w http.ResponseWriter, r *http.Request)
 }
 
 func NewServer() (*Server, error) {
 	log := logger.InitLogger()
 	router := mux.NewRouter()
+
 	dbPool, err := postgres.LoadPgxPool()
 	if err != nil {
 		return nil, err
@@ -101,6 +109,7 @@ func NewServer() (*Server, error) {
 	inputValidator := utils.NewInputValidator()
 
 	errResolver := errResolveLib.NewErrorStore()
+
 	redisClient, err := redis.LoadRedisClient()
 	if err != nil {
 		return nil, err
@@ -110,9 +119,7 @@ func NewServer() (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	fileService := fileServiceLib.NewFilesUsecase(fileRepo, log)
-
 	imageService := imageServiceLib.NewImagesUsecase(fileService)
 
 	sessionsRepo := sessionsRepoLib.NewSessionRepo(redisClient)
@@ -133,6 +140,7 @@ func NewServer() (*Server, error) {
 	addressRepo := addressRepoLib.NewAddressRepo(dbPool, log)
 	addressService := addressServiceLib.NewAddressService(addressRepo, log)
 	addressHandler := addressDeliveryLib.NewAddressHandler(addressService, log)
+
 	prodRepo := productRepoLib.NewProductsStore(dbPool, log)
 
 	ca := NewCategoryApp(router, categoryDelivery)
@@ -140,7 +148,6 @@ func NewServer() (*Server, error) {
 	cartRepo := cartRepoLib.NewCartsStore(dbPool, log)
 	cartService := cartServiceLib.NewCartManager(cartRepo, prodRepo, log)
 	cartHandler := cartDeliveryLib.NewCartHandler(cartService, cartRepo, errResolver, log)
-
 	cartApp := NewCartApp(router, cartHandler)
 
 	prodHandler := productDeliveryLib.NewProductHandler(errResolver, prodRepo, log, cartRepo)
@@ -149,10 +156,12 @@ func NewServer() (*Server, error) {
 	fileDelivery := fileDeliveryLib.NewFilesDelivery(fileRepo)
 
 	ordersRepo := rorders.NewOrdersRepo(dbPool, log)
-	ordersManager := morders.NewOrdersManager(ordersRepo, log, cartRepo)
+	ordersManager := orders2.NewOrdersManager(ordersRepo, log, cartRepo)
 	ordersHandler := orders.NewOrdersHandler(ordersManager, log, errResolver)
-
 	orderApp := NewOrderApp(router, ordersHandler)
+
+	csrfUsecase := csrf.NewCscfUsecase()
+	csrfHandler := csrf2.NewCsrfDelivery(csrfUsecase, sessionsDelivery)
 
 	return &Server{
 		r:        router,
@@ -167,58 +176,49 @@ func NewServer() (*Server, error) {
 		files:    fileDelivery,
 		cart:     cartApp,
 		order:    orderApp,
+		csrf:     csrfHandler,
 	}, nil
 }
 
 func (s *Server) setupRoutes() {
 	errResolver := errResolveLib.NewErrorStore()
-	log := logger.InitLogger()
 
-	prodSub := s.product.InitProductsRoutes()
-	prodSub.Use(middlewares.RequestIDMiddleware)
-	prodSub.Use(middlewares.AccessLogMiddleware(log))
-	prodSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
+	csrfMiddleware := middlewares.CSRFMiddleware(csrf.NewCscfUsecase(), s.sessions)
+
+	subProd := s.product.InitProductsRoutes()
+	subProd.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
+	subProd.Use(csrfMiddleware)
 
 	s.category.InitCategoriesRoutes()
 
-	cartSub := s.cart.InitCartRoutes()
-	cartSub.Use(middlewares.RequestIDMiddleware)
-	cartSub.Use(middlewares.AccessLogMiddleware(log))
-	cartSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
+	subCart := s.cart.InitCartRoutes()
+	subCart.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
+	subCart.Use(csrfMiddleware)
 
-	orderSub := s.order.InitOrderApp()
-	orderSub.Use(middlewares.RequestIDMiddleware)
-	orderSub.Use(middlewares.AccessLogMiddleware(log))
-	orderSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
+	subOrder := s.order.InitOrderApp()
+	subOrder.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
+	subOrder.Use(csrfMiddleware)
 
 	s.r.HandleFunc("/login", s.auth.LoginUser).Methods(http.MethodPost)
 	s.r.HandleFunc("/logout", s.sessions.Delete).Methods(http.MethodPost)
 	s.r.HandleFunc("/signup", s.auth.CreateUser).Methods(http.MethodPost)
 
+	authSub := s.r.Methods(http.MethodGet, http.MethodPost, http.MethodPut).Subrouter()
+	authSub.HandleFunc("/csrf", s.csrf.GetCsrf).Methods(http.MethodGet)
+	authSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
+
 	s.r.HandleFunc("/files/{name}", s.files.GetImage).Methods(http.MethodGet)
 
-	getUnimplemented := s.r.Methods(http.MethodGet, http.MethodPost, http.MethodPut).Subrouter()
-	getUnimplemented.HandleFunc("/account", s.profile.GetProfile).Methods(http.MethodGet)
-	getUnimplemented.HandleFunc("/account", s.profile.UpdateProfileData).Methods(http.MethodPut)
-	getUnimplemented.HandleFunc("/account/avatar", s.profile.UpdateProfileAvatar).Methods(http.MethodPut)
-	getUnimplemented.HandleFunc("/address", s.address.GetAddress).Methods(http.MethodGet)
-	getUnimplemented.HandleFunc("/address", s.address.UpdateAddressData).Methods(http.MethodPut)
-	getUnimplemented.HandleFunc("/cart", func(w http.ResponseWriter, r *http.Request) {
+	csrfProtected := authSub.Methods(http.MethodGet, http.MethodPost, http.MethodPut).Subrouter()
 
-	})
-	getUnimplemented.HandleFunc("/records", func(w http.ResponseWriter, r *http.Request) {
-
-	})
-	getUnimplemented.HandleFunc("/favorite", func(w http.ResponseWriter, r *http.Request) {
-
-	})
+	csrfProtected.HandleFunc("/account", s.profile.GetProfile).Methods(http.MethodGet)
+	csrfProtected.HandleFunc("/account", s.profile.UpdateProfileData).Methods(http.MethodPut)
+	csrfProtected.HandleFunc("/account/avatar", s.profile.UpdateProfileAvatar).Methods(http.MethodPut)
+	csrfProtected.HandleFunc("/address", s.address.GetAddress).Methods(http.MethodGet)
+	csrfProtected.HandleFunc("/address", s.address.UpdateAddressData).Methods(http.MethodPut)
+	csrfProtected.Use(csrfMiddleware)
 
 	s.r.HandleFunc("/", s.auth.GetUserById).Methods(http.MethodGet)
-
-	getUnimplemented.Use(middlewares.RequestIDMiddleware)
-	getUnimplemented.Use(middlewares.AccessLogMiddleware(log))
-	getUnimplemented.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
-
 }
 
 func (s *Server) Run() error {
