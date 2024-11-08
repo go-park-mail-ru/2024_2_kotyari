@@ -21,7 +21,6 @@ func (h *OrdersHandler) GetOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.logger.Info("[delivery.GetOrders] Fetched orders successfully1")
 	orderDTOs := ConvertOrdersToResponse(orders)
 	h.logger.Info("[delivery.GetOrders] Fetched orders successfully")
 

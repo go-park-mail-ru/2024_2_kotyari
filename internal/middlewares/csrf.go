@@ -12,17 +12,21 @@ func CSRFMiddleware(csrfValidator csrfValidator, sessionGetter sessionGetter) fu
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == http.MethodGet || r.Method == http.MethodOptions {
 				next.ServeHTTP(w, r)
+
+				return
 			}
 
 			token := r.Header.Get("X-CSRF-Token")
 			if token == "" {
 				utils.WriteErrorJSON(w, http.StatusForbidden, errors.New("CSRF токен отсутствует"))
+
 				return
 			}
 
 			_, ok := utils.GetContextSessionUserID(r.Context())
 			if !ok {
 				utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.SessionNotFound)
+
 				return
 			}
 
@@ -31,8 +35,8 @@ func CSRFMiddleware(csrfValidator csrfValidator, sessionGetter sessionGetter) fu
 
 			valid, err := csrfValidator.IsValidCSRFToken(session, token)
 			if err != nil || !valid {
-				utils.WriteErrorJSON(w, http.StatusForbidden, err)
-				http.Error(w, "Неверный CSRF токен", http.StatusForbidden)
+				utils.WriteErrorJSON(w, http.StatusForbidden, errors.New("неверный CSRF токен"))
+
 				return
 			}
 

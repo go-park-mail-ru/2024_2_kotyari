@@ -25,6 +25,7 @@ func (ch *CartHandler) UpdatePaymentMethod(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		err, code := ch.errResolver.Get(err)
 		utils.WriteErrorJSON(w, code, err)
+
 		return
 	}
 

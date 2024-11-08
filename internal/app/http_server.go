@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	orders2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders"
 	"log/slog"
 	"net/http"
 
@@ -155,7 +156,7 @@ func NewServer() (*Server, error) {
 	fileDelivery := fileDeliveryLib.NewFilesDelivery(fileRepo)
 
 	ordersRepo := rorders.NewOrdersRepo(dbPool, log)
-	ordersManager := NewOrdersManager(ordersRepo, log, cartRepo)
+	ordersManager := orders2.NewOrdersManager(ordersRepo, log, cartRepo)
 	ordersHandler := orders.NewOrdersHandler(ordersManager, log, errResolver)
 	orderApp := NewOrderApp(router, ordersHandler)
 
@@ -182,41 +183,42 @@ func NewServer() (*Server, error) {
 func (s *Server) setupRoutes() {
 	errResolver := errResolveLib.NewErrorStore()
 
+	csrfMiddleware := middlewares.CSRFMiddleware(csrf.NewCscfUsecase(), s.sessions)
+
 	subProd := s.product.InitProductsRoutes()
 	subProd.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
+	subProd.Use(csrfMiddleware)
 
 	s.category.InitCategoriesRoutes()
 
-	sub := s.cart.InitCartRoutes()
-	sub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
-	sub2 := s.order.InitOrderApp()
-	sub2.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
+	subCart := s.cart.InitCartRoutes()
+	subCart.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
+	subCart.Use(csrfMiddleware)
+
+	subOrder := s.order.InitOrderApp()
+	subOrder.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
+	subOrder.Use(csrfMiddleware)
+
 	s.r.HandleFunc("/login", s.auth.LoginUser).Methods(http.MethodPost)
 	s.r.HandleFunc("/logout", s.sessions.Delete).Methods(http.MethodPost)
 	s.r.HandleFunc("/signup", s.auth.CreateUser).Methods(http.MethodPost)
 
+	authSub := s.r.Methods(http.MethodGet, http.MethodPost, http.MethodPut).Subrouter()
+	authSub.HandleFunc("/csrf", s.csrf.GetCsrf).Methods(http.MethodGet)
+	authSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
+
 	s.r.HandleFunc("/files/{name}", s.files.GetImage).Methods(http.MethodGet)
 
-	getUnimplemented := s.r.Methods(http.MethodGet, http.MethodPost, http.MethodPut).Subrouter()
-	getUnimplemented.HandleFunc("/account", s.profile.GetProfile).Methods(http.MethodGet)
-	getUnimplemented.HandleFunc("/account", s.profile.UpdateProfileData).Methods(http.MethodPut)
-	getUnimplemented.HandleFunc("/account/avatar", s.profile.UpdateProfileAvatar).Methods(http.MethodPut)
-	getUnimplemented.HandleFunc("/address", s.address.GetAddress).Methods(http.MethodGet)
-	getUnimplemented.HandleFunc("/address", s.address.UpdateAddressData).Methods(http.MethodPut)
-	getUnimplemented.HandleFunc("/cart", func(w http.ResponseWriter, r *http.Request) {
+	csrfProtected := authSub.Methods(http.MethodGet, http.MethodPost, http.MethodPut).Subrouter()
 
-	})
-	getUnimplemented.HandleFunc("/records", func(w http.ResponseWriter, r *http.Request) {
-
-	})
-	getUnimplemented.HandleFunc("/favorite", func(w http.ResponseWriter, r *http.Request) {
-
-	})
+	csrfProtected.HandleFunc("/account", s.profile.GetProfile).Methods(http.MethodGet)
+	csrfProtected.HandleFunc("/account", s.profile.UpdateProfileData).Methods(http.MethodPut)
+	csrfProtected.HandleFunc("/account/avatar", s.profile.UpdateProfileAvatar).Methods(http.MethodPut)
+	csrfProtected.HandleFunc("/address", s.address.GetAddress).Methods(http.MethodGet)
+	csrfProtected.HandleFunc("/address", s.address.UpdateAddressData).Methods(http.MethodPut)
+	csrfProtected.Use(csrfMiddleware)
 
 	s.r.HandleFunc("/", s.auth.GetUserById).Methods(http.MethodGet)
-
-	getUnimplemented.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
-
 }
 
 func (s *Server) Run() error {

@@ -15,7 +15,7 @@ func (r *OrdersRepo) GetOrdersRows(ctx context.Context, userID uint32) (pgx.Rows
 		JOIN product_orders po ON o.id = po.order_id
 		JOIN products p ON po.product_id = p.id
 		WHERE o.user_id = $1
-		ORDER BY po.delivery_date, o.created_at;
+		ORDER BY po.delivery_date DESC , o.created_at DESC ;
 	`
 
 	rows, err := r.db.Query(ctx, query, userID)

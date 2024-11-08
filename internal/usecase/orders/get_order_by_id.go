@@ -2,16 +2,14 @@ package orders
 
 import (
 	"context"
-	"log/slog"
-	"time"
-
 	order "github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"log/slog"
 )
 
-func (m *OrdersManager) GetOrderById(ctx context.Context, id uuid.UUID, deliveryDate time.Time, userID uint32) (*order.Order, error) {
-	orderById, err := m.repo.GetOrderById(ctx, id, userID, deliveryDate)
+func (m *OrdersManager) GetOrderById(ctx context.Context, id uuid.UUID, userID uint32) (*order.Order, error) {
+	orderById, err := m.repo.GetOrderById(ctx, id, userID)
 	if err != nil {
 		return nil, err
 	}

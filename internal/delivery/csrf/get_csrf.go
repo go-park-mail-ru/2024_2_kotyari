@@ -24,5 +24,7 @@ func (csrf *CsrfDelivery) GetCsrf(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("X-CSRF-Token", token)
+	w.Header().Set("Access-Control-Expose-Headers", "X-CSRF-Token")
+
 	w.WriteHeader(http.StatusOK)
 }
