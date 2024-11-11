@@ -13,6 +13,7 @@ services:
     depends_on:
       - pg_db
       - redis_service
+      - cassandra
 
   pg_db:
     image: postgres:16.4
@@ -48,10 +49,47 @@ services:
     networks:
       - app-network
 
+  cassandra:
+    image: cassandra:latest
+    container_name: cassandra
+    ports:
+      - "9042:9042"
+    environment:
+      - CASSANDRA_USER=${CASSANDRA_USER}
+      - CASSANDRA_PASSWORD=${CASSANDRA_PASSWORD}
+    volumes:
+      - cassandra-data:/var/lib/cassandra
+    networks:
+      - app-network
+
+  cassandra-init:
+    image: cassandra:latest
+    container_name: cassandra_init
+    depends_on:
+      - cassandra
+    volumes:
+      - ./assets/cassandra_init.cql:/cassandra_init.cql
+    entrypoint: [ "/bin/sh", "-c" ]
+    command: >
+      "
+      echo 'Waiting for Cassandra to be ready...';
+      until cqlsh cassandra -u $CASSANDRA_USER -p $CASSANDRA_PASSWORD -e 'describe keyspaces'; do
+        sleep 30;
+      done;
+      echo 'Cassandra is ready, initializing...';
+      cqlsh cassandra -u $CASSANDRA_USER -p $CASSANDRA_PASSWORD -f /cassandra_init.cql;
+      "
+    environment:
+      - CASSANDRA_USER=${CASSANDRA_USER}
+      - CASSANDRA_PASSWORD=${CASSANDRA_PASSWORD}
+    networks:
+      - app-network
+
 volumes:
   pg_data:
   redis_data:
   go_back:
+  cassandra-data:
 
 networks:
   app-network:

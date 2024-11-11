@@ -44,7 +44,6 @@ func loadPGConfig() (postgresConfig, error) {
 
 func newPostgresConfigURL(p postgresConfig) string {
 	link := "postgres://%s:%s@pg_db/%s"
-	//link := "postgres://%s:%s@localhost:54320/%s"
 	return fmt.Sprintf(link,
 		url.QueryEscape(p.Username),
 		url.QueryEscape(p.Password),

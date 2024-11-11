@@ -2,7 +2,7 @@ package app
 
 import (
 	"context"
-	orders2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/cassandra"
 	"log/slog"
 	"net/http"
 
@@ -36,6 +36,7 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/csrf"
 	fileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/file"
 	imageServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/image"
+	orders2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders"
 	profileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/profile"
 	sessionsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
 	userServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/user"
@@ -102,6 +103,11 @@ func NewServer() (*Server, error) {
 	router := mux.NewRouter()
 
 	dbPool, err := postgres.LoadPgxPool()
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = cassandra.LoadCassandraCluster()
 	if err != nil {
 		return nil, err
 	}
