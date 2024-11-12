@@ -1,5 +1,5 @@
 package model
 
-type SearchTitleSuggestion struct {
-	Title string
+type SearchTitleSuggestions struct {
+	Titles []string
 }
