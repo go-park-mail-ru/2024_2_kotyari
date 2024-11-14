@@ -62,9 +62,12 @@ func (s *SearchStore) GetSearchTitleSuggestions(ctx context.Context, queryParam 
 		return model.SearchTitleSuggestions{}, errs.NoTitlesToSuggest
 	}
 
-	suggestions := make([]string, 0, len(titlesSet))
+	suggestions := make([]string, 0, 6)
 	for title := range titlesSet {
 		suggestions = append(suggestions, title)
+		if len(suggestions) == 6 {
+			break
+		}
 	}
 
 	return model.SearchTitleSuggestions{Titles: suggestions}, nil

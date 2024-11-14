@@ -228,7 +228,6 @@ func (s *Server) setupRoutes() {
 
 	subSearch := s.search.InitSearchRoutes()
 	subSearch.Use(middlewares.RequestIDMiddleware)
-	subSearch.Use(csrfMiddleware)
 
 	s.r.HandleFunc("/", s.auth.GetUserById).Methods(http.MethodGet)
 }

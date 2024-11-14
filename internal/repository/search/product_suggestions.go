@@ -15,7 +15,7 @@ func (s *SearchStore) ProductSuggestion(ctx context.Context, searchQuery string)
 		SELECT p.id, p.title, p.price, p.original_price,
 		       p.discount, p.image_url, p.description
 		FROM products p
-			where p.active = true and p.count > 0 and to_tsvector('russian', title) @@ plainto_tsquery('russian', $1)
+			where p.active = true and p.count > 0 and to_tsvector('russian', title) @@ to_tsquery('russian', $1 || ':*')
 		ORDER BY p.created_at DESC;
 	`
 
