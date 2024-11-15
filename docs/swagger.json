@@ -1,319 +1,330 @@
 {
-    "swagger": "2.0",
-    "info": {
-        "description": "This is simple oxic server",
-        "title": "Swagger Oxic API",
-        "contact": {},
-        "version": "1.0"
-    },
-    "host": "94.139.246.241:8000",
-    "basePath": "/",
-    "paths": {
-        "/catalog/product/{id}": {
-            "get": {
-                "description": "Возвращает продукт по его ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Products"
-                ],
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Product ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/db.Product"
-                        }
-                    },
-                    "404": {
-                        "description": "Продукт не найден",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Ошибка при кодировании JSON",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
+  "swagger": "2.0",
+  "info": {
+    "description": "Oxic api",
+    "title": "Swagger Oxic API",
+    "contact": {},
+    "version": "1.0"
+  },
+  "host": "94.139.246.241:8000",
+  "basePath": "/",
+  "paths": {
+    "/catalog/product/{id}": {
+      "get": {
+        "description": "Возвращает продукт по его ID (Карточку продукта)",
+        "produces": ["application/json"],
+        "tags": ["Products"],
+        "parameters": [
+          {
+            "type": "string",
+            "description": "model.Product ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/model.Product"
             }
-        },
-        "/catalog/products": {
-            "get": {
-                "description": "Возвращает список всех продуктов",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Products"
-                ],
-                "summary": "Get Products",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "$ref": "#/definitions/db.Product"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Ошибка при кодировании JSON",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
+          },
+          "404": {
+            "description": "Продукт не найден",
+            "schema": {
+              "type": "string"
             }
-        },
-        "/islogin": {
-            "get": {
-                "description": "Проверяет, авторизован ли пользователь, и возвращает его имя пользователя",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Проверка авторизации пользователя",
-                "responses": {
-                    "200": {
-                        "description": "Информация о пользователе",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.UsernameResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Пользователь не авторизован",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
+          },
+          "500": {
+            "description": "Ошибка получения ID продукта",
+            "schema": {
+              "code": 
+              "type": "string",
+              "example": "Описание продукта"
             }
-        },
-        "/login": {
-            "post": {
-                "description": "Проверяет учетные данные пользователя и создает сессию при успешной аутентификации",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Логин пользователя",
-                "parameters": [
-                    {
-                        "description": "Данные пользователя",
-                        "name": "user",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/db.User"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Имя пользователя",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.UsernameResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Неправильный запрос",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "Неправильные учетные данные",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Ошибка при создании сессии",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/logout": {
-            "post": {
-                "description": "Завершает сессию пользователя, очищая куки и удаляя все значения из сессии",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Логаут пользователя",
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "401": {
-                        "description": "Пользователь не авторизован",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Ошибка при завершении сессии",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/signup": {
-            "post": {
-                "description": "This endpoint creates a new user in the system",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Signup a new user",
-                "parameters": [
-                    {
-                        "description": "Signup Request Body",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handlers.credsApiRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request",
-                        "schema": {
-                            "$ref": "#/definitions/errs.HTTPErrorResponse"
-                        }
-                    },
-                    "409": {
-                        "description": "User already exists",
-                        "schema": {
-                            "$ref": "#/definitions/errs.HTTPErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/errs.HTTPErrorResponse"
-                        }
-                    }
-                }
-            }
+          }
         }
+      }
     },
-    "definitions": {
-        "db.Product": {
-            "type": "object",
-            "properties": {
-                "currency": {
-                    "description": "Поле не обязательно",
-                    "type": "string"
-                },
-                "currentPrice": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "discount": {
-                    "description": "Поле не обязательно",
-                    "type": "string"
-                },
-                "image": {
-                    "type": "string"
-                },
-                "oldPrice": {
-                    "description": "Поле не обязательно",
-                    "type": "string"
-                },
-                "shortDescription": {
-                    "type": "string"
-                },
-                "url": {
-                    "type": "string"
-                }
+    "/catalog/products": {
+      "get": {
+        "description": "Возвращает список всех продуктов",
+        "produces": ["application/json"],
+        "tags": ["Products"],
+        "summary": "Get Products",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/definitions/model.Product"
+              }
             }
-        },
-        "db.User": {
-            "type": "object",
-            "properties": {
-                "password": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                }
+          },
+          "500": {
+            "description": "Ошибка при кодировании JSON",
+            "schema": {
+              "type": "string"
             }
-        },
-        "errs.HTTPErrorResponse": {
-            "type": "object",
-            "properties": {
-                "error_message": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.UsernameResponse": {
-            "type": "object",
-            "properties": {
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.credsApiRequest": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "repeat_password": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
+          }
         }
+      }
+    },
+    "/islogin": {
+      "get": {
+        "description": "Проверяет, авторизован ли пользователь, и возвращает его имя пользователя",
+        "produces": ["application/json"],
+        "tags": ["auth"],
+        "summary": "Проверка авторизации пользователя",
+        "responses": {
+          "200": {
+            "description": "Информация о пользователе",
+            "schema": {
+              "$ref": "#/definitions/handlers.UsernameResponse"
+            }
+          },
+          "401": {
+            "description": "Пользователь не авторизован",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "description": "Проверяет учетные данные пользователя и создает сессию при успешной аутентификации",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["auth"],
+        "summary": "Логин пользователя",
+        "parameters": [
+          {
+            "description": "Данные пользователя",
+            "name": "user",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/db.User"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Имя пользователя",
+            "schema": {
+              "$ref": "#/definitions/handlers.UsernameResponse"
+            }
+          },
+          "400": {
+            "description": "Неправильный запрос",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "401": {
+            "description": "Неправильные учетные данные",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "500": {
+            "description": "Ошибка при создании сессии",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "/logout": {
+      "post": {
+        "description": "Завершает сессию пользователя, очищая куки и удаляя все значения из сессии",
+        "produces": ["application/json"],
+        "tags": ["auth"],
+        "summary": "Логаут пользователя",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Пользователь не авторизован",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "500": {
+            "description": "Ошибка при завершении сессии",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "/signup": {
+      "post": {
+        "description": "This endpoint creates a new user in the system",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["auth"],
+        "summary": "Signup a new user",
+        "parameters": [
+          {
+            "description": "Signup Request Body",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/handlers.credsApiRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "schema": {
+              "$ref": "#/definitions/errs.HTTPErrorResponse"
+            }
+          },
+          "409": {
+            "description": "User already exists",
+            "schema": {
+              "$ref": "#/definitions/errs.HTTPErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/errs.HTTPErrorResponse"
+            }
+          }
+        }
+      }
     }
+  },
+  "definitions": {
+    "errorApiResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "description": "Код ответа"
+        },
+        "body": {
+            
+        }
+      }
+    },
+
+
+    "model.Product": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "description": "Код ответа"
+        },
+        "body": {
+          "type": "object",
+          "description": "Тело ответа",
+          "properties": {
+            "ID": {
+              "type": "integer",
+              "description": "ID Продукта"
+            },
+            "description": {
+              "type": "string",
+              "description": "Описание продукта",
+              "example": "Описание лучшего продукта"
+            },
+            "count": {
+              "type": "integer",
+              "description": "Количество продукта на складе",
+              "example": 200
+            },
+            "title": {  
+              "type": "string",
+              "description": "Название продукта",
+              "example": "Лучший продукт"
+            },
+            "price": {
+              "type": "integer",
+              "description": "Цена продукта", 
+              "example": 5000
+            },
+            "discount": {
+              "type": "integer",
+              "description": "Скидка",
+              "example": 0
+            },
+            "image_url": {
+              "type": "string",
+              "description": "Ссылка на картинку",
+              "example": "files/1a2b3c4d5e6f.jpg"
+            },
+            "original_price": {
+              "type": "integer",
+              "description": "Оргигинальная цена продукта",
+              "example": 5000
+            }
+          }
+        }
+      
+      }
+    },
+    "db.User": {
+      "type": "object",
+      "properties": {
+        "password": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        }
+      }
+    },
+    "errs.HTTPErrorResponse": {
+      "type": "object",
+      "properties": {
+        "error_message": {
+          "type": "string"
+        }
+      }
+    },
+    "handlers.UsernameResponse": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        }
+      }
+    },
+    "handlers.credsApiRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "repeat_password": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        }
+      }
+    }
+  }
 }
