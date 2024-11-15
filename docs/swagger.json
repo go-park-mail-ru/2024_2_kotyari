@@ -9,7 +9,7 @@
   "host": "94.139.246.241:8000",
   "basePath": "/",
   "paths": {
-    "/catalog/product/{id}": {
+    "/product/{id}": {
       "get": {
         "description": "Возвращает продукт по его ID (Карточку продукта)",
         "produces": ["application/json"],
@@ -17,7 +17,7 @@
         "parameters": [
           {
             "type": "string",
-            "description": "model.Product ID",
+            "description": "ID Продукта",
             "name": "id",
             "in": "path",
             "required": true
@@ -27,304 +27,616 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/model.Product"
+              "$ref": "#/definitions/ProductCard"
             }
           },
           "404": {
             "description": "Продукт не найден",
             "schema": {
-              "type": "string"
-            }
-          },
-          "500": {
-            "description": "Ошибка получения ID продукта",
-            "schema": {
-              "code": 
-              "type": "string",
-              "example": "Описание продукта"
-            }
-          }
-        }
-      }
-    },
-    "/catalog/products": {
-      "get": {
-        "description": "Возвращает список всех продуктов",
-        "produces": ["application/json"],
-        "tags": ["Products"],
-        "summary": "Get Products",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "$ref": "#/definitions/model.Product"
+              "$ref": "#/definitions/ApiError"
+            },
+            "examples": {
+              "application/json": {
+                "code": 404,
+                "body": {
+                  "error_message": "продукт не найдет"
+                }
               }
             }
           },
           "500": {
-            "description": "Ошибка при кодировании JSON",
+            "description": "Внутренняя ошибка сервера",
             "schema": {
-              "type": "string"
+              "$ref": "#/definitions/InternalSEApiResponse"
             }
           }
         }
       }
     },
-    "/islogin": {
+
+    "/catalog": {
       "get": {
-        "description": "Проверяет, авторизован ли пользователь, и возвращает его имя пользователя",
+        "description": "Возвращает список всех продуктов",
         "produces": ["application/json"],
-        "tags": ["auth"],
-        "summary": "Проверка авторизации пользователя",
+        "tags": ["Products"],
         "responses": {
           "200": {
-            "description": "Информация о пользователе",
+            "description": "OK",
             "schema": {
-              "$ref": "#/definitions/handlers.UsernameResponse"
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ProductCatalog"
+              }
             }
           },
-          "401": {
-            "description": "Пользователь не авторизован",
+          "404": {
+            "description": "Продукты не найдены",
             "schema": {
-              "type": "string"
-            }
-          }
-        }
-      }
-    },
-    "/login": {
-      "post": {
-        "description": "Проверяет учетные данные пользователя и создает сессию при успешной аутентификации",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["auth"],
-        "summary": "Логин пользователя",
-        "parameters": [
-          {
-            "description": "Данные пользователя",
-            "name": "user",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/db.User"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Имя пользователя",
-            "schema": {
-              "$ref": "#/definitions/handlers.UsernameResponse"
-            }
-          },
-          "400": {
-            "description": "Неправильный запрос",
-            "schema": {
-              "type": "string"
-            }
-          },
-          "401": {
-            "description": "Неправильные учетные данные",
-            "schema": {
-              "type": "string"
+              "$ref": "#/definitions/ApiError"
+            },
+            "examples": {
+              "application/json": {
+                "code": 404,
+                "body": {
+                  "error_message": "продукты не найдены"
+                }
+              }
             }
           },
           "500": {
-            "description": "Ошибка при создании сессии",
+            "description": "Внутренняя ошибка сервера",
             "schema": {
-              "type": "string"
+              "$ref": "#/definitions/InternalSEApiResponse"
             }
           }
         }
       }
     },
-    "/logout": {
-      "post": {
-        "description": "Завершает сессию пользователя, очищая куки и удаляя все значения из сессии",
+
+    "/product/{id}/reviews": {
+      "get": {
+        "description": "Возвращает продукт по его ID (Карточку продукта)",
         "produces": ["application/json"],
-        "tags": ["auth"],
-        "summary": "Логаут пользователя",
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "401": {
-            "description": "Пользователь не авторизован",
-            "schema": {
-              "type": "string"
-            }
-          },
-          "500": {
-            "description": "Ошибка при завершении сессии",
-            "schema": {
-              "type": "string"
-            }
-          }
-        }
-      }
-    },
-    "/signup": {
-      "post": {
-        "description": "This endpoint creates a new user in the system",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["auth"],
-        "summary": "Signup a new user",
+        "tags": ["Reviews"],
         "parameters": [
           {
-            "description": "Signup Request Body",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/handlers.credsApiRequest"
-            }
+            "type": "string",
+            "description": "ID Продукта",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Порядок сортировки: desc - от хороших к плохим, asc - от плохих к хорошим",
+            "required": false,
+            "type": "string",
+            "enum": ["asc", "desc"]
           }
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "string"
+              "$ref": "#/definitions/ProductReviews"
             }
           },
           "400": {
-            "description": "Invalid request",
+            "description": "Некорректный запрос",
             "schema": {
-              "$ref": "#/definitions/errs.HTTPErrorResponse"
+              "$ref": "#/definitions/ApiError"
+            },
+            "examples": {
+              "application/json": {
+                "code": 400,
+                "body": {
+                  "error_message": "некорректный запрос"
+                }
+              }
             }
           },
-          "409": {
-            "description": "User already exists",
+          "404": {
+            "description": "Отзывы не найдены",
             "schema": {
-              "$ref": "#/definitions/errs.HTTPErrorResponse"
+              "$ref": "#/definitions/ApiError"
+            },
+            "examples": {
+              "application/json": {
+                "code": 404,
+                "body": {
+                  "error_message": "отзывы не найдены"
+                }
+              }
             }
           },
           "500": {
-            "description": "Internal server error",
+            "description": "Внутренняя ошибка сервера",
             "schema": {
-              "$ref": "#/definitions/errs.HTTPErrorResponse"
+              "$ref": "#/definitions/InternalSEApiResponse"
+            }
+          }
+        }
+      },
+
+      "post": {
+        "description": "Создает новый отзыв для продукта по его ID",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Reviews"],
+        "parameters": [
+          {
+            "type": "string",
+            "description": "ID Продукта",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "in": "body",
+            "name": "review",
+            "description": "Детали отзыва",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ReviewCreateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Отзыв успешно создан",
+            "schema": {
+              "$ref": "#/definitions/Review"
+            }
+          },
+          "400": {
+            "description": "Некорректный запрос",
+            "schema": {
+              "$ref": "#/definitions/ApiError"
+            },
+            "examples": {
+              "application/json": {
+                "code": 400,
+                "body": {
+                  "error_message": "некорректный запрос"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Отзыв уже опубликован",
+            "schema": {
+              "$ref": "#/definitions/ApiError"
+            },
+            "examples": {
+              "application/json": {
+                "code": 409,
+                "body": {
+                  "error_message": "Отзыв уже существует"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "schema": {
+              "$ref": "#/definitions/InternalSEApiResponse"
+            }
+          }
+        }
+      },
+
+      "put": {
+        "description": "Обновляет существующий отзыв для указанного продукта",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Reviews"],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "description": "ID продукта",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "review",
+            "in": "body",
+            "description": "Обновленные данные отзыва",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ReviewUpdateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Отзыв успешно обновлен",
+            "schema": {
+              "$ref": "#/definitions/Review"
+            }
+          },
+          "400": {
+            "description": "Некорректный запрос",
+            "schema": {
+              "$ref": "#/definitions/ApiError"
+            },
+            "examples": {
+              "application/json": {
+                "code": 400,
+                "body": {
+                  "error_message": "некорректный запрос"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "schema": {
+              "$ref": "#/definitions/InternalSEApiResponse"
+            }
+          }
+        }
+      },
+
+      "delete": {
+        "description": "Удаляет существующий отзыв для указанного продукта",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Reviews"],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "description": "ID продукта",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Отзыв успешно удален"
+          },
+          "400": {
+            "description": "Некорректный запрос",
+            "schema": {
+              "$ref": "#/definitions/ApiError"
+            },
+            "examples": {
+              "application/json": {
+                "code": 400,
+                "body": {
+                  "error_message": "некорректный запрос"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Отзыв не найден",
+            "schema": {
+              "$ref": "#/definitions/ApiError"
+            },
+            "examples": {
+              "application/json": {
+                "code": 404,
+                "body": {
+                  "error_message": "Отзыв не найден"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "schema": {
+              "$ref": "#/definitions/InternalSEApiResponse"
             }
           }
         }
       }
     }
   },
+
   "definitions": {
-    "errorApiResponse": {
+    "InternalSEApiResponse": {
       "type": "object",
       "properties": {
         "code": {
           "type": "integer",
-          "description": "Код ответа"
-        },
-        "body": {
-            
-        }
-      }
-    },
-
-
-    "model.Product": {
-      "type": "object",
-      "properties": {
-        "code": {
-          "type": "integer",
-          "description": "Код ответа"
+          "description": "Код ответа",
+          "example": 500
         },
         "body": {
           "type": "object",
           "description": "Тело ответа",
           "properties": {
-            "ID": {
-              "type": "integer",
-              "description": "ID Продукта"
-            },
-            "description": {
+            "error_message": {
               "type": "string",
-              "description": "Описание продукта",
-              "example": "Описание лучшего продукта"
-            },
-            "count": {
-              "type": "integer",
-              "description": "Количество продукта на складе",
-              "example": 200
-            },
-            "title": {  
-              "type": "string",
-              "description": "Название продукта",
-              "example": "Лучший продукт"
-            },
-            "price": {
-              "type": "integer",
-              "description": "Цена продукта", 
-              "example": 5000
-            },
-            "discount": {
-              "type": "integer",
-              "description": "Скидка",
-              "example": 0
-            },
-            "image_url": {
-              "type": "string",
-              "description": "Ссылка на картинку",
-              "example": "files/1a2b3c4d5e6f.jpg"
-            },
-            "original_price": {
-              "type": "integer",
-              "description": "Оргигинальная цена продукта",
-              "example": 5000
+              "description": "Сообщение об ошибке",
+              "example": "внутренняя ошибка сервера"
             }
           }
         }
-      
       }
     },
-    "db.User": {
+
+    "ApiError": {
       "type": "object",
       "properties": {
-        "password": {
-          "type": "string"
+        "code": {
+          "type": "integer",
+          "description": "Код ответа",
+          "example": 404
+        },
+        "body": {
+          "type": "object",
+          "description": "Тело ответа",
+          "properties": {
+            "error_message": {
+              "type": "string",
+              "description": "Сообщение об ошибке"
+            }
+          }
+        }
+      }
+    },
+
+    "ProductCatalog": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "description": "Код ответа",
+          "example": 200
+        },
+        "body": {
+          "type": "object",
+          "description": "Тело ответа",
+          "properties": {
+            "products": {
+              "type": "array",
+              "description": "Массив продуктов",
+              "items": {
+                "$ref": "#/definitions/Product"
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "ProductCard": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "description": "Код ответа",
+          "example": 200
+        },
+        "body": {
+          "type": "object",
+          "allOf": [
+            { "$ref": "#/definitions/Product" },
+            {
+              "type": "object",
+              "properties": {
+                "images": {
+                  "type": "array",
+                  "description": "Картинки товара",
+                  "example": [
+                    {
+                      "url": "files/39d812f7be56dddf1fd9142bd68f4083.jpg"
+                    },
+                    {
+                      "url": "files/5ef04aafb83ea6686f3746739bf59941.jpg"
+                    }
+                  ]
+                },
+                "options": {
+                  "type": "object",
+                  "description": "Опции продукта",
+                  "properties": {
+                    "values": {
+                      "type": "array",
+                      "description": "Значения опций продукта",
+                      "example": [
+                        {
+                          "title": "",
+                          "type": "Объем оперативной памяти",
+                          "options": [
+                            {
+                              "link": "",
+                              "value": "8гб"
+                            },
+                            {
+                              "link": "",
+                              "value": "12гб"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                "characteristics": {
+                  "type": "object",
+                  "description": "Характеристики продукта",
+                  "example": {
+                    "Бренд графического процессора": "Qualcomm",
+                    "Бренд процессора": "Qualcomm",
+                    "Видеопроцессор": "Adreno 710",
+                    "Время работы в режиме разговора, ч": "35",
+                    "Встроенная память": "256 ГБ"
+                  }
+                },
+                "seller": {
+                  "type": "object",
+                  "description": "Информация о продавце",
+                  "example": {
+                    "name": "СмартХаб",
+                    "logo": "files/logo2.png"
+                  }
+                },
+                "in_cart": {
+                  "type": "boolean",
+                  "description": "Находится ли продукт в корзине",
+                  "example": true
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+
+    "Product": {
+      "type": "object",
+      "properties": {
+        "ID": {
+          "type": "integer",
+          "description": "ID Продукта"
+        },
+        "description": {
+          "type": "string",
+          "description": "Описание продукта",
+          "example": "Описание лучшего продукта"
+        },
+        "count": {
+          "type": "integer",
+          "description": "Количество продукта на складе",
+          "example": 200
+        },
+        "title": {
+          "type": "string",
+          "description": "Название продукта",
+          "example": "Лучший продукт"
+        },
+        "price": {
+          "type": "integer",
+          "description": "Цена продукта",
+          "example": 5000
+        },
+        "discount": {
+          "type": "integer",
+          "description": "Скидка",
+          "example": 0
+        },
+        "image_url": {
+          "type": "string",
+          "description": "Ссылка на картинку",
+          "example": "files/1a2b3c4d5e6f.jpg"
+        },
+        "original_price": {
+          "type": "integer",
+          "description": "Оригинальная цена продукта",
+          "example": 5000
+        }
+      }
+    },
+
+    "ProductReviews": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "description": "Код ответа",
+          "example": 200
+        },
+        "body": {
+          "type": "object",
+          "description": "Тело ответа",
+          "properties": {
+            "total_review_count": {
+              "type": "integer",
+              "description": "Количество отзывов",
+              "example": 100
+            },
+            "total_review_rating": {
+              "type": "float",
+              "description": "Средняя оценка товара",
+              "example": 4.7
+            },
+            "reviews": {
+              "type": "array",
+              "description": "Массив отзывов",
+              "items": {
+                "$ref": "#/definitions/Review"
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "Review": {
+      "type": "object",
+      "properties": {
+        "rating": {
+          "type": "integer",
+          "description": "Рейтинг продукта",
+          "example": 4
         },
         "username": {
-          "type": "string"
+          "type": "string",
+          "description": "Username человека, оставившего отзыв",
+          "example": "Abobus"
+        },
+        "text": {
+          "type": "string",
+          "description": "Текст отзыва",
+          "example": "Этот товар супер найс"
+        },
+        "images": {
+          "type": "array",
+          "description": "Картинки к отзыву",
+          "example": [
+            {
+              "url": "files/39d812f7be56dddf1fd9142bd68f4083.jpg"
+            },
+            {
+              "url": "files/5ef04aafb83ea6686f3746739bf59941.jpg"
+            }
+          ]
         }
       }
     },
-    "errs.HTTPErrorResponse": {
+
+    "ReviewCreateRequest": {
       "type": "object",
       "properties": {
-        "error_message": {
-          "type": "string"
+        "rating": {
+          "type": "integer",
+          "description": "Рейтинг отзыва (от 1 до 5)",
+          "example": 5
+        },
+        "comment": {
+          "type": "string",
+          "description": "Комментарий к отзыву",
+          "example": "Отличный продукт!"
+        },
+        "is_private": {
+          "type": "boolean",
+          "description": "Анонимный ли отзыв",
+          "example": false
         }
-      }
+      },
+      "required": ["rating", "comment", "is_private"]
     },
-    "handlers.UsernameResponse": {
+
+    "ReviewUpdateRequest": {
       "type": "object",
       "properties": {
-        "username": {
-          "type": "string"
+        "rating": {
+          "type": "integer",
+          "description": "Рейтинг отзыва (от 1 до 5)",
+          "example": 5
+        },
+        "comment": {
+          "type": "string",
+          "description": "Комментарий к отзыву",
+          "example": "Отличный продукт!"
         }
-      }
-    },
-    "handlers.credsApiRequest": {
-      "type": "object",
-      "properties": {
-        "email": {
-          "type": "string"
-        },
-        "password": {
-          "type": "string"
-        },
-        "repeat_password": {
-          "type": "string"
-        },
-        "username": {
-          "type": "string"
-        }
-      }
+      },
+      "required": ["rating", "comment"]
     }
   }
 }
