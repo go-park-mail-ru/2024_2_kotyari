@@ -1,0 +1,10 @@
+session_name: session-id
+
+env: local
+
+http_server:
+  address: 0.0.0.0:8000
+  session_lifetime: 36000
+
+profile_service:
+

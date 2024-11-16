@@ -1,0 +1,49 @@
+syntax="proto3";
+
+package profile;
+
+service Profile {
+  rpc GetProfile(GetProfileRequest) returns (GetProfileResponse);
+
+  rpc UpdateProfile(UpdateProfileInfoRequest) returns (UpdateProfileInfoResponse);
+
+  rpc UpdateProfileAvatar(UpdateAvatarRequest) returns (UpdateAvatarResponse);
+}
+
+message GetProfileRequest {
+  uint32 user_id = 1;
+}
+
+message GetProfileResponse {
+  uint32 id = 1;
+  string email = 2;
+  string username = 3;
+  string gender = 4;
+  uint32 age = 5;
+  string avatar_url = 6;
+  Address address = 7;
+}
+
+message Address {
+  uint32 id = 1;
+  string city = 2;
+  string street = 3;
+  string house = 4;
+  uint32 flat = 5;
+}
+
+message UpdateProfileInfoRequest {
+
+}
+
+message UpdateProfileInfoResponse {
+
+}
+
+message UpdateAvatarRequest {
+
+}
+
+message UpdateAvatarResponse {
+
+}
