@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package user;
+option go_package = "https://github.com/go-park-mail-ru/2024_2_kotyari/user/grpc_gen";
+
+service UserService {
+  rpc CreateUser(UsersSignUpRequest) returns (UsersDefaultResponse);
+  rpc GetUserById(GetUserByIdRequest) returns (UsersDefaultResponse);
+  rpc LoginUser(UsersLoginRequest) returns (UsersDefaultResponse);
+}
+
+message UsersSignUpRequest {
+  string email = 1;
+  string username = 2;
+  string password = 3;
+  string repeat_password = 4;
+}
+
+message UsersLoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message UsersDefaultResponse {
+  string username = 1;
+  string city = 2;
+}
+
+message GetUserByIdRequest {
+  string session_id = 1;
+}
+
+message ErrorResponse {
+  string error_message = 1;
+}
