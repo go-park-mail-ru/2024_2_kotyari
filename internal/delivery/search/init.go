@@ -9,7 +9,7 @@ import (
 
 type SearchRepository interface {
 	GetSearchTitleSuggestions(ctx context.Context, queryParam string) (model.SearchTitleSuggestions, error)
-	ProductSuggestion(ctx context.Context, searchQuery string) ([]model.ProductCatalog, error)
+	ProductSuggestion(ctx context.Context, searchQuery string, sortField string, sortOrder string) ([]model.ProductCatalog, error)
 }
 
 type SearchHandler struct {

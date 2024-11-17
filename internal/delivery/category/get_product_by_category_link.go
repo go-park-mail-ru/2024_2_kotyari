@@ -11,7 +11,10 @@ func (cd *CategoriesDelivery) GetProductsByCategoryLink(w http.ResponseWriter, r
 	vars := mux.Vars(r)
 	link := vars["link"]
 
-	products, err := cd.repo.GetProductsByCategoryLink(r.Context(), link)
+	sortField := r.URL.Query().Get(utils.SearchFieldParam)
+	sortOrder := r.URL.Query().Get(utils.SearchOrderParam)
+
+	products, err := cd.repo.GetProductsByCategoryLink(r.Context(), link, sortField, sortOrder)
 	if err != nil {
 		err, i := cd.errResolver.Get(err)
 
