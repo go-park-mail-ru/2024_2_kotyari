@@ -15,9 +15,9 @@ type usersManager interface {
 }
 
 type UsersHandler struct {
-	userManager    usersManager
-	inputValidator *utils.InputValidator
-	errResolver    errs.GetErrorCode
+	grpcClient     grpc_gen.UserServiceClient
+	inputValidator utils.InputValidator
+	errResolver    errs.Resolver
 }
 
 func NewUsersHandler(userManager usersManager, inputValidator *utils.InputValidator, errResolver errs.GetErrorCode) *UsersHandler {
