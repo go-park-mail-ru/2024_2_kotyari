@@ -1,4 +1,22 @@
 services:
+  user_go:
+    build:
+      context: .
+      dockerfile: ./cmd/profile/Dockerfile
+    ports:
+      - "8001:8001"
+    image: back-go-image
+    container_name: back_go
+    restart: unless-stopped
+    volumes:
+      - ./files:/app/files
+    networks:
+      - app-network
+    depends_on:
+      - pg_db
+      - redis_service
+      - go_back
+
   main_go:
     build:
       context: .

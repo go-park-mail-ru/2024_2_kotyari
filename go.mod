@@ -3,6 +3,8 @@ module github.com/go-park-mail-ru/2024_2_kotyari
 go 1.23
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.2
+	github.com/bxcodec/faker/v3 v3.8.1
 	github.com/bxcodec/faker/v4 v4.0.0-beta.3
 	github.com/caarlos0/env v3.5.0+incompatible
 	github.com/disintegration/imaging v1.6.2
@@ -19,6 +21,9 @@ require (
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
 	github.com/swaggo/swag v1.16.3
+	golang.org/x/crypto v0.29.0
+	google.golang.org/grpc v1.68.0
+	google.golang.org/protobuf v1.35.2
 	go.uber.org/mock v0.5.0
 	golang.org/x/crypto v0.29.0
 	google.golang.org/grpc v1.65.0
@@ -65,6 +70,7 @@ require (
 	golang.org/x/tools v0.27.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240604185151-ef581f913117 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20241113202542-65e8d215514f // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

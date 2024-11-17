@@ -15,15 +15,15 @@ type usersManager interface {
 }
 
 type UsersHandler struct {
-	userManager     usersManager
+	grpcClient     grpc_gen.UserServiceClient
 	stringSanitizer utils.StringSanitizer
-	errResolver     errs.GetErrorCode
+	errResolver    errs.Resolver
 }
 
 func NewUsersHandler(userManager usersManager, stringSanitizer utils.StringSanitizer, errResolver errs.GetErrorCode) *UsersHandler {
 	return &UsersHandler{
-		userManager:     userManager,
+		userManager:    userManager,
 		stringSanitizer: stringSanitizer,
-		errResolver:     errResolver,
+		errResolver:    errResolver,
 	}
 }

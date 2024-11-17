@@ -21,7 +21,6 @@ COPY files /app/files
 RUN mkdir -p /app/internal/configs
 COPY configs app/configs
 
-
 WORKDIR /app
 EXPOSE 8000
 
