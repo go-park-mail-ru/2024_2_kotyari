@@ -11,11 +11,12 @@ import (
 	addressDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/address"
 	cartDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/cart"
 	categoryDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/category"
-	csrf2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/csrf"
+	csrfDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/csrf"
 	fileDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/file"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/orders"
 	productDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/product"
 	profileDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/profile"
+	reviewsDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/reviews"
 	searchDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/search"
 	sessionsDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/sessions"
 	userDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/user"
@@ -29,6 +30,7 @@ import (
 	rorders "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/orders"
 	productRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/product"
 	profileRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/profile"
+	reviewsRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/reviews"
 	searchRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/search"
 	sessionsRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/sessions"
 	userRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/user"
@@ -37,8 +39,9 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/csrf"
 	fileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/file"
 	imageServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/image"
-	orders2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders"
+	ordersServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders"
 	profileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/profile"
+	reviewsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/reviews"
 	sessionsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
 	userServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/user"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
@@ -93,6 +96,7 @@ type Server struct {
 	cart     CartApp
 	order    OrderApp
 	csrf     csrfDelivery
+	reviews  ReviewsApp
 	search   SearchApp
 }
 
@@ -159,12 +163,17 @@ func NewServer() (*Server, error) {
 	fileDelivery := fileDeliveryLib.NewFilesDelivery(fileRepo)
 
 	ordersRepo := rorders.NewOrdersRepo(dbPool, log)
-	ordersManager := orders2.NewOrdersManager(ordersRepo, log, cartRepo)
+	ordersManager := ordersServiceLib.NewOrdersManager(ordersRepo, log, cartRepo)
 	ordersHandler := orders.NewOrdersHandler(ordersManager, log, errResolver)
 	orderApp := NewOrderApp(router, ordersHandler)
 
 	csrfUsecase := csrf.NewCscfUsecase()
-	csrfHandler := csrf2.NewCsrfDelivery(csrfUsecase, sessionsDelivery)
+	csrfHandler := csrfDeliveryLib.NewCsrfDelivery(csrfUsecase, sessionsDelivery)
+
+	reviewsRepo := reviewsRepoLib.NewReviewsStore(dbPool, log)
+	reviewsManager := reviewsServiceLib.NewReviewsService(reviewsRepo, inputValidator, log)
+	reviewsHandler := reviewsDeliveryLib.NewReviewsHandler(reviewsManager, inputValidator, errResolver, log)
+	reviewsApp := NewReviewsApp(router, reviewsHandler)
 
 	searchRepo := searchRepoLib.NewSearchStore(dbPool, log)
 	searchHandler := searchDeliveryLib.NewSearchDelivery(searchRepo, errResolver, log)
@@ -184,6 +193,7 @@ func NewServer() (*Server, error) {
 		cart:     cartApp,
 		order:    orderApp,
 		csrf:     csrfHandler,
+		reviews:  reviewsApp,
 		search:   searchApp,
 	}, nil
 }
@@ -228,6 +238,10 @@ func (s *Server) setupRoutes() {
 
 	subSearch := s.search.InitSearchRoutes()
 	subSearch.Use(middlewares.RequestIDMiddleware)
+
+	reviewsSub := s.reviews.InitRoutes()
+	reviewsSub.Use(middlewares.RequestIDMiddleware)
+	reviewsSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 
 	s.r.HandleFunc("/", s.auth.GetUserById).Methods(http.MethodGet)
 }

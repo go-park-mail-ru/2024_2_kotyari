@@ -2,6 +2,12 @@ BINARY_NAME=server
 
 default: help
 
+include .env
+export $(shell sed 's/=.*//' .env)
+
+DB_URL := postgres://$(DB_USERNAME):$(DB_PASSWORD)@localhost:54320/$(DB_NAME)?sslmode=disable
+MIGRATIONS_DIR := ./assets/migrations
+
 help:
 	@echo 'usage: make [target]'
 	@echo 'targets:'
@@ -17,6 +23,10 @@ help:
 	@echo 'pg-refresh - Refreshing PostgreSQL database container'
 	@echo 'all-refresh - Refreshing both Go application and PostgreSQL database containers'
 	@echo 'all-stop - Stop all docker containers'
+	@echo 'apply-migrations - Apply all migrations from assets/migrations folder'
+	@echo 'revert-migrations - Revert all migrations from assets/migrations folder'
+	@echo 'For this tools to work you need to have migrate tool to be installed'
+	@echo 'You can install it by running this command: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest'
 
 build:
 	go build -o ${BINARY_NAME} ./cmd/main.go
@@ -67,5 +77,13 @@ all-delete:
 	docker compose down -v
 
 all-refresh: back-refresh pg-refresh redis-refresh
+
+apply-migrations:
+	@echo 'Applying migrations...'
+	@migrate -path $(MIGRATIONS_DIR) -database $(DB_URL) up
+
+revert-migrations:
+	@echo 'Reverting migrations...'
+	@migrate -path $(MIGRATIONS_DIR) -database "$(DB_URL)" down
 
 .PHONY: clean build
