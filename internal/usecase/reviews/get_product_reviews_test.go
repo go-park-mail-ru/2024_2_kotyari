@@ -24,19 +24,25 @@ func TestReviewsService_GetProductReviews(t *testing.T) {
 	tests := []struct {
 		name      string
 		productID uint32
+		sortField string
+		sortOrder string
 		setupFunc func(ctrl *gomock.Controller) *ReviewsService
 		want      want
 	}{
 		{
 			name:      "Отзывы успешно получены",
 			productID: 1,
+			sortField: "",
+			sortOrder: "",
 			setupFunc: func(ctrl *gomock.Controller) *ReviewsService {
 				reviewsRepositoryMock := mocks.NewMockreviewsRepo(ctrl)
 				logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 				reviewsRepositoryMock.EXPECT().GetProductReviews(
 					gomock.Any(),
-					uint32(1)).Return(model.Reviews{
+					uint32(1),
+					"",
+					"").Return(model.Reviews{
 					TotalReviewCount: 0,
 					TotalRating:      0,
 					Reviews: []model.Review{
@@ -74,6 +80,8 @@ func TestReviewsService_GetProductReviews(t *testing.T) {
 		{
 			name:      "Отзывы для продукта не найдены",
 			productID: 1,
+			sortField: "",
+			sortOrder: "",
 			setupFunc: func(ctrl *gomock.Controller) *ReviewsService {
 				reviewsRepositoryMock := mocks.NewMockreviewsRepo(ctrl)
 				logger := slog.New(slog.NewTextHandler(io.Discard, nil))
@@ -81,6 +89,8 @@ func TestReviewsService_GetProductReviews(t *testing.T) {
 				reviewsRepositoryMock.EXPECT().GetProductReviews(
 					gomock.Any(),
 					uint32(1),
+					"",
+					"",
 				).Return(model.Reviews{}, errs.NoReviewsForProduct)
 
 				return &ReviewsService{
@@ -97,6 +107,8 @@ func TestReviewsService_GetProductReviews(t *testing.T) {
 		{
 			name:      "Ошибка при получении отзывов для продукта",
 			productID: 1,
+			sortField: "",
+			sortOrder: "",
 			setupFunc: func(ctrl *gomock.Controller) *ReviewsService {
 				reviewsRepositoryMock := mocks.NewMockreviewsRepo(ctrl)
 				logger := slog.New(slog.NewTextHandler(io.Discard, nil))
@@ -104,6 +116,8 @@ func TestReviewsService_GetProductReviews(t *testing.T) {
 				reviewsRepositoryMock.EXPECT().GetProductReviews(
 					gomock.Any(),
 					uint32(1),
+					"",
+					"",
 				).Return(model.Reviews{}, testDBError)
 
 				return &ReviewsService{
@@ -129,7 +143,7 @@ func TestReviewsService_GetProductReviews(t *testing.T) {
 
 			ctx := context.WithValue(context.Background(), testContextRequestIDKey, testContextRequestIDValue)
 
-			resp, err := tt.setupFunc(ctrl).GetProductReviews(ctx, tt.productID)
+			resp, err := tt.setupFunc(ctrl).GetProductReviews(ctx, tt.productID, tt.sortField, tt.sortOrder)
 			assert.Equal(t, tt.want.reviews, resp)
 			assert.Equal(t, tt.want.err, err)
 		})

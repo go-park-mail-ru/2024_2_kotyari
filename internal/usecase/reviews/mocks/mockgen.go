@@ -70,18 +70,18 @@ func (mr *MockreviewsRepoMockRecorder) DeleteReview(ctx, productID, userID any) 
 }
 
 // GetProductReviews mocks base method.
-func (m *MockreviewsRepo) GetProductReviews(ctx context.Context, productID uint32) (model.Reviews, error) {
+func (m *MockreviewsRepo) GetProductReviews(ctx context.Context, productID uint32, sortField, sortOrder string) (model.Reviews, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetProductReviews", ctx, productID)
+	ret := m.ctrl.Call(m, "GetProductReviews", ctx, productID, sortField, sortOrder)
 	ret0, _ := ret[0].(model.Reviews)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetProductReviews indicates an expected call of GetProductReviews.
-func (mr *MockreviewsRepoMockRecorder) GetProductReviews(ctx, productID any) *gomock.Call {
+func (mr *MockreviewsRepoMockRecorder) GetProductReviews(ctx, productID, sortField, sortOrder any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProductReviews", reflect.TypeOf((*MockreviewsRepo)(nil).GetProductReviews), ctx, productID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProductReviews", reflect.TypeOf((*MockreviewsRepo)(nil).GetProductReviews), ctx, productID, sortField, sortOrder)
 }
 
 // GetReview mocks base method.
