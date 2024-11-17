@@ -22,6 +22,7 @@ func (r *ReviewsStore) GetProductReviews(ctx context.Context, productID uint32, 
 
 	fieldSortOptions := map[string]string{
 		"rating": "r.rating",
+		"date":   "r.created_at",
 	}
 
 	field, ok := fieldSortOptions[sortField]
