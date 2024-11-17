@@ -14,7 +14,7 @@ func (cs *CategoriesStore) GetProductsByCategoryLink(ctx context.Context, catego
 
 	fieldSortOptions := map[string]string{
 		"rating": "p.rating",
-		"date":   "p.created_at",
+		"price":  "p.price",
 	}
 
 	field, ok := fieldSortOptions[sortField]

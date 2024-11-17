@@ -16,7 +16,7 @@ func (s *SearchStore) ProductSuggestion(ctx context.Context, searchQuery string,
 
 	fieldSortOptions := map[string]string{
 		"rating": "p.rating",
-		"date":   "p.created_at",
+		"price":  "p.price",
 	}
 
 	field, ok := fieldSortOptions[sortField]
