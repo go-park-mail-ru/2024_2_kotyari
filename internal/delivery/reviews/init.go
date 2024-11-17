@@ -10,7 +10,7 @@ import (
 )
 
 type reviewsManager interface {
-	GetProductReviews(ctx context.Context, productID uint32) (model.Reviews, error)
+	GetProductReviews(ctx context.Context, productID uint32, sortField string, sortOrder string) (model.Reviews, error)
 	AddReview(ctx context.Context, productID uint32, userID uint32, review model.Review) error
 	UpdateReview(ctx context.Context, productID uint32, userID uint32, review model.Review) error
 	DeleteReview(ctx context.Context, productID uint32, userID uint32) error

@@ -9,7 +9,7 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
-func (s *ReviewsService) GetProductReviews(ctx context.Context, productID uint32) (model.Reviews, error) {
+func (s *ReviewsService) GetProductReviews(ctx context.Context, productID uint32, sortField string, sortOrder string) (model.Reviews, error) {
 	requestID, err := utils.GetContextRequestID(ctx)
 	if err != nil {
 		return model.Reviews{}, err
@@ -17,7 +17,7 @@ func (s *ReviewsService) GetProductReviews(ctx context.Context, productID uint32
 
 	s.log.Info("[ReviewsService.GetProductReviews] Started executing, requestID", slog.Any("request-id", requestID))
 
-	reviews, err := s.reviewsRepo.GetProductReviews(ctx, productID)
+	reviews, err := s.reviewsRepo.GetProductReviews(ctx, productID, sortField, sortOrder)
 	if err != nil {
 		return model.Reviews{}, err
 	}
