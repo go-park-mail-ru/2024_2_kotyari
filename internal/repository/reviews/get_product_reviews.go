@@ -39,25 +39,7 @@ func (r *ReviewsStore) GetProductReviews(ctx context.Context, productID uint32) 
 		return model.Reviews{}, err
 	}
 
-	reviewsDTO, err := pgx.CollectRows(rows, func(row pgx.CollectableRow) (ReviewDTO, error) {
-		var reviewDTO ReviewDTO
-
-		err = row.Scan(
-			&reviewDTO.Text,
-			&reviewDTO.Rating,
-			&reviewDTO.IsPrivate,
-			&reviewDTO.Username,
-			&reviewDTO.AvatarURL,
-			&reviewDTO.CreatedAt)
-
-		if err != nil {
-			r.log.Error("[ReviewsStore.GetProductReviews] Error happened when scanning rows", slog.String("error", err.Error()))
-
-			return ReviewDTO{}, err
-		}
-
-		return reviewDTO, nil
-	})
+	reviewsDTO, err := pgx.CollectRows(rows, pgx.RowToStructByNameLax[ReviewDTO])
 
 	if len(reviewsDTO) == 0 {
 		return model.Reviews{}, errs.NoReviewsForProduct

@@ -13,14 +13,16 @@ const (
 )
 
 type ReviewDTO struct {
-	ID        uint32
-	Text      pgtype.Text
-	Username  string
-	AvatarURL string
-	Rating    uint8
-	IsPrivate bool
-	UpdatedAt time.Time
-	CreatedAt time.Time
+	ID        uint32      `db:"id"`
+	ProductID uint32      `db:"product_id"`
+	UserID    uint32      `db:"user_id"`
+	Text      pgtype.Text `db:"text"`
+	Username  string      `db:"username"`
+	AvatarURL string      `db:"avatar_url"`
+	Rating    uint8       `db:"rating"`
+	IsPrivate bool        `db:"is_private"`
+	UpdatedAt time.Time   `db:"updated_at"`
+	CreatedAt time.Time   `db:"created_at"`
 }
 
 func (r ReviewDTO) ToModel() model.Review {
