@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	orders2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders"
 	"log/slog"
 	"net/http"
 
@@ -17,6 +16,7 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/orders"
 	productDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/product"
 	profileDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/profile"
+	searchDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/search"
 	sessionsDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/sessions"
 	userDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/user"
 	errResolveLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
@@ -29,6 +29,7 @@ import (
 	rorders "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/orders"
 	productRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/product"
 	profileRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/profile"
+	searchRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/search"
 	sessionsRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/sessions"
 	userRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/user"
 	addressServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/address"
@@ -36,6 +37,7 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/csrf"
 	fileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/file"
 	imageServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/image"
+	orders2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders"
 	profileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/profile"
 	sessionsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
 	userServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/user"
@@ -91,6 +93,7 @@ type Server struct {
 	cart     CartApp
 	order    OrderApp
 	csrf     csrfDelivery
+	search   SearchApp
 }
 
 type csrfDelivery interface {
@@ -163,6 +166,10 @@ func NewServer() (*Server, error) {
 	csrfUsecase := csrf.NewCscfUsecase()
 	csrfHandler := csrf2.NewCsrfDelivery(csrfUsecase, sessionsDelivery)
 
+	searchRepo := searchRepoLib.NewSearchStore(dbPool, log)
+	searchHandler := searchDeliveryLib.NewSearchDelivery(searchRepo, errResolver, log)
+	searchApp := NewSearchApp(router, searchHandler)
+
 	return &Server{
 		r:        router,
 		auth:     userHandler,
@@ -177,6 +184,7 @@ func NewServer() (*Server, error) {
 		cart:     cartApp,
 		order:    orderApp,
 		csrf:     csrfHandler,
+		search:   searchApp,
 	}, nil
 }
 
@@ -217,6 +225,9 @@ func (s *Server) setupRoutes() {
 	csrfProtected.HandleFunc("/address", s.address.GetAddress).Methods(http.MethodGet)
 	csrfProtected.HandleFunc("/address", s.address.UpdateAddressData).Methods(http.MethodPut)
 	csrfProtected.Use(csrfMiddleware)
+
+	subSearch := s.search.InitSearchRoutes()
+	subSearch.Use(middlewares.RequestIDMiddleware)
 
 	s.r.HandleFunc("/", s.auth.GetUserById).Methods(http.MethodGet)
 }

@@ -233,3 +233,9 @@ ALTER TABLE "orders" ADD COLUMN IF NOT EXISTS "preferred_payment_method" payment
 
 ALTER TABLE "products"
     ADD COLUMN "weight" real NOT NULL DEFAULT 1.0;
+
+ALTER TABLE products ADD COLUMN tsv tsvector GENERATED ALWAYS AS (
+    to_tsvector('russian', title)
+    ) STORED;
+
+CREATE INDEX idx_products_tsv ON products USING GIN (tsv);
