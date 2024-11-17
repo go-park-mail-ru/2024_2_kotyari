@@ -40,7 +40,6 @@ import (
 	fileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/file"
 	imageServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/image"
 	ordersServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders"
-	orders2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders"
 	profileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/profile"
 	reviewsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/reviews"
 	sessionsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
