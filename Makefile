@@ -8,22 +8,6 @@ export $(shell sed 's/=.*//' .env)
 DB_URL := postgres://$(DB_USERNAME):$(DB_PASSWORD)@localhost:54320/$(DB_NAME)?sslmode=disable
 MIGRATIONS_DIR := ./assets/migrations
 
-
-# Путь к папке с прототипами
-PROTO_DIR := ./api/protos
-
-# Путь к папке сгенерированных файлов
-GEN_DIR := gen
-
-# Команда protoc
-PROTOC := protoc
-
-# Список всех сущностей (названия подпапок в ./api/protos)
-ENTITIES := $(shell find $(PROTO_DIR) -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
-
-# Общая цель для генерации всех сущностей
-proto-build: $(ENTITIES)
-
 help:
 	@echo 'usage: make [target]'
 	@echo 'targets:'
@@ -43,6 +27,39 @@ help:
 	@echo 'revert-migrations - Revert all migrations from assets/migrations folder'
 	@echo 'For this tools to work you need to have migrate tool to be installed'
 	@echo 'You can install it by running this command: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest'
+
+PROTO_DIR := ./api/protos
+
+GEN_DIR := gen
+
+PROTOC := protoc
+
+ENTITIES := $(shell find $(PROTO_DIR) -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
+
+proto-build: $(ENTITIES)
+
+
+# export PATH=$PATH:$(go env GOPATH)/bin
+
+$(ENTITIES):
+	@echo "Генерация кода для сущности $@..."
+	@mkdir -p $(PROTO_DIR)/$@/$(GEN_DIR)
+	@$(PROTOC) \
+		--proto_path=$(PROTO_DIR)/$@/proto \
+		--go_out=$(PROTO_DIR)/$@/$(GEN_DIR) \
+		--go_opt=paths=source_relative \
+		--go-grpc_out=$(PROTO_DIR)/$@/$(GEN_DIR) \
+		--go-grpc_opt=paths=source_relative \
+		$(PROTO_DIR)/$@/proto/*.proto
+	@echo "Генерация для $@ завершена."
+
+
+run:
+	go run ./cmd/main.go
+
+clean:
+	go clean
+	rm ${BINARY_NAME}
 
 test:
 	go test ./...
@@ -85,6 +102,9 @@ recreate-redis:
 all-delete:
 	docker compose down -v
 
+profile-refresh:
+	docker stop profile_go && docker rm profile_go && docker rmi profile-go-image
+
 all-refresh: main-refresh pg-refresh redis-refresh
 
 apply-migrations:
@@ -96,7 +116,7 @@ revert-migrations:
 	@migrate -path $(MIGRATIONS_DIR) -database "$(DB_URL)" down
 
 
-back-refresh: main-refresh rating-updater-refresh
+back-refresh: main-refresh rating-updater-refresh profile-refresh
 
 # Правило генерации для каждой сущности
 $(ENTITIES):

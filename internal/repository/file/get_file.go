@@ -3,7 +3,6 @@ package file
 import (
 	"fmt"
 	"log"
-	"log/slog"
 	"os"
 )
 
@@ -24,6 +23,5 @@ func (repo *FilesRepo) GetFile(filename string) (*os.File, error) {
 		return nil, fmt.Errorf("ошибка при открытии файла: %w", err)
 	}
 
-	repo.log.Debug("Файл успешно открыт для чтения", slog.String("path", fullPath))
 	return file, nil
 }

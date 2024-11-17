@@ -10,7 +10,6 @@ import (
 )
 
 func (ps *ProfilesService) UpdateProfile(ctx context.Context, oldProfileData model.Profile, newProfileData model.Profile) error {
-
 	newProfile := oldProfileData
 
 	if newProfileData.Email != "" {

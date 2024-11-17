@@ -10,10 +10,8 @@ import (
 )
 
 func (ar *AddressStore) GetAddressByProfileID(ctx context.Context, profileID uint32) (model.Address, error) {
-
 	const query = `
-		SELECT id, 
-		       city, 
+		SELECT city, 
 		       street, 
 		       house, 
 		       flat 
@@ -22,7 +20,7 @@ func (ar *AddressStore) GetAddressByProfileID(ctx context.Context, profileID uin
 	`
 
 	var address model.Address
-	err := ar.Db.QueryRow(ctx, query, profileID).Scan(&address.Id,
+	err := ar.Db.QueryRow(ctx, query, profileID).Scan(
 		&address.City,
 		&address.Street,
 		&address.House,
@@ -31,15 +29,17 @@ func (ar *AddressStore) GetAddressByProfileID(ctx context.Context, profileID uin
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			ar.Log.Warn("[ AddressStore.GetAddressByProfileID ] Адрес не найден для данного профиля", slog.String("error", err.Error()))
+
 			return model.Address{
-				Id:     0,
 				City:   "",
 				Street: "",
 				House:  "",
-				Flat:   new(string),
+				Flat:   nil,
 			}, nil
 		}
+
 		ar.Log.Error("[ AddressStore.GetAddressByProfileID ] Ошибка при получении адреса", slog.String("error", err.Error()))
+
 		return model.Address{}, err
 	}
 

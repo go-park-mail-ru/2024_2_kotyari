@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	mainApp "github.com/go-park-mail-ru/2024_2_kotyari/internal/apps/main"
+	mainService "github.com/go-park-mail-ru/2024_2_kotyari/internal/apps/main_service"
 	"github.com/joho/godotenv"
 )
 
@@ -21,7 +21,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	server, err := mainApp.NewServer()
+	server, err := mainService.NewServer()
 	if err != nil {
 		log.Fatal(fmt.Errorf("error occured when creating server, %w", err))
 	}

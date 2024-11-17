@@ -1,6 +1,7 @@
 package profile
 
 import (
+	profile_grpc "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/profile/gen"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"log/slog"
 	"net/http"
@@ -8,19 +9,38 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
-func (pd *ProfilesDelivery) GetProfile(writer http.ResponseWriter, request *http.Request) {
-	userID, ok := utils.GetContextSessionUserID(request.Context())
+func (pd *ProfilesDelivery) GetProfile(w http.ResponseWriter, r *http.Request) {
+	userID, ok := utils.GetContextSessionUserID(r.Context())
 	if !ok {
-		utils.WriteErrorJSON(writer, http.StatusUnauthorized, errs.UserNotAuthorized)
-	}
+		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)
 
-	profile, err := pd.profileManager.GetProfile(request.Context(), userID)
-	if err != nil {
-		pd.log.Error("[ ProfilesDelivery.GetProfile ] Ошибка при получении профиля на уровне деливери", slog.String("error", err.Error()))
 		return
 	}
 
-	profileResponse := FromModel(profile)
+	profile, err := pd.client.GetProfile(r.Context(), &profile_grpc.GetProfileRequest{UserId: userID})
+	if err != nil {
+		pd.log.Error("[ ProfilesDelivery.GetProfile ]",
+			slog.String("error", err.Error()),
+		)
 
-	utils.WriteJSON(writer, http.StatusOK, profileResponse)
+		_, code := pd.errResolver.Get(err)
+		utils.WriteErrorJSON(w, code, err)
+		return
+	}
+
+	address, err := pd.addressGetter.GetAddressByProfileID(r.Context(), profile.UserId)
+	if err != nil {
+		pd.log.Error("[ ProfilesDelivery.GetProfile ]",
+			slog.String("error", err.Error()),
+		)
+
+		_, code := pd.errResolver.Get(err)
+		utils.WriteErrorJSON(w, code, err)
+
+		return
+	}
+
+	profileResponse := fromGrpcResponse(profile, address)
+
+	utils.WriteJSON(w, http.StatusOK, profileResponse)
 }

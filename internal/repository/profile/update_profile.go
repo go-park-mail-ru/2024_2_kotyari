@@ -8,7 +8,6 @@ import (
 )
 
 func (pr *ProfilesStore) UpdateProfile(ctx context.Context, profileID uint32, profileModel model.Profile) error {
-
 	const query = `
 		UPDATE users 
 		SET email = $1, 
@@ -17,12 +16,17 @@ func (pr *ProfilesStore) UpdateProfile(ctx context.Context, profileID uint32, pr
 		WHERE id = $4;	
 	`
 
-	_, err := pr.db.Exec(ctx, query, profileModel.Email,
+	_, err := pr.db.Exec(ctx, query,
+		profileModel.Email,
 		profileModel.Username,
 		profileModel.Gender,
-		profileID)
+		profileID,
+	)
 	if err != nil {
-		pr.log.Error("[ ProfilesStore.UpdateProfile ] Ошибка обновления профиля в базе данных", slog.String("error", err.Error()))
+		pr.log.Error("[ ProfilesStore.UpdateProfile ] Ошибка обновления профиля в базе данных",
+			slog.String("error", err.Error()),
+		)
+
 		return err
 	}
 

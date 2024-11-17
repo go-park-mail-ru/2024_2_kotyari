@@ -5,12 +5,10 @@ import (
 )
 
 type AddressResponse struct {
-	ID        uint32 `json:"id"`
-	City      string `json:"city"`
-	Street    string `json:"street"`
-	House     string `json:"house"`
-	Flat      string `json:"flat"`
-	ProfileID uint32 `json:"profile_id"`
+	City   string `json:"city"`
+	Street string `json:"street"`
+	House  string `json:"house"`
+	Flat   string `json:"flat"`
 }
 
 type UpdateAddressRequest struct {
@@ -31,7 +29,6 @@ func (a *UpdateAddressRequest) ToModel() model.Address {
 
 func FromModel(address model.Address) AddressResponse {
 	return AddressResponse{
-		ID:     address.Id,
 		City:   address.City,
 		Street: address.Street,
 		House:  address.House,
