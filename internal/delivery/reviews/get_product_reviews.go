@@ -29,8 +29,8 @@ func (h *ReviewsHandler) GetProductReviews(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	sortField := r.URL.Query().Get("sort")
-	sortOrder := r.URL.Query().Get("order")
+	sortField := r.URL.Query().Get(utils.SearchFieldParam)
+	sortOrder := r.URL.Query().Get(utils.SearchOrderParam)
 
 	reviews, err := h.reviewsManager.GetProductReviews(r.Context(), productID, sortField, sortOrder)
 	if err != nil {

@@ -30,9 +30,7 @@ func (r *ReviewsStore) GetProductReviews(ctx context.Context, productID uint32, 
 		field = "r.created_at"
 	}
 
-	if sortOrder != "asc" && sortOrder != "desc" {
-		sortOrder = "desc"
-	}
+	sortOrder = utils.ReturnSortOrderOption(sortOrder)
 
 	query := fmt.Sprintf(`
 		select r.text, r.rating, r.is_private, u.username, u.avatar_url, r.created_at
