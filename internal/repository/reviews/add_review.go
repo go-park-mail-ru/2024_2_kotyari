@@ -8,31 +8,32 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
-func (r *ReviewsStore) AddReview(ctx context.Context, productID uint32, userID uint32, review model.Review) error {
+func (r *ReviewsStore) AddReview(ctx context.Context, productID uint32, userID uint32, review model.Review) (model.Review, error) {
 	requestID, err := utils.GetContextRequestID(ctx)
 	if err != nil {
-		return err
+		return model.Review{}, err
 	}
 
 	r.log.Info("[ReviewsStore.AddReview] Started executing", slog.Any("request-id", requestID))
 
 	const query = `
-		insert into reviews(product_id, user_id, text, rating, is_private) 
-		values ($1, $2, $3, $4, $5);
+		with inserted_review as (
+			insert into reviews(product_id, user_id, text, rating, is_private)
+			values($1, $2, $3, $4, $5)
+			returning user_id, created_at
+		)
+		select u.username, u.avatar_url, ir.created_at
+		from inserted_review ir
+		join users u on u.id = ir.user_id;
 	`
 
-	commandTag, err := r.db.Exec(ctx, query, productID, userID, review.Text, review.Rating, review.IsPrivate)
+	err = r.db.QueryRow(ctx, query, productID, userID, review.Text, review.Rating, review.IsPrivate).Scan(
+		&review.Username, &review.AvatarURL, &review.CreatedAt)
 	if err != nil {
 		r.log.Error("[ReviewsStore.AddReview] Error executing query", slog.String("error", err.Error()))
 
-		return err
+		return model.Review{}, err
 	}
 
-	if commandTag.RowsAffected() != 1 {
-		r.log.Error("[ReviewsStore.AddReview] No rows were affected")
-
-		return err
-	}
-
-	return nil
+	return review, nil
 }

@@ -46,12 +46,12 @@ func (h *ReviewsHandler) AddReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.reviewsManager.AddReview(r.Context(), productID, userID, req.ToModel())
+	review, err := h.reviewsManager.AddReview(r.Context(), productID, userID, req.ToModel())
 	if err != nil {
 		utils.WriteErrorJSONByError(w, err, h.errResolver)
 
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusCreated, nil)
+	utils.WriteJSON(w, http.StatusCreated, reviewResponseFromModel(review))
 }
