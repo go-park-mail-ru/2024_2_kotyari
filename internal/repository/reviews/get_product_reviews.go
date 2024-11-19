@@ -55,16 +55,15 @@ func (r *ReviewsStore) GetProductReviews(ctx context.Context, productID uint32, 
 
 	reviewsDTO, err := pgx.CollectRows(rows, pgx.RowToStructByNameLax[ReviewDTO])
 
-	if len(reviewsDTO) == 0 {
-		return model.Reviews{}, errs.NoReviewsForProduct
-	}
-
 	if err != nil {
 		r.log.Error("[ReviewsStore.GetProductReviews] Error happened when scanning rows", slog.String("error", err.Error()))
 
 		return model.Reviews{}, err
 	}
 
+	if len(reviewsDTO) == 0 {
+		return model.Reviews{}, errs.NoReviewsForProduct
+	}
 	return model.Reviews{
 		Reviews: ToReviewModelSlice(reviewsDTO),
 	}, nil
