@@ -9,7 +9,10 @@ import (
 func (s *SearchHandler) ProductSuggestions(w http.ResponseWriter, r *http.Request) {
 	query := utils.GetSearchQuery(r)
 
-	products, err := s.searchRepository.ProductSuggestion(r.Context(), query)
+	sortField := r.URL.Query().Get(utils.SearchFieldParam)
+	sortOrder := r.URL.Query().Get(utils.SearchOrderParam)
+
+	products, err := s.searchRepository.ProductSuggestion(r.Context(), query, sortField, sortOrder)
 	if err != nil {
 		err, code := s.errResolver.Get(err)
 		utils.WriteErrorJSON(w, code, err)

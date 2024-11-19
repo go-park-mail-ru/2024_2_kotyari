@@ -3,21 +3,36 @@ package search
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"github.com/jackc/pgx/v5"
 )
 
-func (s *SearchStore) ProductSuggestion(ctx context.Context, searchQuery string) ([]model.ProductCatalog, error) {
-	const query = `
+func (s *SearchStore) ProductSuggestion(ctx context.Context, searchQuery string, sortField string, sortOrder string) ([]model.ProductCatalog, error) {
+
+	fieldSortOptions := map[string]string{
+		"rating": "p.rating",
+		"price":  "p.price",
+	}
+
+	field, ok := fieldSortOptions[sortField]
+	if !ok {
+		field = "p.created_at"
+	}
+
+	sortOrder = utils.ReturnSortOrderOption(sortOrder)
+
+	query := fmt.Sprintf(`
 		SELECT p.id, p.title, p.price, p.original_price,
 		       p.discount, p.image_url, p.description
 		FROM products p
 			where p.active = true and p.count > 0 and to_tsvector('russian', title) @@ to_tsquery('russian', $1 || ':*')
-		ORDER BY p.created_at DESC;
-	`
+		ORDER BY %s %s;
+	`, field, sortOrder)
 
 	rows, err := s.db.Query(ctx, query, searchQuery)
 	if err != nil {
