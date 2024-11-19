@@ -64,6 +64,7 @@ func (r *ReviewsStore) GetProductReviews(ctx context.Context, productID uint32, 
 	if len(reviewsDTO) == 0 {
 		return model.Reviews{}, errs.NoReviewsForProduct
 	}
+
 	return model.Reviews{
 		Reviews: ToReviewModelSlice(reviewsDTO),
 	}, nil
