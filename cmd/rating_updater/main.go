@@ -1,0 +1,1 @@
+package rating_updater
