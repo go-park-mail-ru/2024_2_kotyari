@@ -23,7 +23,7 @@ func (d *UsersHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	req.Email = d.stringSanitizer.SanitizeString(req.Email)
 	req.Password = d.stringSanitizer.SanitizeString(req.Password)
 
-	sessionID, user, err := d.userManager.LoginUser(r.Context(), req.ToModel())
+	sessionID, user, err := d.userClientGrpc.LoginUser(r.Context(), req.ToModel())
 	if err != nil {
 		err, code := d.errResolver.Get(err)
 		utils.WriteJSON(w, code, errs.HTTPErrorResponse{
