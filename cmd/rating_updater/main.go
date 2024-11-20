@@ -7,10 +7,18 @@ import (
 	errResolveLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/grpc_api/rating_updater/app"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/product"
+	"github.com/joho/godotenv"
 	"log"
 )
 
+const configFile = ".env"
+
 func main() {
+	err := godotenv.Load(configFile)
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	dbPool, err := postgres.LoadPgxPool()
 	if err != nil {
 		log.Fatal(err)

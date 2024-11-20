@@ -2,7 +2,6 @@ package app
 
 import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/grpc_api/rating_updater/delivery"
 	"log/slog"
 	"net"
 
@@ -14,10 +13,9 @@ type App struct {
 	log    *slog.Logger
 }
 
-func NewApp(repository delivery.RatingUpdaterRepository, logger *slog.Logger, code errs.GetErrorCode) *App {
+func NewApp(repository RatingUpdaterRepository, logger *slog.Logger, code errs.GetErrorCode) *App {
 	grpcServer := grpc.NewServer()
-	handler := delivery.NewRatingUpdaterHandler(repository, logger, code)
-	Register(handler, grpcServer)
+	Register(repository, grpcServer)
 
 	return &App{
 		server: grpcServer,

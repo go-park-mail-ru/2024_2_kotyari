@@ -74,6 +74,9 @@ all-run:
 main-refresh:
 	docker stop main_go && docker rm main_go && docker rmi main-go-image && docker compose up -d
 
+rating-updater-refresh:
+	docker stop rating_updater_go && docker rm rating_updater_go && docker rmi rating-updater-go-image && docker compose up -d
+
 pg-refresh:
 	docker stop pg_db && docker rm pg_db && docker compose up -d
 

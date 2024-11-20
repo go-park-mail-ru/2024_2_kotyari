@@ -22,7 +22,7 @@ services:
       dockerfile: ./cmd/rating_updater/Dockerfile
     ports:
       - "8004:8004"
-    image: back-go-image
+    image: rating-updater-go-image
     container_name: rating_updater_go
     restart: unless-stopped
     volumes:
