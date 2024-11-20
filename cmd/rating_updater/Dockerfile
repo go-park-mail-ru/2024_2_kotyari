@@ -2,13 +2,12 @@ FROM golang:1.23.1-alpine3.20 AS build
 
 WORKDIR /var/backend
 
-RUN apk update && apk add --no-cache git && apk add --no-cache bash && apk add build-base
-
 # Copy necessary files
 COPY cmd/rating_updater rating_updater
 COPY internal internal
 COPY .env .env
 COPY docs docs
+COPY api api
 
 COPY go.mod go.mod
 COPY go.sum go.sum

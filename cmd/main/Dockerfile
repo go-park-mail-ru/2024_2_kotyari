@@ -2,9 +2,6 @@ FROM golang:1.23.1-alpine3.20 AS build
 
 WORKDIR /var/backend
 
-RUN apk update && apk add --no-cache git
-
-
 # Copy necessary files
 COPY cmd/main main
 COPY internal internal
