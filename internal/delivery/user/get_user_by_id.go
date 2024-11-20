@@ -25,8 +25,8 @@ func (d *UsersHandler) GetUserById(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
-
-	user, err := d.userManager.GetUserBySessionID(r.Context(), cookie.Value)
+	d.userClientGrpc.GetUserById()
+	user, err := d.userClientGrpc.GetUserBySessionID(r.Context(), cookie.Value)
 	if err != nil {
 		err, code := d.errResolver.Get(err)
 		utils.WriteJSON(w, code, errs.HTTPErrorResponse{

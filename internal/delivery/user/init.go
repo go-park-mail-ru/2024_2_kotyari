@@ -1,28 +1,22 @@
 package user
 
 import (
-	"context"
-
+	"github.com/go-park-mail-ru/2024_2_kotyari/api/protos/user/gen"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	sessionsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
-type usersManager interface {
-	CreateUser(ctx context.Context, user model.User) (string, model.User, error)
-	LoginUser(ctx context.Context, user model.User) (string, model.User, error)
-	GetUserBySessionID(ctx context.Context, sessionID string) (model.User, error)
-}
-
 type UsersHandler struct {
-	grpcClient     grpc_gen.UserServiceClient
-	inputValidator utils.InputValidator
-	errResolver    errs.Resolver
+	userClientGrpc grpc_gen.UserServiceClient
+	inputValidator *utils.InputValidator
+	sessionService sessionsServiceLib.SessionService
+	errResolver    errs.GetErrorCode
 }
 
-func NewUsersHandler(userManager usersManager, inputValidator *utils.InputValidator, errResolver errs.GetErrorCode) *UsersHandler {
+func NewUsersHandler(userManager grpc_gen.UserServiceClient, inputValidator *utils.InputValidator, errResolver errs.GetErrorCode) *UsersHandler {
 	return &UsersHandler{
-		userManager:    userManager,
+		userClientGrpc: userManager,
 		inputValidator: inputValidator,
 		errResolver:    errResolver,
 	}
