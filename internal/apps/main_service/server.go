@@ -1,8 +1,19 @@
+<<<<<<<< HEAD:internal/apps/main_service/server.go
 package main_service
 
 import (
 	"context"
 	"fmt"
+========
+package go_main
+
+import (
+	"context"
+	grpc_gen "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/user/gen"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+>>>>>>>> bffcdd5 ([OZON-126][improve] микросервис авторизации):internal/app/go_main/http_server.go
 	"log/slog"
 	"net/http"
 
@@ -35,7 +46,6 @@ import (
 	reviewsRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/reviews"
 	searchRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/search"
 	sessionsRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/sessions"
-	userRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/user"
 	addressServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/address"
 	cartServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/cart"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/csrf"
@@ -43,8 +53,6 @@ import (
 	imageServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/image"
 	ordersServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders"
 	reviewsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/reviews"
-	sessionsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
-	userServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/user"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"github.com/gorilla/mux"
 	"google.golang.org/grpc"
@@ -143,13 +151,21 @@ func NewServer() (*Server, error) {
 	fileService := fileServiceLib.NewFilesUsecase(fileRepo, log)
 	imageService := imageServiceLib.NewImagesUsecase(fileService)
 
-	sessionsRepo := sessionsRepoLib.NewSessionRepo(redisClient)
-	sessionsService := sessionsServiceLib.NewSessionService(sessionsRepo)
+	sessionsRepo := sessionsRepoLib.NewSessionRepo(redisClient, log)
+	sessionService := sessions.NewSessionService(sessionsRepo, log)
 	sessionsDelivery := sessionsDeliveryLib.NewSessionDelivery(sessionsRepo, errResolver)
 
-	userRepo := userRepoLib.NewUsersStore(dbPool)
-	userService := userServiceLib.NewUserService(userRepo, inputValidator, sessionsService)
-	userHandler := userDeliveryLib.NewUsersHandler(userService, inputValidator, errResolver)
+	// todo + config
+	userConn, err := grpc.NewClient(
+		"user_go:8001", grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	client := grpc_gen.NewUserServiceClient(userConn)
+
+	userHandler := userDeliveryLib.NewUsersDelivery(client, inputValidator, sessionService, errResolver, log)
 
 	categoryRepo := categoryRepoLib.NewCategoriesStore(dbPool, log)
 	categoryDelivery := categoryDeliveryLib.NewCategoriesDelivery(categoryRepo, log, errResolver)

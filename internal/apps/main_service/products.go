@@ -1,4 +1,8 @@
+<<<<<<<< HEAD:internal/apps/main_service/products.go
 package main_service
+========
+package go_main
+>>>>>>>> bffcdd5 ([OZON-126][improve] микросервис авторизации):internal/app/go_main/products.go
 
 import (
 	"net/http"

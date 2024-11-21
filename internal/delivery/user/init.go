@@ -1,23 +1,31 @@
 package user
 
 import (
+	"context"
 	"github.com/go-park-mail-ru/2024_2_kotyari/api/protos/user/gen"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
-	sessionsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
+	"log/slog"
 )
 
-type UsersHandler struct {
-	userClientGrpc grpc_gen.UserServiceClient
-	inputValidator *utils.InputValidator
-	sessionService sessionsServiceLib.SessionService
-	errResolver    errs.GetErrorCode
+type sessionCreator interface {
+	Create(ctx context.Context, userID uint32) (string, error)
 }
 
-func NewUsersHandler(userManager grpc_gen.UserServiceClient, inputValidator *utils.InputValidator, errResolver errs.GetErrorCode) *UsersHandler {
-	return &UsersHandler{
+type UsersDelivery struct {
+	userClientGrpc grpc_gen.UserServiceClient
+	inputValidator *utils.InputValidator
+	sessionService sessionCreator
+	errResolver    errs.GetErrorCode
+	log            *slog.Logger
+}
+
+func NewUsersDelivery(userManager grpc_gen.UserServiceClient, inputValidator *utils.InputValidator, sessionService sessionCreator, errResolver errs.GetErrorCode, log *slog.Logger) *UsersDelivery {
+	return &UsersDelivery{
 		userClientGrpc: userManager,
 		inputValidator: inputValidator,
+		sessionService: sessionService,
 		errResolver:    errResolver,
+		log:            log,
 	}
 }
