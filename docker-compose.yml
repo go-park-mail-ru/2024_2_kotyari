@@ -2,11 +2,11 @@ services:
   user_go:
     build:
       context: .
-      dockerfile: ./cmd/profile/Dockerfile
+      dockerfile: ./cmd/user/Dockerfile
     ports:
       - "8001:8001"
-    image: back-go-image
-    container_name: back_go
+    image: user-go-image
+    container_name: user_go
     restart: unless-stopped
     volumes:
       - ./files:/app/files

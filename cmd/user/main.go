@@ -1,10 +1,11 @@
 package main
 
 import (
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/app/user"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/logger"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/postgres"
+	user2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/grpc_api/user"
 	userRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/user"
-	sessionsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
 	userServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/user"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"github.com/joho/godotenv"
@@ -13,6 +14,7 @@ import (
 
 const configFile = ".env"
 
+// todo вынос в app
 func main() {
 	err := godotenv.Load(configFile)
 	if err != nil {
@@ -29,16 +31,14 @@ func main() {
 	// todo добавить
 	inputValidator := utils.NewInputValidator()
 
-	sessionRepo := session
-	sessionService := sessionsServiceLib.SessionService{}
 	userRepo := userRepoLib.NewUsersStore(dbPool, slogLog)
 	userService := userServiceLib.NewUserService(userRepo, inputValidator, slogLog)
 
-	delivery := profile.NewProfilesGrpc(profileRepo, profileService, slogLog)
+	delivery := user2.NewUsersGrpc(userService, userRepo, slogLog)
 
-	app := profilesGrpc.NewProfilesApp(slogLog, delivery)
+	app := user.NewUsersApp(slogLog, delivery)
 
-	err = app.Run("0.0.0.0:8003")
+	err = app.Run("0.0.0.0:8001")
 	if err != nil {
 		log.Fatalf("err %v", err)
 	}

@@ -3,8 +3,7 @@ package user
 import (
 	"context"
 	"errors"
-	"fmt"
-	"log"
+	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
@@ -18,13 +17,21 @@ func (us *UsersStore) GetUserByEmail(ctx context.Context, userModel model.User) 
 
 	var user model.User
 
-	err := us.db.QueryRow(ctx, query, userModel.Email).Scan(&user.ID, &user.Username, &user.Password, &user.City)
+	err := us.db.QueryRow(ctx, query, userModel.Email).
+		Scan(&user.ID, &user.Username, &user.Password, &user.City)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
+			us.log.Error("[ UsersStore.GetUserByEmail ] Юзер не найден",
+				slog.String("error", err.Error()),
+			)
+
 			return model.User{}, errs.UserDoesNotExist
 		}
 
-		log.Println(fmt.Errorf("[UserStore.GetUserByEmail] An error occured: %w", err))
+		us.log.Error("[ UsersStore.GetUserByEmail ] Ошибка при получении юзера из бд",
+			slog.String("error", err.Error()),
+		)
+
 		return model.User{}, err
 	}
 

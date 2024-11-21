@@ -1,4 +1,4 @@
-package app
+package go_main
 
 import (
 	"github.com/gorilla/mux"

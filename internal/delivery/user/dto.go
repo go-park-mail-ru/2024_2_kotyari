@@ -23,32 +23,31 @@ type UsersDefaultResponse struct {
 	City     string `json:"city"`
 }
 
-func (ur *UsersSignUpRequest) ToGrpc() grpc_gen.UsersSignUpRequest {
-	return grpc_gen.UsersSignUpRequest{
-		Email:          ur.Email,
-		Username:       ur.Username,
-		HashedPassword: ur.Password,
-	}
-}
-
-func (ur *UsersSignUpRequest) ToModel() model.User {
+func (us *UsersSignUpRequest) ToModel() model.User {
 	return model.User{
-		Email:    ur.Email,
-		Username: ur.Username,
-		Password: ur.Password,
-	}
-}
-
-func (ur) FromModelToGrpcRequest() grpc_gen.UsersSignUpRequest {
-	return grpc_gen.UsersSignUpRequest{
-		Email:          ur.Email,
-		Username:       ur.Username,
-		HashedPassword: ur.Password,
+		Email:    us.Email,
+		Username: us.Username,
+		Password: us.Password,
 	}
 }
 
 func (ul *UsersLoginRequest) ToModel() model.User {
 	return model.User{
+		Email:    ul.Email,
+		Password: ul.Password,
+	}
+}
+
+func (us *UsersSignUpRequest) ToGrpcSignupRequest() *grpc_gen.UsersSignUpRequest {
+	return &grpc_gen.UsersSignUpRequest{
+		Username: us.Username,
+		Email:    us.Email,
+		Password: us.Password,
+	}
+}
+
+func (ul *UsersLoginRequest) ToGrpcLoginRequest() *grpc_gen.UsersLoginRequest {
+	return &grpc_gen.UsersLoginRequest{
 		Email:    ul.Email,
 		Password: ul.Password,
 	}

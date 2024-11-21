@@ -3,23 +3,18 @@ package user
 import (
 	"context"
 	proto "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/user/gen"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"log/slog"
 )
 
-func (um *GrpcUserManager) CreateUser(ctx context.Context, in *proto.UsersSignUpRequest) (*proto.UsersDefaultResponse, error) {
-	email := in.GetEmail()
-	username := in.GetUsername()
-	password := in.GetPassword()
-
-	userModel, err := um.usersManager.CreateUser(ctx, model.User{
-		Email:    email,
-		Username: username,
-		Password: password,
-	})
-
+func (um *UsersGrpc) CreateUser(ctx context.Context, in *proto.UsersSignUpRequest) (*proto.UsersDefaultResponse, error) {
+	userModel, err := um.usersManager.CreateUser(ctx, toModel(in))
 	if err != nil {
-		return &proto.UsersDefaultResponse{}, err
+		um.log.Error("[ UsersGrpc.CreateUser ] Ошибка при отдаче на уровень usecase", slog.String("error", err.Error()))
+		return nil, err
 	}
+
+	um.log.Info("[ UsersGrpc.CreateUser ]", slog.Any("user", userModel))
+
 	return &proto.UsersDefaultResponse{
 		UserId:   userModel.ID,
 		Username: userModel.Username,

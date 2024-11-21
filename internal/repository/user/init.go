@@ -5,7 +5,6 @@ import (
 	"log/slog"
 )
 
-// todo: везде логерр добавить
 type UsersStore struct {
 	db  *pgxpool.Pool
 	log *slog.Logger
