@@ -1,8 +1,10 @@
 package utils
 
 const (
-	SearchFieldParam = "sort"
-	SearchOrderParam = "order"
+	SearchFieldParam  = "sort"
+	SearchOrderParam  = "order"
+	DefaultFieldParam = "date"
+	DefaultOrderParam = "desc"
 
 	ascSortOrderOption  = "asc"
 	descSortOrderOption = "desc"

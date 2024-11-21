@@ -10,5 +10,4 @@ message UpdateRatingRequest {
 
 message UpdateRatingResponse {
   bool success = 1;
-  string message = 2;
 }

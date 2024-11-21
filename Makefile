@@ -106,7 +106,7 @@ revert-migrations:
 	@migrate -path $(MIGRATIONS_DIR) -database "$(DB_URL)" down
 
 
-
+back-refresh: main-refresh rating-updater-refresh
 
 # Правило генерации для каждой сущности
 $(ENTITIES):
