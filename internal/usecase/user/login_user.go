@@ -8,20 +8,15 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
-func (us *UsersService) LoginUser(ctx context.Context, user model.User) (string, model.User, error) {
+func (us *UsersService) LoginUser(ctx context.Context, user model.User) (model.User, error) {
 	dbUser, err := us.userRepo.GetUserByEmail(ctx, user)
 	if err != nil {
-		return "", model.User{}, err
+		return model.User{}, err
 	}
 
 	if !utils.VerifyPassword(dbUser.Password, user.Password) {
-		return "", model.User{}, errs.WrongCredentials
+		return model.User{}, errs.WrongCredentials
 	}
 
-	sessionID, err := us.sessionService.Create(ctx, dbUser.ID)
-	if err != nil {
-		return "", model.User{}, err
-	}
-
-	return sessionID, dbUser, nil
+	return dbUser, nil
 }

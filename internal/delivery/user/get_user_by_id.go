@@ -1,7 +1,7 @@
 package user
 
 import (
-	"errors"
+	grpc_gen "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/user/gen"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
@@ -9,24 +9,11 @@ import (
 )
 
 func (d *UsersHandler) GetUserById(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie(utils.SessionName)
-	if err != nil {
-		if errors.Is(err, http.ErrNoCookie) {
-			utils.WriteJSON(w, http.StatusUnauthorized, errs.HTTPErrorResponse{
-				ErrorMessage: errs.UserNotAuthorized.Error(),
-			})
-
-			return
-		}
-
-		utils.WriteJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
-			ErrorMessage: errs.InternalServerError.Error(),
-		})
-
-		return
+	userID, ok := utils.GetContextSessionUserID(r.Context())
+	if !ok {
+		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)
 	}
-	d.userClientGrpc.GetUserById()
-	user, err := d.userClientGrpc.GetUserBySessionID(r.Context(), cookie.Value)
+	usersDefaultResponse, err := d.userClientGrpc.GetUserById(r.Context(), &grpc_gen.GetUserByIdRequest{UserId: userID})
 	if err != nil {
 		err, code := d.errResolver.Get(err)
 		utils.WriteJSON(w, code, errs.HTTPErrorResponse{
@@ -37,7 +24,7 @@ func (d *UsersHandler) GetUserById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJSON(w, http.StatusOK, UsersDefaultResponse{
-		Username: user.Username,
-		City:     user.City,
+		Username: usersDefaultResponse.Username,
+		City:     usersDefaultResponse.City,
 	})
 }

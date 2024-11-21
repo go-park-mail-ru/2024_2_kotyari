@@ -5,5 +5,5 @@ option go_package = "https://github.com/go-park-mail-ru/2024_2_kotyari/user/grpc
 
 message UsersLoginRequest {
   string email = 1;
-  string hashed_password = 2;
+  string password = 2;
 }
