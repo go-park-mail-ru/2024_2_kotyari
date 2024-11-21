@@ -171,7 +171,11 @@ func NewServer() (*Server, error) {
 	csrfHandler := csrfDeliveryLib.NewCsrfDelivery(csrfUsecase, sessionsDelivery)
 
 	reviewsRepo := reviewsRepoLib.NewReviewsStore(dbPool, log)
-	reviewsManager := reviewsServiceLib.NewReviewsService(reviewsRepo, inputValidator, log)
+	reviewsManager, err := reviewsServiceLib.NewReviewsService(reviewsRepo, inputValidator, log)
+	if err != nil {
+		return nil, err
+	}
+
 	reviewsHandler := reviewsDeliveryLib.NewReviewsHandler(reviewsManager, reviewsRepo, inputValidator, errResolver, log)
 	reviewsApp := NewReviewsApp(router, reviewsHandler)
 

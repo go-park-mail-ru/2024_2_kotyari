@@ -2,6 +2,9 @@ package reviews
 
 import (
 	"context"
+	ratingUpdater "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/rating_updater/gen"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
@@ -19,12 +22,26 @@ type ReviewsService struct {
 	reviewsRepo    reviewsRepo
 	inputValidator *utils.InputValidator
 	log            *slog.Logger
+	client         ratingUpdater.RatingUpdaterClient
 }
 
-func NewReviewsService(repo reviewsRepo, validator *utils.InputValidator, logger *slog.Logger) *ReviewsService {
+func NewReviewsService(repo reviewsRepo, validator *utils.InputValidator, logger *slog.Logger) (*ReviewsService, error) {
+	ratingUpdaterConnection, err := grpc.NewClient("rating_updater_go:8004",
+		grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	if err != nil {
+		logger.Error("[NewReviewsService] Failed to establish gRPC connection",
+			slog.String("error", err.Error()))
+
+		return nil, err
+	}
+
+	client := ratingUpdater.NewRatingUpdaterClient(ratingUpdaterConnection)
+
 	return &ReviewsService{
 		reviewsRepo:    repo,
 		inputValidator: validator,
 		log:            logger,
-	}
+		client:         client,
+	}, nil
 }
