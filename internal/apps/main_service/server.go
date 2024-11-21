@@ -148,7 +148,7 @@ func NewServer() (*Server, error) {
 	sessionsDelivery := sessionsDeliveryLib.NewSessionDelivery(sessionsRepo, errResolver)
 
 	userRepo := userRepoLib.NewUsersStore(dbPool)
-	userService := userServiceLib.NewUserService(userRepo, sessionsService)
+	userService := userServiceLib.NewUserService(userRepo, inputValidator, sessionsService)
 	userHandler := userDeliveryLib.NewUsersHandler(userService, inputValidator, errResolver)
 
 	categoryRepo := categoryRepoLib.NewCategoriesStore(dbPool, log)
@@ -256,6 +256,7 @@ func (s *Server) setupRoutes() {
 
 	authSub := s.r.Methods(http.MethodGet, http.MethodPost, http.MethodPut).Subrouter()
 	authSub.HandleFunc("/csrf", s.csrf.GetCsrf).Methods(http.MethodGet)
+	authSub.HandleFunc("/", s.auth.GetUserById).Methods(http.MethodGet)
 	authSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 
 	s.r.HandleFunc("/files/{name}", s.files.GetImage).Methods(http.MethodGet)
@@ -277,7 +278,6 @@ func (s *Server) setupRoutes() {
 	reviewsSub.Use(middlewares.RequestIDMiddleware)
 	reviewsSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 
-	s.r.HandleFunc("/", s.auth.GetUserById).Methods(http.MethodGet)
 }
 
 func (s *Server) Run() error {

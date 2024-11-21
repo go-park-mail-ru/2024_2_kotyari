@@ -8,13 +8,18 @@ import (
 
 type usersManager interface {
 	CreateUser(ctx context.Context, user model.User) (model.User, error)
-	LoginUser(ctx context.Context, user model.User) (string, model.User, error)
+	LoginUser(ctx context.Context, user model.User) (model.User, error)
 	GetUserBySessionID(ctx context.Context, sessionID string) (model.User, error)
+}
+
+type userGetter interface {
+	GetUserByUserID(ctx context.Context, id uint32) (model.User, error)
 }
 
 type GrpcUserManager struct {
 	proto.UnimplementedUserServiceServer
 	usersManager usersManager
+	userGetter   userGetter
 }
 
 func NewUsersHandler(usersManager usersManager) *GrpcUserManager {

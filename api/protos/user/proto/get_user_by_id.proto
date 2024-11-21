@@ -5,5 +5,5 @@ option go_package = "https://github.com/go-park-mail-ru/2024_2_kotyari/user/grpc
 
 
 message GetUserByIdRequest {
-  string user_id = 1;
+  uint32 user_id = 1;
 }
