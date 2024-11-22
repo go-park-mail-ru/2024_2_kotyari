@@ -44,16 +44,6 @@ help:
 	@echo 'For this tools to work you need to have migrate tool to be installed'
 	@echo 'You can install it by running this command: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest'
 
-build:
-	go build -o ${BINARY_NAME} ./cmd/main.go
-
-run:
-	go run ./cmd/main.go
-
-clean:
-	go clean
-	rm ${BINARY_NAME}
-
 test:
 	go test ./...
 
@@ -66,7 +56,7 @@ fmt:
 	go fmt ./...
 
 go-build:
-	docker build -t back-go-image:latest .
+	docker build -t main-go-image:latest .
 
 all-run:
 	docker compose up -d

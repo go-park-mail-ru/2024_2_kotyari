@@ -3,35 +3,33 @@ package main
 import (
 	"log"
 
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/logger"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/postgres"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/grpc_api/rating_updater/app"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/grpc_api/rating_updater/app/usecase"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/product"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/reviews"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/apps/rating_updater"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs"
 	"github.com/joho/godotenv"
 )
 
-const configFile = ".env"
+// ratingUpdaterService / TODO: Вынести в другое место
+const ratingUpdaterService = "rating_updater"
 
 func main() {
-	err := godotenv.Load(configFile)
+	err := godotenv.Load(configs.EnvPath)
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 
-	dbPool, err := postgres.LoadPgxPool()
+	v, err := configs.SetupViper()
+	if err != nil {
+		log.Fatal("Error loading viper", err.Error())
+	}
+
+	config := v.GetStringMap(ratingUpdaterService)
+
+	ratingUpdaterApp, err := rating_updater.NewApp(config)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	initLogger := logger.InitLogger()
-	productsRepo := product.NewProductsStore(dbPool, initLogger)
-	reviewsRepo := reviews.NewReviewsStore(dbPool, initLogger)
-	productUpdaterManager := usecase.NewRatingUpdateService(productsRepo, reviewsRepo, initLogger)
-
-	grpcApp := app.NewApp(productUpdaterManager, initLogger)
-	err = grpcApp.Run()
+	err = ratingUpdaterApp.Run()
 	if err != nil {
 		log.Fatal(err)
 	}

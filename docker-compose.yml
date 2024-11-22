@@ -9,7 +9,7 @@ services:
     container_name: main_go
     restart: unless-stopped
     volumes:
-      - ./files:/app/files
+      - ./files:/delivery/files
     networks:
       - app-network
     depends_on:
@@ -26,13 +26,13 @@ services:
     container_name: rating_updater_go
     restart: unless-stopped
     volumes:
-      - ./files:/app/files
+      - ./files:/delivery/files
     networks:
       - app-network
     depends_on:
       - pg_db
       - redis_service
-      - go_back
+      - main_go
 
   pg_db:
     image: postgres:16.4

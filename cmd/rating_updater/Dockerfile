@@ -21,7 +21,7 @@ RUN apk add bash
 COPY --from=build /var/backend/rating_updater /app/rating_updater
 COPY --from=build /var/backend/.env /app/.env
 
-RUN mkdir -p /app/files
+RUN mkdir -p /delivery/files
 COPY files /app/files
 
 WORKDIR /app

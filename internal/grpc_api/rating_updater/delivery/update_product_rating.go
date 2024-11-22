@@ -1,4 +1,4 @@
-package app
+package delivery
 
 import (
 	"context"
@@ -11,22 +11,22 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (r *RatingUpdaterServer) UpdateRating(ctx context.Context, request *ratingUpdater.UpdateRatingRequest) (*ratingUpdater.UpdateRatingResponse, error) {
+func (r *RatingUpdaterGRPC) UpdateRating(ctx context.Context, request *ratingUpdater.UpdateRatingRequest) (*ratingUpdater.UpdateRatingResponse, error) {
 	err := r.manager.UpdateProductRating(ctx, request.GetProductId())
 	if err != nil {
 		if errors.Is(err, errs.ProductNotFound) {
-			r.log.Error("[RatingUpdaterServer.UpdateRating] Product not found", slog.String("error", err.Error()))
+			r.log.Error("[RatingUpdaterGRPC.UpdateRating] Product not found", slog.String("error", err.Error()))
 
 			return nil, status.Error(codes.NotFound, "Product not found")
 		}
 
 		if errors.Is(err, errs.NoReviewsForProduct) {
-			r.log.Error("[RatingUpdaterServer.UpdateRating] No reviews for product", slog.String("error", err.Error()))
+			r.log.Error("[RatingUpdaterGRPC.UpdateRating] No reviews for product", slog.String("error", err.Error()))
 
 			return nil, status.Error(codes.NotFound, "Reviews for product not found")
 		}
 
-		r.log.Error("[RatingUpdaterServer.UpdateRating] Unexpected error occurred", slog.String("error", err.Error()))
+		r.log.Error("[RatingUpdaterGRPC.UpdateRating] Unexpected error occurred", slog.String("error", err.Error()))
 
 		return nil, status.Error(codes.NotFound, errs.InternalServerError.Error())
 	}

@@ -1,23 +1,25 @@
-package app
+package delivery
 
 import (
 	"context"
 	"log/slog"
 
 	ratingUpdater "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/rating_updater/gen"
-	"google.golang.org/grpc"
 )
 
 type RatingUpdaterManager interface {
 	UpdateProductRating(ctx context.Context, productID uint32) error
 }
 
-type RatingUpdaterServer struct {
+type RatingUpdaterGRPC struct {
 	manager RatingUpdaterManager
 	log     *slog.Logger
 	ratingUpdater.UnimplementedRatingUpdaterServer
 }
 
-func Register(manager RatingUpdaterManager, logger *slog.Logger, server *grpc.Server) {
-	ratingUpdater.RegisterRatingUpdaterServer(server, &RatingUpdaterServer{manager: manager, log: logger})
+func NewRatingUpdaterGRPC(manager RatingUpdaterManager, logger *slog.Logger) *RatingUpdaterGRPC {
+	return &RatingUpdaterGRPC{
+		manager: manager,
+		log:     logger,
+	}
 }
