@@ -53,6 +53,9 @@ var (
 	ReviewNotFound                = errors.New("отзыв не найден")
 	ReviewAlreadyExists           = errors.New("отзыв уже существует")
 	NoTitlesToSuggest             = errors.New("отсутствуют продукты для саджестов")
+	NoStatistics                  = errors.New("нет статистики")
+	NoCSATReviews                 = errors.New("нет оценок сервиса")
+	NoUserCSAT                    = errors.New("у пользователя нет csat")
 )
 
 type ErrorStore struct {
@@ -114,6 +117,9 @@ func NewErrorStore() *ErrorStore {
 			ReviewNotFound:                http.StatusNotFound,
 			ReviewAlreadyExists:           http.StatusConflict,
 			NoTitlesToSuggest:             http.StatusNotFound,
+			NoStatistics:                  http.StatusNotFound,
+			NoCSATReviews:                 http.StatusNotFound,
+			NoUserCSAT:                    http.StatusNotFound,
 		},
 	}
 }
