@@ -1,18 +1,38 @@
 services:
   go_back:
-    build: .
+    build:
+      context: .
+      dockerfile: ./cmd/main/Dockerfile
     ports:
       - "8000:8000"
     image: back-go-image
     container_name: back_go
     restart: unless-stopped
     volumes:
-      - ./files:/app/files
+      - ./files:/apps/files
     networks:
       - app-network
     depends_on:
       - pg_db
       - redis_service
+
+  csat_go:
+    build:
+      context: .
+      dockerfile: ./cmd/csat/Dockerfile
+    ports:
+      - "8005:8005"
+    image: csat-go-image
+    container_name: csat_go
+    restart: unless-stopped
+    volumes:
+      - ./files:/app/files
+    networks:
+      - app-network
+    depends_on:
+      - csat_db
+      - redis_service
+      - go_back
 
   pg_db:
     image: postgres:16.4
@@ -28,6 +48,24 @@ services:
       - ./assets/init.sql:/docker-entrypoint-initdb.d/init.sql
       - pg_data:/var/lib/postgresql/data/
     container_name: pg_db
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  csat_db:
+    image: postgres:16.4
+    ports:
+      - "54321:5432"
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${CSAT_USERNAME}
+      - POSTGRES_PASSWORD=${CSAT_PASSWORD}
+      - POSTGRES_DB=${CSAT_NAME}
+    volumes:
+      - ./assets/init_csat.sql:/docker-entrypoint-initdb.d/init.sql
+      - csat_data:/var/lib/postgresql/data/
+    container_name: csat_db
     restart: unless-stopped
     networks:
       - app-network
@@ -52,6 +90,7 @@ volumes:
   pg_data:
   redis_data:
   go_back:
+  csat_data:
 
 networks:
   app-network:
