@@ -239,3 +239,4 @@ ALTER TABLE products ADD COLUMN tsv tsvector GENERATED ALWAYS AS (
     ) STORED;
 
 CREATE INDEX idx_products_tsv ON products USING GIN (tsv);
+
