@@ -21,7 +21,7 @@ func InitLogger() *slog.Logger {
 		logger = newLogger(slog.LevelInfo)
 	default:
 		logFile := &lumberjack.Logger{
-			Filename:   "apps.log",
+			Filename:   "app.log",
 			MaxSize:    10, // MB
 			MaxBackups: 3,  // Сколько старых файлов хранить
 			MaxAge:     3,  // Сколько дней хранить файлы
