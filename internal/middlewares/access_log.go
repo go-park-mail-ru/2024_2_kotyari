@@ -34,7 +34,7 @@ func AccessLogMiddleware(log *slog.Logger) func(http.Handler) http.Handler {
 				log.Error("[AccessLogMiddleware] Empty requestID")
 			}
 
-			log.Info("Access Log",
+			log.Info("Access log",
 				"method", r.Method,
 				"url", r.URL.String(),
 				"remote_addr", r.RemoteAddr,
