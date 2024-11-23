@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func (cs *CartsStore) RemoveCartProduct(ctx context.Context, productID uint32, count int32) error {
+func (cs *CartsStore) RemoveCartProduct(ctx context.Context, productID uint32, count int32, userID uint32) error {
 	tx, err := cs.db.BeginTx(ctx, pgx.TxOptions{
 		AccessMode: pgx.ReadWrite,
 	})
@@ -34,7 +34,7 @@ func (cs *CartsStore) RemoveCartProduct(ctx context.Context, productID uint32, c
 		}
 	}()
 
-	err = cs.deleteCartProduct(ctx, productID)
+	err = cs.deleteCartProduct(ctx, productID, userID)
 	if err != nil {
 		cs.log.Error("[CartStore.RemoveCartProduct] Error deleting product from cart", slog.String("error", err.Error()))
 
@@ -51,14 +51,14 @@ func (cs *CartsStore) RemoveCartProduct(ctx context.Context, productID uint32, c
 	return nil
 }
 
-func (cs *CartsStore) deleteCartProduct(ctx context.Context, productID uint32) error {
+func (cs *CartsStore) deleteCartProduct(ctx context.Context, productID uint32, userID uint32) error {
 	const deleteQuery = `
 		update carts
 		set count = 0, is_deleted = true, is_selected = false
-		where product_id = $1;
+		where product_id = $1 and user_id = $2;
 	`
 
-	commandTag, err := cs.db.Exec(ctx, deleteQuery, productID)
+	commandTag, err := cs.db.Exec(ctx, deleteQuery, productID, userID)
 	if err != nil {
 		cs.log.Error("[CartsStore.RemoveCartProduct] Error occurred when removing cart", "error", slog.String("error", err.Error()))
 

@@ -2,15 +2,13 @@ package orders
 
 import (
 	"errors"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v5"
 	"log/slog"
 	"net/http"
-	"time"
-
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
 func (h *OrdersHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +19,6 @@ func (h *OrdersHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	idStr := vars["id"]
-	deliveryDateStr := vars["delivery_date"]
 
 	id, err := uuid.Parse(idStr)
 	if err != nil {
@@ -30,16 +27,7 @@ func (h *OrdersHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var deliveryDate time.Time
-	if deliveryDate, err = time.Parse("2006-01-02T15:04:05.000Z", deliveryDateStr); err != nil {
-		if deliveryDate, err = time.Parse("2006-01-02T15:04:05.000000Z", deliveryDateStr); err != nil {
-			h.logger.Error("[delivery.GetOrderById] Invalid delivery date format", slog.String("deliveryDate", deliveryDateStr))
-			utils.WriteErrorJSONByError(w, errs.ErrInvalidDeliveryDateFormat, h.errResolver)
-			return
-		}
-	}
-
-	order, err := h.ordersManager.GetOrderById(r.Context(), id, deliveryDate, userID)
+	order, err := h.ordersManager.GetOrderById(r.Context(), id, userID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			h.logger.Warn("[delivery.GetOrderById] Order not found", slog.String("orderID", id.String()))

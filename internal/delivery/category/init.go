@@ -10,7 +10,7 @@ import (
 
 type categoriesRepository interface {
 	GetAllCategories(ctx context.Context) ([]model.Category, error)
-	GetProductsByCategoryLink(ctx context.Context, categoryLink string) ([]model.ProductCatalog, error)
+	GetProductsByCategoryLink(ctx context.Context, categoryLink string, sortField string, sortOrder string) ([]model.ProductCatalog, error)
 }
 
 type CategoriesDelivery struct {

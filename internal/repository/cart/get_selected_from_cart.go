@@ -3,12 +3,12 @@ package cart
 import (
 	"context"
 	"errors"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 	"strconv"
 	"time"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const basicUrl = "/catalog/product/"
@@ -16,10 +16,10 @@ const basicUrl = "/catalog/product/"
 func mapRowToCartProduct(
 	id pgtype.Int4,
 	title pgtype.Text,
-	price pgtype.Float8,
+	price pgtype.Uint32,
 	image pgtype.Text,
-	weight pgtype.Float8,
-	quantity pgtype.Int4,
+	weight pgtype.Float4,
+	quantity pgtype.Uint32,
 ) model.CartProductForOrder {
 	product := model.CartProductForOrder{}
 
@@ -29,10 +29,10 @@ func mapRowToCartProduct(
 		product.URL = ""
 	}
 	product.Title = title.String
-	product.Price = float32(price.Float64)
+	product.Price = price.Uint32
 	product.Image = image.String
-	product.Weight = float32(weight.Float64)
-	product.Quantity = uint16(quantity.Int32)
+	product.Weight = weight.Float32
+	product.Quantity = quantity.Uint32
 	product.DeliveryDate = time.Now().Add(72 * time.Hour)
 
 	return product
@@ -70,10 +70,10 @@ func (cs *CartsStore) GetSelectedFromCart(ctx context.Context, userID uint32) (*
 		var (
 			id           pgtype.Int4
 			title        pgtype.Text
-			price        pgtype.Float8
+			price        pgtype.Uint32
 			image        pgtype.Text
-			weight       pgtype.Float8
-			quantity     pgtype.Int4
+			weight       pgtype.Float4
+			quantity     pgtype.Uint32
 			deliveryDate pgtype.Timestamptz
 		)
 

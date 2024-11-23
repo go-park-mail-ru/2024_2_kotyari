@@ -2,58 +2,99 @@ package postgres
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs"
+	"github.com/joho/godotenv"
 	"log"
 	"net/url"
+	"os"
 	"time"
 
-	"github.com/caarlos0/env"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const (
+	MainDBCFG = "main_db"
+	CSATDBCFG = "csat_db"
+
 	defaultMaxConnections            = 90
 	defaultMinConnections            = 0
 	defaultMaxConnectionLifeTime     = time.Hour * 2
 	defaultMinConnectionIdleLifeTime = time.Minute * 30
 )
 
-type postgresConfig struct {
-	Username string `env:"DB_USERNAME"`
-	Password string `env:"DB_PASSWORD"`
-	DBName   string `env:"DB_NAME"`
+type postgresVarsConfig struct {
+	UsernameVar  string `mapstructure:"db_username"`
+	PasswordVar  string `mapstructure:"db_password"`
+	DBNameVar    string `mapstructure:"db_name"`
+	DockerDBName string `mapstructure:"docker_name"`
 }
 
-func loadPGConfig() (postgresConfig, error) {
-	cfg := postgresConfig{}
+type postgresConfig struct {
+	Username     string
+	Password     string
+	DBName       string
+	DockerDbName string
+}
 
-	if err := env.Parse(&cfg); err != nil {
+func loadPGConfig(configName string) (postgresConfig, error) {
+	v, err := configs.SetupViper()
+	if err != nil {
+		log.Println("Error loading viper", err.Error())
+
 		return postgresConfig{}, err
 	}
 
-	emptyConfig := postgresConfig{}
-	if cfg == emptyConfig {
-		return postgresConfig{}, errors.New("[loadPGConfig] postgres config is empty")
+	if err = godotenv.Load(configs.EnvPath); err != nil {
+		log.Println("Error loading .env", err.Error())
+		return postgresConfig{}, err
 	}
 
+	var cfgVars postgresVarsConfig
+	if err = v.Sub(configName).Unmarshal(&cfgVars); err != nil {
+		log.Println("Viper unmarshalling error", err.Error())
+
+		return postgresConfig{}, err
+	}
+
+	cfg, err := parseEnvVars(cfgVars)
+	if err != nil {
+		log.Println("Error loading .env vars", err.Error())
+
+		return postgresConfig{}, err
+	}
 	log.Printf("postgres config load success")
 
 	return cfg, nil
 }
 
+func parseEnvVars(varsConfig postgresVarsConfig) (postgresConfig, error) {
+	dbUsername := os.Getenv(varsConfig.UsernameVar)
+	dbPassword := os.Getenv(varsConfig.PasswordVar)
+	dbName := os.Getenv(varsConfig.DBNameVar)
+	dockerDBName := os.Getenv(varsConfig.DockerDBName)
+
+	return postgresConfig{
+		Username:     dbUsername,
+		Password:     dbPassword,
+		DBName:       dbName,
+		DockerDbName: dockerDBName,
+	}, nil
+}
+
 func newPostgresConfigURL(p postgresConfig) string {
-	link := "postgres://%s:%s@pg_db/%s"
+	link := "postgres://%s:%s@%s/%s"
 	//link := "postgres://%s:%s@localhost:54320/%s"
 	return fmt.Sprintf(link,
 		url.QueryEscape(p.Username),
 		url.QueryEscape(p.Password),
+		p.DockerDbName,
 		p.DBName,
 	)
 }
 
-func LoadPgxPool() (*pgxpool.Pool, error) {
-	cfg, err := loadPGConfig()
+func LoadPgxPool(configName string) (*pgxpool.Pool, error) {
+	cfg, err := loadPGConfig(configName)
 	if err != nil {
 		return nil, err
 	}

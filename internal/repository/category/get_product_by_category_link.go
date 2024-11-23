@@ -2,21 +2,36 @@ package category
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
-func (cs *CategoriesStore) GetProductsByCategoryLink(ctx context.Context, categoryLink string) ([]model.ProductCatalog, error) {
-	const query = `SELECT p.id, p.title, p.price, p.original_price,
+func (cs *CategoriesStore) GetProductsByCategoryLink(ctx context.Context, categoryLink string, sortField string, sortOrder string) ([]model.ProductCatalog, error) {
+
+	fieldSortOptions := map[string]string{
+		"rating": "p.rating",
+		"price":  "p.price",
+	}
+
+	field, ok := fieldSortOptions[sortField]
+	if !ok {
+		field = "p.created_at"
+	}
+
+	sortOrder = utils.ReturnSortOrderOption(sortOrder)
+
+	query := fmt.Sprintf(`SELECT p.id, p.title, p.price, p.original_price,
 						   p.discount, p.image_url, p.description
 					FROM products p
 						JOIN product_categories pc ON p.id = pc.product_id
 						JOIN categories c ON pc.category_id = c.id
 					WHERE p.active = true AND p.count > 0 AND c.link_to = $1  -- Parameter for category name
-					ORDER BY p.created_at DESC;
-					`
+					ORDER BY %s %s;
+					`, field, sortOrder)
 
 	rows, err := cs.db.Query(ctx, query, categoryLink)
 	if err != nil {

@@ -1,4 +1,4 @@
-package morders
+package orders
 
 import (
 	"context"
@@ -27,7 +27,7 @@ func (m *OrdersManager) CreateOrderFromCart(ctx context.Context, address string,
 		return nil, errors.New("cart is empty for user: " + strconv.Itoa(int(userID)))
 	}
 
-	var totalPrice uint16
+	var totalPrice uint32
 	productOrders := make([]order.ProductOrder, 0, len(cartItems))
 
 	for _, item := range cartItems {
@@ -44,12 +44,12 @@ func (m *OrdersManager) CreateOrderFromCart(ctx context.Context, address string,
 		Products:     cartItems,
 	}
 
-	order, err := m.repo.CreateOrderFromCart(ctx, orderData)
+	orderFromCart, err := m.repo.CreateOrderFromCart(ctx, orderData)
 	if err != nil {
-		m.logger.Error("failed to create order in repo", slog.String("error", err.Error()), slog.Uint64("user_id", uint64(userID)))
+		m.logger.Error("failed to create orderFromCart in repo", slog.String("error", err.Error()), slog.Uint64("user_id", uint64(userID)))
 		return nil, err
 	}
 
 	m.logger.Info("CreateOrderFromCart completed successfully", slog.String("order_id", orderID.String()), slog.Uint64("user_id", uint64(userID)))
-	return order, nil
+	return orderFromCart, nil
 }

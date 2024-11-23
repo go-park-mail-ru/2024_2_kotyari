@@ -21,7 +21,7 @@ func (cm *CartManager) GetSelectedFromCart(ctx context.Context, userID uint32) (
 		totalProductWeight := product.Weight * float32(product.Quantity)
 		cart.TotalItems += product.Quantity
 		cart.TotalWeight += totalProductWeight
-		cart.FinalPrice += product.Price * float32(product.Quantity)
+		cart.FinalPrice += product.Price * product.Quantity
 
 		if _, exists := deliveryDatesMap[product.DeliveryDate]; !exists {
 			deliveryDatesMap[product.DeliveryDate] = &model.DeliveryDateForOrder{

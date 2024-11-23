@@ -49,6 +49,15 @@ var (
 	ErrFileTypeNotAllowed         = errors.New("тип файла не допустим")
 	RequestIDNotFound             = errors.New("не удалось получить request-id")
 	NoSelectedProducts            = errors.New("не выбрано ни одного продукта")
+	NoReviewsForProduct           = errors.New("для этого продукта нет отзывов")
+	ReviewNotFound                = errors.New("отзыв не найден")
+	ReviewAlreadyExists           = errors.New("отзыв уже существует")
+	NoTitlesToSuggest             = errors.New("отсутствуют продукты для саджестов")
+	NoStatistics                  = errors.New("нет статистики")
+	NoCSATReviews                 = errors.New("нет оценок сервиса")
+	NoUserCSAT                    = errors.New("у пользователя нет csat")
+	UserCSATAlreadyExists         = errors.New("csat дял пользователя уже существует")
+	NoQuestionText                = errors.New("нет вопросов по этому типу")
 )
 
 type ErrorStore struct {
@@ -106,6 +115,15 @@ func NewErrorStore() *ErrorStore {
 			ErrGetNearestDeliveryDate:     http.StatusNotFound,
 			RequestIDNotFound:             http.StatusBadRequest,
 			NoSelectedProducts:            http.StatusBadRequest,
+			NoReviewsForProduct:           http.StatusNotFound,
+			ReviewNotFound:                http.StatusNotFound,
+			ReviewAlreadyExists:           http.StatusConflict,
+			NoTitlesToSuggest:             http.StatusNotFound,
+			NoStatistics:                  http.StatusNotFound,
+			NoCSATReviews:                 http.StatusNotFound,
+			NoUserCSAT:                    http.StatusNotFound,
+			UserCSATAlreadyExists:         http.StatusConflict,
+			NoQuestionText:                http.StatusNotFound,
 		},
 	}
 }

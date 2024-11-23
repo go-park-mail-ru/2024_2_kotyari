@@ -1,9 +1,9 @@
 package model
 
 type CartForOrder struct {
-	TotalItems             uint16
+	TotalItems             uint32
 	TotalWeight            float32
-	FinalPrice             float32
+	FinalPrice             uint32
 	DeliveryDates          []DeliveryDateForOrder
 	UserName               string
 	PreferredPaymentMethod string

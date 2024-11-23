@@ -4,8 +4,8 @@ import "time"
 
 type CartProductForOrder struct {
 	Title        string
-	Price        float32
-	Quantity     uint16
+	Price        uint32
+	Quantity     uint32
 	Image        string
 	Weight       float32
 	URL          string

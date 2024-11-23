@@ -57,6 +57,7 @@ func (r *OrdersRepo) convertOrdersMapToSlice(ordersMap map[uuid.UUID]map[string]
 			orders = append(orders, ord)
 		}
 	}
+
 	return orders
 }
 

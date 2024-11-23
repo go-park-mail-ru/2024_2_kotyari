@@ -20,7 +20,7 @@ func (cm *CartManager) RemoveSelected(ctx context.Context, userID uint32) error 
 	}
 
 	for _, product := range products {
-		err := cm.cartRepository.RemoveCartProduct(ctx, product.ID, int32(product.Count))
+		err := cm.cartRepository.RemoveCartProduct(ctx, product.ID, int32(product.Count), userID)
 		if err != nil {
 			cm.log.Error("[CartManager.RemoveSelected] Error deleting selected product from cart",
 				slog.String("error", err.Error()),

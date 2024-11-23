@@ -65,7 +65,7 @@ func (cm *CartManager) validateCartProductCount(ctx context.Context, count int32
 		}
 
 		if int32(cartProductCount)+count == 0 {
-			err := cm.cartRepository.RemoveCartProduct(ctx, productID, count)
+			err := cm.cartRepository.RemoveCartProduct(ctx, productID, count, userID)
 			if err != nil {
 				cm.log.Error("[CartManager.validateCartProductCount] Error removing cart", slog.String("error", err.Error()))
 
