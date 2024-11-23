@@ -51,7 +51,7 @@ func (ps *ProductsStore) getProductInfo(ctx context.Context, productID uint64) (
     SELECT 
         p.id, p.title, p.count, 
         p.price, p.original_price, p.discount,
-        p.rating,  p.description, p.characteristics::jsonb, 
+        p.csat_service,  p.description, p.characteristics::jsonb, 
         s.id, s.name, s.logo
     FROM products p
         JOIN sellers s ON p.seller_id = s.id

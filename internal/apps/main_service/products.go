@@ -1,4 +1,8 @@
+<<<<<<<< HEAD:internal/apps/products.go
 package apps
+========
+package main_service
+>>>>>>>> d5de27b ([HACK-2][improve] микросервис csat):internal/apps/main_service/products.go
 
 import (
 	"net/http"

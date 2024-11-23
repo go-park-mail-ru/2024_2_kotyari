@@ -38,7 +38,7 @@ type GetProductResponse struct {
 	Price         uint32  `json:"price"`
 	OriginalPrice uint32  `json:"original_price"`
 	Discount      uint32  `json:"discount"`
-	Rating        float32 `json:"rating"`
+	Rating        float32 `json:"csat_service"`
 }
 
 func cartResponseFromModel(cart model.Cart, products []GetProductResponse) GetCartResponse {

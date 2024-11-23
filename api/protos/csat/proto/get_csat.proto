@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package rating;
+option go_package = "https://github.com/go-park-mail-ru/2024_2_kotyari/csat_service/grpc_gen";
+
+message GetCsatRequest {
+  string type = 1;
+  uint32 rating = 2;
+  string text = 3;
+}
+
+message GetCsatResponse {
+  string text = 1;
+}
