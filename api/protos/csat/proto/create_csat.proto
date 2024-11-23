@@ -8,9 +8,3 @@ message CreateCsatRequest {
   uint32 rating = 2;
   string text = 3;
 }
-
-message CreateCsatResponse {
-  string type = 1;
-  uint32 rating = 2;
-  string text = 3;
-}

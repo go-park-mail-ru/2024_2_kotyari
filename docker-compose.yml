@@ -9,7 +9,7 @@ services:
     container_name: back_go
     restart: unless-stopped
     volumes:
-      - ./files:/app/files
+      - ./files:/apps/files
     networks:
       - app-network
     depends_on:
@@ -26,7 +26,7 @@ services:
     container_name: csat_go
     restart: unless-stopped
     volumes:
-      - ./files:/app/files
+      - ./files:/apps/files
     networks:
       - app-network
     depends_on:

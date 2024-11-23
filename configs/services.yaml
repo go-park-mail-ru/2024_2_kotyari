@@ -3,7 +3,7 @@ main_service:
   address: "0.0.0.0"
   port: ":8000"
 
-csat_go:
+csat_service:
   domain: "csat_go"
   address: "0.0.0.0"
   port: ":8005"

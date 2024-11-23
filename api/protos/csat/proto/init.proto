@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package rating;
 option go_package = "https://github.com/go-park-mail-ru/2024_2_kotyari/csat_service/grpc_gen";
-
+import "google/protobuf/empty.proto";
 import "get_csat.proto";
 import "get_statistics.proto";
 import "update_csat.proto";
@@ -10,7 +10,7 @@ import "create_csat.proto";
 
 service CsatService {
   rpc GetCsat(GetCsatRequest) returns (GetCsatResponse);
-  rpc CreateCsat(CreateCsatRequest) returns (CreateCsatResponse);
+  rpc CreateCsat(CreateCsatRequest) returns (google.protobuf.Empty);
   rpc GetStatistics(GetStatisticsRequest) returns (GetStatisticsResponse);
   rpc UpdateCsat(UpdateCsatRequest) returns (UpdateCsatResponse);
 }

@@ -1,13 +1,8 @@
-<<<<<<<< HEAD:internal/apps/config.go
-package apps
-========
 package main_service
->>>>>>>> d5de27b ([HACK-2][improve] микросервис csat):internal/apps/main_service/config.go
 
 import (
-	"log"
-
 	"github.com/caarlos0/env"
+	"log"
 )
 
 type config struct {

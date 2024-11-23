@@ -114,18 +114,18 @@ func LoadPgxPool(configName string) (*pgxpool.Pool, error) {
 		return nil, fmt.Errorf("[LoadPgxPool] failed to connect to postgres: %w", err)
 	}
 
-	err = testPing(connPool)
-	if err != nil {
-		return nil, err
-	}
+	//err = testPing(connPool)
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	return connPool, nil
 }
 
-func testPing(pool *pgxpool.Pool) error {
-	if err := pool.Ping(context.Background()); err != nil {
-		return fmt.Errorf("[TestPing] failed to ping postgres: %w", err)
-	}
-
-	return nil
-}
+//func testPing(pool *pgxpool.Pool) error {
+//	if err := pool.Ping(context.Background()); err != nil {
+//		return fmt.Errorf("[TestPing] failed to ping postgres: %w", err)
+//	}
+//
+//	return nil
+//}

@@ -10,12 +10,12 @@ import (
 )
 
 type csatManager interface {
-	CreateCsat(ctx context.Context, csat model.CSAT) (model.CSAT, error)
+	CreateCSAT(ctx context.Context, csat model.CSAT) error
 }
 
 type csatRepo interface {
-	GetStatistics(ctx context.Context, typeOf string) (model.CSATStatistics, float64, error)
-	GetCsat(ctx context.Context, typeOf string) (string, error)
+	GetStatistics(ctx context.Context, statisticType model.CSATType) (model.CSATStatistics, error)
+	GetSurveyQuestion(ctx context.Context, statisticType model.CSATType) (model.SurveyQuestion, error)
 }
 
 type CsatsGrpc struct {

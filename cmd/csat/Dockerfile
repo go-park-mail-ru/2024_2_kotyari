@@ -15,10 +15,10 @@ RUN apk add bash
 COPY --from=build /var/backend/main /app/main
 COPY --from=build /var/backend/.env /app/.env
 
-RUN mkdir -p /app/files
+RUN mkdir -p /apps/files
 COPY files /app/files
 
-RUN mkdir -p /app/internal/configs
+RUN mkdir -p /apps/internal/configs
 COPY configs app/configs
 
 WORKDIR /app

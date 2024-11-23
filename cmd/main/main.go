@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/app/main_service"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/apps/main_service"
 	"log"
 
 	"github.com/joho/godotenv"

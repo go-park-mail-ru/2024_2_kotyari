@@ -8,6 +8,7 @@ package grpc_gen
 
 import (
 	context "context"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -30,7 +31,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CsatServiceClient interface {
 	GetCsat(ctx context.Context, in *GetCsatRequest, opts ...grpc.CallOption) (*GetCsatResponse, error)
-	CreateCsat(ctx context.Context, in *CreateCsatRequest, opts ...grpc.CallOption) (*CreateCsatResponse, error)
+	CreateCsat(ctx context.Context, in *CreateCsatRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	GetStatistics(ctx context.Context, in *GetStatisticsRequest, opts ...grpc.CallOption) (*GetStatisticsResponse, error)
 	UpdateCsat(ctx context.Context, in *UpdateCsatRequest, opts ...grpc.CallOption) (*UpdateCsatResponse, error)
 }
@@ -53,9 +54,9 @@ func (c *csatServiceClient) GetCsat(ctx context.Context, in *GetCsatRequest, opt
 	return out, nil
 }
 
-func (c *csatServiceClient) CreateCsat(ctx context.Context, in *CreateCsatRequest, opts ...grpc.CallOption) (*CreateCsatResponse, error) {
+func (c *csatServiceClient) CreateCsat(ctx context.Context, in *CreateCsatRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateCsatResponse)
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, CsatService_CreateCsat_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -88,7 +89,7 @@ func (c *csatServiceClient) UpdateCsat(ctx context.Context, in *UpdateCsatReques
 // for forward compatibility.
 type CsatServiceServer interface {
 	GetCsat(context.Context, *GetCsatRequest) (*GetCsatResponse, error)
-	CreateCsat(context.Context, *CreateCsatRequest) (*CreateCsatResponse, error)
+	CreateCsat(context.Context, *CreateCsatRequest) (*empty.Empty, error)
 	GetStatistics(context.Context, *GetStatisticsRequest) (*GetStatisticsResponse, error)
 	UpdateCsat(context.Context, *UpdateCsatRequest) (*UpdateCsatResponse, error)
 	mustEmbedUnimplementedCsatServiceServer()
@@ -104,7 +105,7 @@ type UnimplementedCsatServiceServer struct{}
 func (UnimplementedCsatServiceServer) GetCsat(context.Context, *GetCsatRequest) (*GetCsatResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCsat not implemented")
 }
-func (UnimplementedCsatServiceServer) CreateCsat(context.Context, *CreateCsatRequest) (*CreateCsatResponse, error) {
+func (UnimplementedCsatServiceServer) CreateCsat(context.Context, *CreateCsatRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateCsat not implemented")
 }
 func (UnimplementedCsatServiceServer) GetStatistics(context.Context, *GetStatisticsRequest) (*GetStatisticsResponse, error) {
