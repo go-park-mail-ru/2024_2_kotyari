@@ -6,7 +6,7 @@ main_service:
 csat_go:
   domain: "csat_go"
   address: "0.0.0.0"
-  port: ":8004"
+  port: ":8005"
 
 
 main_db:
