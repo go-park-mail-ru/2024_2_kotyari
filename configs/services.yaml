@@ -1,0 +1,22 @@
+main_service:
+  domain: "main_go"
+  address: "0.0.0.0"
+  port: ":8000"
+
+csat_go:
+  domain: "csat_go"
+  address: "0.0.0.0"
+  port: ":8004"
+
+
+main_db:
+  db_username: "DB_USERNAME"
+  db_password: "DB_PASSWORD"
+  db_name: "DB_NAME"
+  docker_name: "DB_DOCKER_NAME"
+
+csat_db:
+  db_username: "CSAT_USERNAME"
+  db_password: "CSAT_PASSWORD"
+  db_name: "CSAT_NAME"
+  docker_name: "CSAT_DOCKER_NAME"

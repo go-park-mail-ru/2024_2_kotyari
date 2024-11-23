@@ -1,4 +1,4 @@
-package app
+package apps
 
 import (
 	"context"
@@ -108,7 +108,7 @@ func NewServer() (*Server, error) {
 	log := logger.InitLogger()
 	router := mux.NewRouter()
 
-	dbPool, err := postgres.LoadPgxPool()
+	dbPool, err := postgres.LoadPgxPool(postgres.MainDBCFG)
 	if err != nil {
 		return nil, err
 	}
