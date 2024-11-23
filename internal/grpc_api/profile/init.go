@@ -11,6 +11,7 @@ import (
 type profileManager interface {
 	GetProfile(ctx context.Context, id uint32) (model.Profile, error)
 	UpdateProfile(ctx context.Context, oldProfileData model.Profile, newProfileData model.Profile) error
+	ChangePassword(ctx context.Context, userId uint32, oldPassword, newPassword, repeatPassword string) error
 }
 
 type avatarSaver interface {

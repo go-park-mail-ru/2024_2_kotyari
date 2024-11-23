@@ -4,6 +4,7 @@ package profile_grpc
 
 import (
 	context "context"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -21,6 +22,7 @@ type ProfileClient interface {
 	GetProfile(ctx context.Context, in *GetProfileRequest, opts ...grpc.CallOption) (*GetProfileResponse, error)
 	UpdateProfileData(ctx context.Context, in *UpdateProfileDataRequest, opts ...grpc.CallOption) (*UpdateProfileDataResponse, error)
 	UpdateProfileAvatar(ctx context.Context, in *UpdateAvatarRequest, opts ...grpc.CallOption) (*UpdateAvatarResponse, error)
+	ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type profileClient struct {
@@ -58,6 +60,15 @@ func (c *profileClient) UpdateProfileAvatar(ctx context.Context, in *UpdateAvata
 	return out, nil
 }
 
+func (c *profileClient) ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/profile.Profile/ChangePassword", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProfileServer is the server API for Profile service.
 // All implementations must embed UnimplementedProfileServer
 // for forward compatibility
@@ -65,6 +76,7 @@ type ProfileServer interface {
 	GetProfile(context.Context, *GetProfileRequest) (*GetProfileResponse, error)
 	UpdateProfileData(context.Context, *UpdateProfileDataRequest) (*UpdateProfileDataResponse, error)
 	UpdateProfileAvatar(context.Context, *UpdateAvatarRequest) (*UpdateAvatarResponse, error)
+	ChangePassword(context.Context, *ChangePasswordRequest) (*empty.Empty, error)
 	mustEmbedUnimplementedProfileServer()
 }
 
@@ -80,6 +92,9 @@ func (UnimplementedProfileServer) UpdateProfileData(context.Context, *UpdateProf
 }
 func (UnimplementedProfileServer) UpdateProfileAvatar(context.Context, *UpdateAvatarRequest) (*UpdateAvatarResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateProfileAvatar not implemented")
+}
+func (UnimplementedProfileServer) ChangePassword(context.Context, *ChangePasswordRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ChangePassword not implemented")
 }
 func (UnimplementedProfileServer) mustEmbedUnimplementedProfileServer() {}
 
@@ -148,6 +163,24 @@ func _Profile_UpdateProfileAvatar_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Profile_ChangePassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ChangePasswordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProfileServer).ChangePassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/profile.Profile/ChangePassword",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProfileServer).ChangePassword(ctx, req.(*ChangePasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Profile_ServiceDesc is the grpc.ServiceDesc for Profile service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -166,6 +199,10 @@ var Profile_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateProfileAvatar",
 			Handler:    _Profile_UpdateProfileAvatar_Handler,
+		},
+		{
+			MethodName: "ChangePassword",
+			Handler:    _Profile_ChangePassword_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

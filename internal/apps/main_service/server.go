@@ -77,6 +77,7 @@ type profilesDelivery interface {
 	GetProfile(writer http.ResponseWriter, request *http.Request)
 	UpdateProfileData(writer http.ResponseWriter, request *http.Request)
 	UpdateProfileAvatar(writer http.ResponseWriter, request *http.Request)
+	ChangePassword(writer http.ResponseWriter, request *http.Request)
 }
 
 type addressesDelivery interface {
@@ -263,6 +264,7 @@ func (s *Server) setupRoutes() {
 
 	csrfProtected.HandleFunc("/account", s.profile.GetProfile).Methods(http.MethodGet)
 	csrfProtected.HandleFunc("/account", s.profile.UpdateProfileData).Methods(http.MethodPut)
+	csrfProtected.HandleFunc("/change_password", s.profile.ChangePassword).Methods(http.MethodPut)
 	csrfProtected.HandleFunc("/account/avatar", s.profile.UpdateProfileAvatar).Methods(http.MethodPut)
 	csrfProtected.HandleFunc("/address", s.address.GetAddress).Methods(http.MethodGet)
 	csrfProtected.HandleFunc("/address", s.address.UpdateAddressData).Methods(http.MethodPut)

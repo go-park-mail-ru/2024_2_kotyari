@@ -20,7 +20,7 @@ func (pd *ProfilesDelivery) UpdateProfileAvatar(writer http.ResponseWriter, requ
 		return
 	}
 
-	avatarPath, msg, err := pd.updateProfileAvatar(request)
+	avatarPath, msg, err := pd.uploadAvatarFromRequest(request)
 	if err != nil {
 		pd.log.Error("UpdateProfileAvatar",
 			slog.String("error", err.Error()),

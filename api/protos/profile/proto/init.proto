@@ -5,6 +5,8 @@ package profile;
 import "get_profile.proto";
 import "update_profile_data.proto";
 import "update_profile_avatar.proto";
+import "change_password.proto";
+import "google/protobuf/empty.proto";
 
 option go_package = "https://github.com/go-park-mail-ru/2024_2_kotyari/api/protos/profile_grpc";
 
@@ -14,4 +16,6 @@ service Profile {
   rpc UpdateProfileData(UpdateProfileDataRequest) returns (UpdateProfileDataResponse);
 
   rpc UpdateProfileAvatar(UpdateAvatarRequest) returns (UpdateAvatarResponse);
+
+  rpc ChangePassword(ChangePasswordRequest) returns (google.protobuf.Empty);
 }

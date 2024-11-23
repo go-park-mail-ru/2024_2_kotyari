@@ -2,6 +2,7 @@ package profile
 
 import (
 	"errors"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"io"
 	"log/slog"
 	"mime/multipart"
@@ -9,11 +10,14 @@ import (
 	"os"
 )
 
-// TODO : вынести
-func (pd *ProfilesDelivery) updateProfileAvatar(r *http.Request) (string, error, error) {
+// uploadAvatarFromRequest загружает аватар из запроса.
+//
+// Возвращает путь к сохраненному файлу, сообщение об ошибке, которое будет отправлено в ответе,
+// и саму ошибку.
+func (pd *ProfilesDelivery) uploadAvatarFromRequest(r *http.Request) (string, error, error) {
 	file, header, err := r.FormFile("avatar")
 	if err != nil {
-		return "", errors.New("не удалось прочитать файл, попробуйте позже"), err
+		return "", errs.AvatarFileReadError, err
 	}
 
 	defer func(f multipart.File) {
@@ -24,13 +28,12 @@ func (pd *ProfilesDelivery) updateProfileAvatar(r *http.Request) (string, error,
 	}(file)
 
 	if header.Size > maxUploadSize {
-		return "", errors.New("[ ProfilesDelivery.UpdateProfileAvatar ] Размер файла превышает 10 МБ"),
-			errors.New("[ ProfilesDelivery.UpdateProfileAvatar ] Размер файла превышает 10 МБ")
+		return "", errs.AvatarFileSizeExceedsLimit, errors.New("[ ProfilesDelivery.UpdateProfileAvatar ] Размер файла превышает 10 МБ")
 	}
 
 	tempFile, err := os.CreateTemp("", "avatar-*")
 	if err != nil {
-		return "", errors.New("внутренняя ошибка сервера, попробуйте позже"), err
+		return "", errs.InternalServerError, err
 	}
 
 	defer func(name string) {
@@ -43,16 +46,16 @@ func (pd *ProfilesDelivery) updateProfileAvatar(r *http.Request) (string, error,
 	}(tempFile.Name())
 
 	if _, err = io.Copy(tempFile, file); err != nil {
-		return "", errors.New("внутренняя ошибка сервера, попробуйте позже"), err
+		return "", errs.AvatarUploadError, err
 	}
 
 	if _, err = tempFile.Seek(0, 0); err != nil {
-		return "", errors.New("внутренняя ошибка сервера, попробуйте позже"), err
+		return "", errs.InternalServerError, err
 	}
 
 	path, err := pd.imageSaver.SaveImage(tempFile.Name(), tempFile)
 	if err != nil {
-		return "", errors.New("не удалось загрузить фотографию"), err
+		return "", errs.AvatarImageSaveError, err
 	}
 
 	return path, nil, nil
