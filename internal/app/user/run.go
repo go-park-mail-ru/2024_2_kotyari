@@ -1,6 +1,8 @@
 package user
 
 import (
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/metrics/grpc"
+	metricsMiddleware "github.com/go-park-mail-ru/2024_2_kotyari/internal/metrics/grpc"
 	"log/slog"
 	"net"
 )
@@ -16,6 +18,13 @@ func (app *UsersApp) Run() error {
 
 		return err
 	}
+	metrics, err := grpc.NewGrpcMetrics("user")
+	if err != nil {
+		app.log.Error("Ошибка при регистрации метрики", slog.String("error", err.Error()))
+		return err
+	}
+
+	metricsMiddleware := metricsMiddleware.NewGrpcMiddleware(metrics)
 
 	app.delivery.Register(app.gRPCServer)
 

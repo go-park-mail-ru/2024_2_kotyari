@@ -26,7 +26,7 @@ package address
 //	suite.mock = mock
 //	suite.repo = &AddressStore{
 //		Db:  mock,
-//		Log: slog.New(slog.NewTextHandler(io.Discard, nil)),
+//		log: slog.New(slog.NewTextHandler(io.Discard, nil)),
 //	}
 //}
 //
