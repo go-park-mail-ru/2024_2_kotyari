@@ -56,6 +56,7 @@ var (
 	NoStatistics                  = errors.New("нет статистики")
 	NoCSATReviews                 = errors.New("нет оценок сервиса")
 	NoUserCSAT                    = errors.New("у пользователя нет csat")
+	UserCSATAlreadyExists         = errors.New("csat дял пользователя уже существует")
 )
 
 type ErrorStore struct {
@@ -120,6 +121,7 @@ func NewErrorStore() *ErrorStore {
 			NoStatistics:                  http.StatusNotFound,
 			NoCSATReviews:                 http.StatusNotFound,
 			NoUserCSAT:                    http.StatusNotFound,
+			UserCSATAlreadyExists:         http.StatusConflict,
 		},
 	}
 }
