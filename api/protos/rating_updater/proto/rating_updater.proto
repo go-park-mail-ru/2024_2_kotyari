@@ -7,7 +7,3 @@ option go_package = "https://github.com/go-park-mail-ru/2024_2_kotyari/api/proto
 message UpdateRatingRequest {
   uint32 product_id = 1;
 }
-
-message UpdateRatingResponse {
-  bool success = 1;
-}

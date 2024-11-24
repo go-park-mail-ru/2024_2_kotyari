@@ -8,9 +8,14 @@ const (
 	KeyAddress      = "address"
 	KeyPort         = "port"
 	ServicesConfigs = "services"
-	ConfigPath      = "internal/configs"
+	ConfigPath      = "configs"
 	EnvPath         = ".env"
 )
+
+type ServiceViperConfig struct {
+	Address string
+	Port    string
+}
 
 func SetupViper() (*viper.Viper, error) {
 	viper.AddConfigPath(ConfigPath)
@@ -21,4 +26,11 @@ func SetupViper() (*viper.Viper, error) {
 	}
 
 	return viper.GetViper(), nil
+}
+
+func ParseServiceViperConfig(config map[string]any) ServiceViperConfig {
+	return ServiceViperConfig{
+		Address: config[KeyAddress].(string),
+		Port:    config[KeyPort].(string),
+	}
 }

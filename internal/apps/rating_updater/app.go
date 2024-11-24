@@ -3,35 +3,31 @@ package rating_updater
 import (
 	"context"
 	"fmt"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs"
 	"log/slog"
 	"net"
 
 	ratingUpdater "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/rating_updater/gen"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/logger"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/postgres"
-	reviewsUpdaterDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/grpc_api/rating_updater/delivery"
-	reviewsUpdaterServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/grpc_api/rating_updater/usecase"
+	reviewsUpdaterDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/grpc_api/rating_updater"
 	productRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/product"
 	reviewsRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/reviews"
+	reviewsUpdaterServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/rating_updater"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type RatingUpdaterDelivery interface {
 	Register(server *grpc.Server)
-	UpdateRating(ctx context.Context, request *ratingUpdater.UpdateRatingRequest) (*ratingUpdater.UpdateRatingResponse, error)
-}
-
-type viperConfig struct {
-	address string
-	port    string
+	UpdateRating(ctx context.Context, request *ratingUpdater.UpdateRatingRequest) (*emptypb.Empty, error)
 }
 
 type RatingUpdaterApp struct {
 	delivery RatingUpdaterDelivery
 	server   *grpc.Server
 	log      *slog.Logger
-	config   viperConfig
+	config   configs.ServiceViperConfig
 }
 
 func NewApp(config map[string]any) (*RatingUpdaterApp, error) {
@@ -50,10 +46,7 @@ func NewApp(config map[string]any) (*RatingUpdaterApp, error) {
 	ratingUpdaterDelivery := reviewsUpdaterDeliveryLib.NewRatingUpdaterGRPC(ratingUpdaterManager, log)
 	ratingUpdaterDelivery.Register(grpcServer)
 
-	cfg := viperConfig{
-		address: config[configs.KeyAddress].(string),
-		port:    config[configs.KeyPort].(string),
-	}
+	cfg := configs.ParseServiceViperConfig(config)
 
 	return &RatingUpdaterApp{
 		delivery: ratingUpdaterDelivery,
@@ -64,7 +57,7 @@ func NewApp(config map[string]any) (*RatingUpdaterApp, error) {
 }
 
 func (a *RatingUpdaterApp) Run() error {
-	l, err := net.Listen("tcp", fmt.Sprintf("%s:%s", a.config.address, a.config.port))
+	l, err := net.Listen("tcp", fmt.Sprintf("%s:%s", a.config.Address, a.config.Port))
 	if err != nil {
 		return err
 	}

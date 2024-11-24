@@ -1,4 +1,4 @@
-package usecase
+package rating_updater
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 )
 
 func (r *RatingUpdaterService) UpdateProductRating(ctx context.Context, productID uint32) error {
-	reviews, err := r.reviewsFetcher.GetProductReviews(ctx, productID, utils.DefaultFieldParam, utils.DefaultOrderParam)
+	reviews, err := r.reviewsGetter.GetProductReviews(ctx, productID, utils.DefaultFieldParam, utils.DefaultOrderParam)
 	if err != nil {
 		r.log.Error("[RatingUpdaterService.UpdateProductRating] Error occurred when fetching products",
 			slog.String("error", err.Error()))

@@ -1,4 +1,4 @@
-package delivery
+package rating_updater
 
 import (
 	"context"

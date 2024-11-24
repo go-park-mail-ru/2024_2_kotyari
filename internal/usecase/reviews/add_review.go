@@ -3,7 +3,6 @@ package reviews
 import (
 	"context"
 	"errors"
-	rating_updater "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/rating_updater/gen"
 	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
@@ -35,16 +34,10 @@ func (s *ReviewsService) AddReview(ctx context.Context, productID uint32, userID
 				return err
 			}
 
-			success, err := s.client.UpdateRating(ctx, &rating_updater.UpdateRatingRequest{ProductId: productID})
+			err = s.ratingUpdater.UpdateRating(ctx, productID)
 			if err != nil {
 				s.log.Error("[ReviewsService.AddReview] Error happened when updating product rating",
 					slog.String("error", err.Error()))
-
-				return err
-			}
-
-			if !success.Success {
-				s.log.Error("[ReviewsService.AddReview] Failed to change product rating")
 
 				return errs.FailedToChangeProductRating
 			}

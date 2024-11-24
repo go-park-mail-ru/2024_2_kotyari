@@ -4,13 +4,7 @@ WORKDIR /var/backend
 
 # Copy necessary files
 COPY cmd/rating_updater/main.go main.go
-COPY internal internal
-COPY .env .env
-COPY docs docs
-COPY api api
-
-COPY go.mod go.mod
-COPY go.sum go.sum
+COPY . .
 
 # Install dependencies and build
 RUN go mod tidy
@@ -23,6 +17,9 @@ COPY --from=build /var/backend/.env /app/.env
 
 RUN mkdir -p /delivery/files
 COPY files /app/files
+
+RUN mkdir -p /app/internal/configs
+COPY configs app/configs
 
 WORKDIR /app
 EXPOSE 8004

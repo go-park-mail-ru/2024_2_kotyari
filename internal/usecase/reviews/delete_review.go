@@ -37,5 +37,12 @@ func (s *ReviewsService) DeleteReview(ctx context.Context, productID uint32, use
 		return err
 	}
 
+	err = s.ratingUpdater.UpdateRating(ctx, productID)
+	if err != nil {
+		s.log.Error("[ReviewsService.DeleteReview] Error happened when updating rating", slog.String("error", err.Error()))
+
+		return err
+	}
+
 	return nil
 }

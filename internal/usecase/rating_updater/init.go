@@ -1,4 +1,4 @@
-package usecase
+package rating_updater
 
 import (
 	"context"
@@ -11,20 +11,20 @@ type RatingUpdaterRepository interface {
 	UpdateProductRating(ctx context.Context, productID uint32, newRating float32) error
 }
 
-type ReviewsFetcher interface {
+type ReviewsGetter interface {
 	GetProductReviews(ctx context.Context, productID uint32, sortField string, sortOrder string) (model.Reviews, error)
 }
 
 type RatingUpdaterService struct {
-	repository     RatingUpdaterRepository
-	reviewsFetcher ReviewsFetcher
-	log            *slog.Logger
+	repository    RatingUpdaterRepository
+	reviewsGetter ReviewsGetter
+	log           *slog.Logger
 }
 
-func NewRatingUpdateService(repository RatingUpdaterRepository, reviewsFetcher ReviewsFetcher, logger *slog.Logger) *RatingUpdaterService {
+func NewRatingUpdateService(repository RatingUpdaterRepository, reviewsFetcher ReviewsGetter, logger *slog.Logger) *RatingUpdaterService {
 	return &RatingUpdaterService{
-		repository:     repository,
-		reviewsFetcher: reviewsFetcher,
-		log:            logger,
+		repository:    repository,
+		reviewsGetter: reviewsFetcher,
+		log:           logger,
 	}
 }

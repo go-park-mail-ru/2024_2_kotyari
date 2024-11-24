@@ -2,9 +2,11 @@ package apps
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net/http"
 
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/logger"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/postgres"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/redis"
@@ -46,6 +48,11 @@ import (
 	userServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/user"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"github.com/gorilla/mux"
+)
+
+const (
+	mainService          = "main_service"
+	ratingUpdaterService = "rating_updater"
 )
 
 type categoryApp interface {
@@ -90,7 +97,7 @@ type Server struct {
 	category categoryApp
 	profile  profilesDelivery
 	address  addressesDelivery
-	cfg      config
+	cfg      configs.ServiceViperConfig
 	log      *slog.Logger
 	files    filesDelivery
 	cart     CartApp
@@ -107,6 +114,10 @@ type csrfDelivery interface {
 func NewServer() (*Server, error) {
 	log := logger.InitLogger()
 	router := mux.NewRouter()
+	v, err := configs.SetupViper()
+	if err != nil {
+		return nil, err
+	}
 
 	dbPool, err := postgres.LoadPgxPool()
 	if err != nil {
@@ -170,8 +181,14 @@ func NewServer() (*Server, error) {
 	csrfUsecase := csrf.NewCscfUsecase()
 	csrfHandler := csrfDeliveryLib.NewCsrfDelivery(csrfUsecase, sessionsDelivery)
 
+	reviewsGRPCCfg := v.GetStringMap(ratingUpdaterService)
+	reviewsGRPC, err := reviewsDeliveryLib.NewRatingUpdaterGRPC(reviewsGRPCCfg)
+	if err != nil {
+		return nil, err
+	}
+
 	reviewsRepo := reviewsRepoLib.NewReviewsStore(dbPool, log)
-	reviewsManager, err := reviewsServiceLib.NewReviewsService(reviewsRepo, inputValidator, log)
+	reviewsManager, err := reviewsServiceLib.NewReviewsService(reviewsRepo, inputValidator, log, reviewsGRPC)
 	if err != nil {
 		return nil, err
 	}
@@ -183,6 +200,8 @@ func NewServer() (*Server, error) {
 	searchHandler := searchDeliveryLib.NewSearchDelivery(searchRepo, errResolver, log)
 	searchApp := NewSearchApp(router, searchHandler)
 
+	cfg := v.GetStringMap(mainService)
+
 	return &Server{
 		r:        router,
 		auth:     userHandler,
@@ -190,7 +209,7 @@ func NewServer() (*Server, error) {
 		profile:  profileHandler,
 		address:  addressHandler,
 		category: ca,
-		cfg:      initServer(),
+		cfg:      configs.ParseServiceViperConfig(cfg),
 		log:      log,
 		sessions: sessionsDelivery,
 		files:    fileDelivery,
@@ -253,8 +272,8 @@ func (s *Server) setupRoutes() {
 func (s *Server) Run() error {
 	s.setupRoutes()
 
-	handler := middlewares.CorsMiddleware(s.r, s.cfg.SessionLifetime)
+	handler := middlewares.CorsMiddleware(s.r)
 
-	s.log.Info("starting  server", slog.String("address:", s.cfg.ServerAddress))
-	return http.ListenAndServe(s.cfg.ServerAddress, handler)
+	s.log.Info("starting  server", slog.String("address:", s.cfg.Port))
+	return http.ListenAndServe(fmt.Sprintf(":%s", s.cfg.Port), handler)
 }

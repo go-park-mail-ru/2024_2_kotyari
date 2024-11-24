@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -26,7 +27,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RatingUpdaterClient interface {
-	UpdateRating(ctx context.Context, in *UpdateRatingRequest, opts ...grpc.CallOption) (*UpdateRatingResponse, error)
+	UpdateRating(ctx context.Context, in *UpdateRatingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type ratingUpdaterClient struct {
@@ -37,9 +38,9 @@ func NewRatingUpdaterClient(cc grpc.ClientConnInterface) RatingUpdaterClient {
 	return &ratingUpdaterClient{cc}
 }
 
-func (c *ratingUpdaterClient) UpdateRating(ctx context.Context, in *UpdateRatingRequest, opts ...grpc.CallOption) (*UpdateRatingResponse, error) {
+func (c *ratingUpdaterClient) UpdateRating(ctx context.Context, in *UpdateRatingRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateRatingResponse)
+	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, RatingUpdater_UpdateRating_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -51,7 +52,7 @@ func (c *ratingUpdaterClient) UpdateRating(ctx context.Context, in *UpdateRating
 // All implementations must embed UnimplementedRatingUpdaterServer
 // for forward compatibility.
 type RatingUpdaterServer interface {
-	UpdateRating(context.Context, *UpdateRatingRequest) (*UpdateRatingResponse, error)
+	UpdateRating(context.Context, *UpdateRatingRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedRatingUpdaterServer()
 }
 
@@ -62,7 +63,7 @@ type RatingUpdaterServer interface {
 // pointer dereference when methods are called.
 type UnimplementedRatingUpdaterServer struct{}
 
-func (UnimplementedRatingUpdaterServer) UpdateRating(context.Context, *UpdateRatingRequest) (*UpdateRatingResponse, error) {
+func (UnimplementedRatingUpdaterServer) UpdateRating(context.Context, *UpdateRatingRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateRating not implemented")
 }
 func (UnimplementedRatingUpdaterServer) mustEmbedUnimplementedRatingUpdaterServer() {}

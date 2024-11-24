@@ -1,4 +1,4 @@
-env: dev
+env: local
 
 main_service:
   domain: "main_go"
