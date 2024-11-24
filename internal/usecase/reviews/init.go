@@ -20,17 +20,17 @@ type ratingUpdater interface {
 }
 
 type ReviewsService struct {
-	reviewsRepo    reviewsRepo
-	inputValidator *utils.InputValidator
-	log            *slog.Logger
-	ratingUpdater  ratingUpdater
+	reviewsRepo     reviewsRepo
+	stringSanitizer utils.StringSanitizer
+	log             *slog.Logger
+	ratingUpdater   ratingUpdater
 }
 
-func NewReviewsService(repo reviewsRepo, validator *utils.InputValidator, logger *slog.Logger, updater ratingUpdater) (*ReviewsService, error) {
+func NewReviewsService(repo reviewsRepo, stringSanitizer utils.StringSanitizer, logger *slog.Logger, updater ratingUpdater) (*ReviewsService, error) {
 	return &ReviewsService{
-		reviewsRepo:    repo,
-		inputValidator: validator,
-		log:            logger,
-		ratingUpdater:  updater,
+		reviewsRepo:     repo,
+		stringSanitizer: stringSanitizer,
+		log:             logger,
+		ratingUpdater:   updater,
 	}, nil
 }

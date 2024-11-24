@@ -26,20 +26,20 @@ type reviewsGetter interface {
 }
 
 type ReviewsHandler struct {
-	reviewsManager reviewsManager
+	reviewsManager  reviewsManager
 	reviewsGetter  reviewsGetter
-	inputValidator *utils.InputValidator
-	errResolver    errs.GetErrorCode
-	log            *slog.Logger
+	stringSanitizer utils.StringSanitizer
+	errResolver     errs.GetErrorCode
+	log             *slog.Logger
 }
 
-func NewReviewsHandler(manager reviewsManager, reviewsGetter reviewsGetter, validator *utils.InputValidator, code errs.GetErrorCode, logger *slog.Logger) *ReviewsHandler {
+func NewReviewsHandler(manager reviewsManager, reviewsGetter reviewsGetter, stringSanitizer utils.StringSanitizer, code errs.GetErrorCode, logger *slog.Logger) *ReviewsHandler {
 	return &ReviewsHandler{
-		reviewsManager: manager,
+		reviewsManager:  manager,
 		reviewsGetter:  reviewsGetter,
-		inputValidator: validator,
-		errResolver:    code,
-		log:            logger,
+		stringSanitizer: stringSanitizer,
+		errResolver:     code,
+		log:             logger,
 	}
 }
 

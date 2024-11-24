@@ -2,6 +2,10 @@ package utils
 
 import "github.com/microcosm-cc/bluemonday"
 
+type StringSanitizer interface {
+	SanitizeString(dirtyString string) string
+}
+
 type InputValidator struct {
 	policy *bluemonday.Policy
 }
