@@ -5,6 +5,12 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
+type UsersDefaultResponse struct {
+	Username  string `json:"username"`
+	City      string `json:"city"`
+	AvatarUrl string `json:"avatar_url"`
+}
+
 type ProfileResponse struct {
 	ID        uint32 `json:"id"`
 	Email     string `json:"email"`

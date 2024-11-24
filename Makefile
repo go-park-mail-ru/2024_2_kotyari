@@ -55,7 +55,7 @@ go-build:
 all-run:
 	docker compose up -d
 
-main-go-refresh:
+main-refresh:
 	docker stop main_go && docker rm main_go && docker rmi main-go-image && docker compose up -d
 
 pg-refresh:
@@ -76,7 +76,7 @@ recreate-redis:
 all-delete:
 	docker compose down -v
 
-all-refresh: back-refresh pg-refresh redis-refresh
+all-refresh: main-refresh pg-refresh redis-refresh
 
 apply-migrations:
 	@echo 'Applying migrations...'

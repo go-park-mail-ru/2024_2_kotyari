@@ -13,12 +13,12 @@ import (
 
 func (us *UsersStore) GetUserByUserID(ctx context.Context, id uint32) (model.User, error) {
 	const query = `
-		select username, city from users where id=$1;
+		select username, city, avatar_url from users where id=$1;
 	`
 
 	var user model.User
 
-	err := us.db.QueryRow(ctx, query, id).Scan(&user.Username, &user.City)
+	err := us.db.QueryRow(ctx, query, id).Scan(&user.Username, &user.City, &user.AvatarUrl)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return model.User{}, errs.UserDoesNotExist
