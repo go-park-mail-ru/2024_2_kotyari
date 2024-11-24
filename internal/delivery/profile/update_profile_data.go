@@ -29,12 +29,11 @@ func (pd *ProfilesDelivery) UpdateProfileData(writer http.ResponseWriter, reques
 		return
 	}
 
-	resGrpc, err := pd.client.UpdateProfileData(request.Context(), &profile_grpc.UpdateProfileDataRequest{
+	_, err := pd.client.UpdateProfileData(request.Context(), &profile_grpc.UpdateProfileDataRequest{
 		UserId:   userId,
 		Email:    req.Email,
 		Username: req.Username,
-		Gender:   req.Gender,
-	})
+		Gender:   req.Gender})
 	if err != nil {
 		_, code := pd.errResolver.Get(err)
 		utils.WriteErrorJSON(writer, code, err)
@@ -43,9 +42,9 @@ func (pd *ProfilesDelivery) UpdateProfileData(writer http.ResponseWriter, reques
 	}
 
 	res := UpdateProfile{
-		Email:    resGrpc.GetEmail(),
-		Username: resGrpc.GetUsername(),
-		Gender:   resGrpc.GetGender(),
+		Email:    req.Email,
+		Username: req.Username,
+		Gender:   req.Gender,
 	}
 
 	utils.WriteJSON(writer, http.StatusOK, res)

@@ -16,7 +16,6 @@ func (p *ProfilesGrpc) GetProfile(ctx context.Context, in *profilegrpc.GetProfil
 		Email:     profile.Email,
 		Username:  profile.Username,
 		Gender:    profile.Gender,
-		Age:       profile.Age,
 		AvatarUrl: profile.AvatarURL,
 	}, nil
 }

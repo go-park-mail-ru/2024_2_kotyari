@@ -20,9 +20,9 @@ type profilesDelivery interface {
 	Register(grpcServer *grpc.Server)
 
 	ChangePassword(ctx context.Context, in *profilegrpc.ChangePasswordRequest) (*empty.Empty, error)
+	UpdateProfileAvatar(ctx context.Context, in *profilegrpc.UpdateAvatarRequest) (*empty.Empty, error)
+	UpdateProfileData(ctx context.Context, in *profilegrpc.UpdateProfileDataRequest) (*empty.Empty, error)
 	GetProfile(ctx context.Context, in *profilegrpc.GetProfileRequest) (*profilegrpc.GetProfileResponse, error)
-	UpdateProfileAvatar(ctx context.Context, in *profilegrpc.UpdateAvatarRequest) (*profilegrpc.UpdateAvatarResponse, error)
-	UpdateProfileData(ctx context.Context, in *profilegrpc.UpdateProfileDataRequest) (*profilegrpc.UpdateProfileDataResponse, error)
 }
 
 type config struct {

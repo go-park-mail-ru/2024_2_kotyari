@@ -32,12 +32,11 @@ func (pd *ProfilesDelivery) UpdateProfileAvatar(writer http.ResponseWriter, requ
 		return
 	}
 
-	resGrpc, err := pd.client.UpdateProfileAvatar(
+	_, err = pd.client.UpdateProfileAvatar(
 		request.Context(),
 		&profilegrpc.UpdateAvatarRequest{
 			UserId:   userID,
-			Filepath: avatarPath,
-		})
+			Filepath: avatarPath})
 	if err != nil {
 		pd.log.Error("[ ProfilesDelivery.UpdateProfileAvatar ]", slog.String("error", err.Error()))
 		if errors.Is(err, errs.ErrFileTypeNotAllowed) {
@@ -51,9 +50,7 @@ func (pd *ProfilesDelivery) UpdateProfileAvatar(writer http.ResponseWriter, requ
 		return
 	}
 
-	avatarResponse := AvatarResponse{
-		AvatarUrl: resGrpc.Filepath,
-	}
+	res := AvatarResponse{AvatarUrl: avatarPath}
 
-	utils.WriteJSON(writer, http.StatusOK, avatarResponse)
+	utils.WriteJSON(writer, http.StatusOK, res)
 }

@@ -13,6 +13,5 @@ message GetProfileResponse {
   string email = 2;
   string username = 3;
   string gender = 4;
-  uint32 age = 5;
   string avatar_url = 6;
 }

@@ -11,9 +11,3 @@ message UpdateProfileDataRequest {
   string username = 3;
   string gender = 4;
 }
-
-message UpdateProfileDataResponse {
-  string email = 1;
-  string username = 2;
-  string gender = 3;
-}

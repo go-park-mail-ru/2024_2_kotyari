@@ -4,10 +4,11 @@ import (
 	"context"
 	profilegrpc "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/profile/gen"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/golang/protobuf/ptypes/empty"
 	"log/slog"
 )
 
-func (p *ProfilesGrpc) UpdateProfileData(ctx context.Context, in *profilegrpc.UpdateProfileDataRequest) (*profilegrpc.UpdateProfileDataResponse, error) {
+func (p *ProfilesGrpc) UpdateProfileData(ctx context.Context, in *profilegrpc.UpdateProfileDataRequest) (*empty.Empty, error) {
 	oldProfileData, err := p.manager.GetProfile(ctx, in.UserId)
 	if err != nil {
 		p.log.Warn("[ ProfilesDelivery.UpdateProfileData ] Не удалось получить старые данные профиля", slog.String("error", err.Error()))
@@ -27,9 +28,5 @@ func (p *ProfilesGrpc) UpdateProfileData(ctx context.Context, in *profilegrpc.Up
 		return nil, err
 	}
 
-	return &profilegrpc.UpdateProfileDataResponse{
-		Email:    in.Email,
-		Username: in.Username,
-		Gender:   in.Gender,
-	}, nil
+	return &empty.Empty{}, nil
 }

@@ -2,20 +2,22 @@ syntax="proto3";
 
 package profile;
 
+option go_package = "https://github.com/go-park-mail-ru/2024_2_kotyari/api/protos/profile_grpc";
+
 import "get_profile.proto";
 import "update_profile_data.proto";
 import "update_profile_avatar.proto";
 import "change_password.proto";
+
 import "google/protobuf/empty.proto";
 
-option go_package = "https://github.com/go-park-mail-ru/2024_2_kotyari/api/protos/profile_grpc";
 
 service Profile {
   rpc GetProfile(GetProfileRequest) returns (GetProfileResponse);
 
-  rpc UpdateProfileData(UpdateProfileDataRequest) returns (UpdateProfileDataResponse);
+  rpc UpdateProfileData(UpdateProfileDataRequest) returns (google.protobuf.Empty);
 
-  rpc UpdateProfileAvatar(UpdateAvatarRequest) returns (UpdateAvatarResponse);
+  rpc UpdateProfileAvatar(UpdateAvatarRequest) returns (google.protobuf.Empty);
 
   rpc ChangePassword(ChangePasswordRequest) returns (google.protobuf.Empty);
 }

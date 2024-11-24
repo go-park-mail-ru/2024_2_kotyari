@@ -9,7 +9,3 @@ message UpdateAvatarRequest {
   uint32 user_id = 1;
   string filepath = 2;
 }
-
-message UpdateAvatarResponse {
-  string filepath = 1;
-}

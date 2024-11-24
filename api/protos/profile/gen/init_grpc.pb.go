@@ -20,8 +20,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ProfileClient interface {
 	GetProfile(ctx context.Context, in *GetProfileRequest, opts ...grpc.CallOption) (*GetProfileResponse, error)
-	UpdateProfileData(ctx context.Context, in *UpdateProfileDataRequest, opts ...grpc.CallOption) (*UpdateProfileDataResponse, error)
-	UpdateProfileAvatar(ctx context.Context, in *UpdateAvatarRequest, opts ...grpc.CallOption) (*UpdateAvatarResponse, error)
+	UpdateProfileData(ctx context.Context, in *UpdateProfileDataRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	UpdateProfileAvatar(ctx context.Context, in *UpdateAvatarRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
@@ -42,8 +42,8 @@ func (c *profileClient) GetProfile(ctx context.Context, in *GetProfileRequest, o
 	return out, nil
 }
 
-func (c *profileClient) UpdateProfileData(ctx context.Context, in *UpdateProfileDataRequest, opts ...grpc.CallOption) (*UpdateProfileDataResponse, error) {
-	out := new(UpdateProfileDataResponse)
+func (c *profileClient) UpdateProfileData(ctx context.Context, in *UpdateProfileDataRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/profile.Profile/UpdateProfileData", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -51,8 +51,8 @@ func (c *profileClient) UpdateProfileData(ctx context.Context, in *UpdateProfile
 	return out, nil
 }
 
-func (c *profileClient) UpdateProfileAvatar(ctx context.Context, in *UpdateAvatarRequest, opts ...grpc.CallOption) (*UpdateAvatarResponse, error) {
-	out := new(UpdateAvatarResponse)
+func (c *profileClient) UpdateProfileAvatar(ctx context.Context, in *UpdateAvatarRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/profile.Profile/UpdateProfileAvatar", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -74,8 +74,8 @@ func (c *profileClient) ChangePassword(ctx context.Context, in *ChangePasswordRe
 // for forward compatibility
 type ProfileServer interface {
 	GetProfile(context.Context, *GetProfileRequest) (*GetProfileResponse, error)
-	UpdateProfileData(context.Context, *UpdateProfileDataRequest) (*UpdateProfileDataResponse, error)
-	UpdateProfileAvatar(context.Context, *UpdateAvatarRequest) (*UpdateAvatarResponse, error)
+	UpdateProfileData(context.Context, *UpdateProfileDataRequest) (*empty.Empty, error)
+	UpdateProfileAvatar(context.Context, *UpdateAvatarRequest) (*empty.Empty, error)
 	ChangePassword(context.Context, *ChangePasswordRequest) (*empty.Empty, error)
 	mustEmbedUnimplementedProfileServer()
 }
@@ -87,10 +87,10 @@ type UnimplementedProfileServer struct {
 func (UnimplementedProfileServer) GetProfile(context.Context, *GetProfileRequest) (*GetProfileResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetProfile not implemented")
 }
-func (UnimplementedProfileServer) UpdateProfileData(context.Context, *UpdateProfileDataRequest) (*UpdateProfileDataResponse, error) {
+func (UnimplementedProfileServer) UpdateProfileData(context.Context, *UpdateProfileDataRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateProfileData not implemented")
 }
-func (UnimplementedProfileServer) UpdateProfileAvatar(context.Context, *UpdateAvatarRequest) (*UpdateAvatarResponse, error) {
+func (UnimplementedProfileServer) UpdateProfileAvatar(context.Context, *UpdateAvatarRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateProfileAvatar not implemented")
 }
 func (UnimplementedProfileServer) ChangePassword(context.Context, *ChangePasswordRequest) (*empty.Empty, error) {

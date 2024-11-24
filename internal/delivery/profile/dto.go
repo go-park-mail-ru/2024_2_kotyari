@@ -17,7 +17,6 @@ type ProfilesResponse struct {
 	Email     string `json:"email"`
 	Username  string `json:"username"`
 	Gender    string `json:"gender"`
-	Age       uint32 `json:"age"`
 	AvatarUrl string `json:"avatar_url"`
 	Address   address.AddressResponse
 }
@@ -29,7 +28,6 @@ func fromGrpcResponse(p *profilegrpc.GetProfileResponse, addr model.Address) Pro
 
 	return ProfilesResponse{
 		ID:        p.UserId,
-		Age:       p.Age,
 		Email:     p.Email,
 		Username:  p.Username,
 		Gender:    p.Gender,
