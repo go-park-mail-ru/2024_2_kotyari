@@ -68,10 +68,32 @@ services:
     networks:
       - app-network
 
+  prometheus:
+    image: prom/prometheus:latest
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    #      - '--web.external-url=prometheus'
+
+  grafana:
+    image: grafana/grafana
+    restart: always
+    ports:
+      - "8008:3000"
+
 volumes:
   pg_data:
   redis_data:
   go_back:
+  prometheus:
+  grafana:
+  prometheus_data:
 
 networks:
   app-network:
