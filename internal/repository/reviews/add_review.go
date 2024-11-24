@@ -22,7 +22,6 @@ func (r *ReviewsStore) AddReview(ctx context.Context, productID uint32, userID u
 	`
 
 	commandTag, err := r.db.Exec(ctx, query, productID, userID, review.Text, review.Rating, review.IsPrivate)
-
 	if err != nil {
 		r.log.Error("[ReviewsStore.AddReview] Error executing query", slog.String("error", err.Error()))
 
