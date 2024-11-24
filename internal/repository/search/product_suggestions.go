@@ -27,7 +27,7 @@ func (s *SearchStore) ProductSuggestion(ctx context.Context, searchQuery string,
 	sortOrder = utils.ReturnSortOrderOption(sortOrder)
 
 	query := fmt.Sprintf(`
-		SELECT p.id, p.title, p.price, p.original_price,
+		SELECT p.id, p.title, p.price, p.original_price, p.rating,
 		       p.discount, p.image_url, p.description
 		FROM products p
 			where p.active = true and p.count > 0 and to_tsvector('russian', title) @@ to_tsquery('russian', $1 || ':*')
@@ -51,7 +51,7 @@ func (s *SearchStore) ProductSuggestion(ctx context.Context, searchQuery string,
 		var p model.ProductCatalog
 
 		err = rows.Scan(
-			&p.ID, &p.Title, &p.Price, &p.OriginalPrice,
+			&p.ID, &p.Title, &p.Price, &p.OriginalPrice, &p.Rating,
 			&p.Discount, &p.ImageURL, &p.Description,
 		)
 		if err != nil {

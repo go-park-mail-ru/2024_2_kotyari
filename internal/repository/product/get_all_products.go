@@ -12,7 +12,7 @@ import (
 
 func (ps *ProductsStore) GetAllProducts(ctx context.Context) ([]model.ProductCatalog, error) {
 	const query = `
-		SELECT p.id, p.title, p.price, p.original_price,
+		SELECT p.id, p.title, p.price, p.original_price, p.rating,
 		       p.discount, p.image_url, p.description
 		FROM products p
 			where p.active = true and p.count > 0
@@ -37,7 +37,7 @@ func (ps *ProductsStore) GetAllProducts(ctx context.Context) ([]model.ProductCat
 		var p model.ProductCatalog
 
 		err = rows.Scan(
-			&p.ID, &p.Title, &p.Price, &p.OriginalPrice,
+			&p.ID, &p.Title, &p.Price, &p.OriginalPrice, &p.Rating,
 			&p.Discount, &p.ImageURL, &p.Description,
 		)
 		if err != nil {
