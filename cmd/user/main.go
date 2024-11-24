@@ -3,16 +3,16 @@ package main
 import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/app/user"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/logger"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/postgres"
-	user2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/grpc_api/user"
-	userRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/user"
-	userServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/user"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
+	configs "github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/user"
 	"github.com/joho/godotenv"
+	"google.golang.org/grpc"
 	"log"
 )
 
-const configFile = ".env"
+const (
+	userService = "user_go"
+	configFile  = ".env"
+)
 
 // todo вынос в app
 func main() {
@@ -21,24 +21,20 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	dbPool, err := postgres.LoadPgxPool()
+	viper, err := configs.SetupViper()
 	if err != nil {
-		log.Fatalf("не инициализируется бд %v", err)
+		log.Fatalf("Error setting up viper %v", err)
 	}
 
+	conf := viper.GetStringMap(userService)
+	//
+	//log.Println(conf)
+	server := grpc.NewServer()
 	slogLog := logger.InitLogger()
 
-	// todo добавить
-	inputValidator := utils.NewInputValidator()
+	app, err := user.NewUsersApp(slogLog, server, conf)
 
-	userRepo := userRepoLib.NewUsersStore(dbPool, slogLog)
-	userService := userServiceLib.NewUserService(userRepo, inputValidator, slogLog)
-
-	delivery := user2.NewUsersGrpc(userService, userRepo, slogLog)
-
-	app := user.NewUsersApp(slogLog, delivery)
-
-	err = app.Run("0.0.0.0:8001")
+	err = app.Run()
 	if err != nil {
 		log.Fatalf("err %v", err)
 	}

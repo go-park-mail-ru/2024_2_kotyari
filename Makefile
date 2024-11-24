@@ -112,6 +112,9 @@ main-refresh:
 rating-updater-refresh:
 	docker stop rating_updater_go && docker rm rating_updater_go && docker rmi rating-updater-go-image && docker compose up -d
 
+user-refresh:
+	docker stop user_go && docker rm user_go && docker rmi user-go-image && docker compose up -d
+
 pg-refresh:
 	docker stop pg_db && docker rm pg_db && docker compose up -d
 
