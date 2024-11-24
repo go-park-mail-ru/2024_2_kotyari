@@ -1,12 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/app/user"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/logger"
 	configs "github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/user"
+	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 	"log"
+	"net/http"
+	"time"
 )
 
 const (
@@ -33,6 +38,16 @@ func main() {
 	slogLog := logger.InitLogger()
 
 	app, err := user.NewUsersApp(slogLog, server, conf)
+
+	router := mux.NewRouter()
+	router.PathPrefix("/metrics").Handler(promhttp.Handler())
+	serverProm := http.Server{Handler: router, Addr: fmt.Sprintf(":%d", 8082), ReadHeaderTimeout: 10 * time.Second}
+
+	go func() {
+		if err := serverProm.ListenAndServe(); err != nil {
+			log.Println("fail auth.ListenAndServe")
+		}
+	}()
 
 	err = app.Run()
 	if err != nil {

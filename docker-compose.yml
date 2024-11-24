@@ -5,6 +5,7 @@ services:
       dockerfile: ./cmd/user/Dockerfile
     ports:
       - "8001:8001"
+      - "8082:8082"
     image: user-go-image
     container_name: user_go
     restart: unless-stopped
