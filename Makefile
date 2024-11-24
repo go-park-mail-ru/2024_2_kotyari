@@ -55,8 +55,8 @@ go-build:
 all-run:
 	docker compose up -d
 
-back-refresh:
-	docker stop back_go && docker rm back_go && docker rmi back-go-image && docker compose up -d
+main-go-refresh:
+	docker stop main_go && docker rm main_go && docker rmi main-go-image && docker compose up -d
 
 pg-refresh:
 	docker stop pg_db && docker rm pg_db && docker compose up -d

@@ -1,10 +1,10 @@
 services:
-  go_back:
+  main_go:
     build: .
     ports:
       - "8000:8000"
-    image: back-go-image
-    container_name: back_go
+    image: main-go-image
+    container_name: main_go
     restart: unless-stopped
     volumes:
       - ./files:/app/files
