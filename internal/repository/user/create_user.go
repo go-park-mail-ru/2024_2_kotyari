@@ -13,7 +13,7 @@ func (us *UsersStore) CreateUser(ctx context.Context, userModel model.User) (mod
 	const insertQuery = `
 		insert into users(email, username, password) 
 		values ($1, $2, $3)
-		returning id, city;
+		returning id, city, avatar_url;
 	`
 
 	_, err := us.GetUserByEmail(ctx, userModel)
@@ -25,7 +25,7 @@ func (us *UsersStore) CreateUser(ctx context.Context, userModel model.User) (mod
 		userModel.Email,
 		userModel.Username,
 		userModel.Password,
-	).Scan(&userModel.ID, &userModel.City)
+	).Scan(&userModel.ID, &userModel.City, &userModel.AvatarUrl)
 	if err != nil {
 		log.Println(fmt.Errorf("[UserStore.CreateUser] An error occured: %w", err))
 		return model.User{}, err

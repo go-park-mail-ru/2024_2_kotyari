@@ -47,7 +47,8 @@ func (d *UsersHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, utils.SetSessionCookie(sessionID))
 
 	utils.WriteJSON(w, http.StatusOK, UsersDefaultResponse{
-		Username: user.Username,
-		City:     user.City,
+		Username:  user.Username,
+		City:      user.City,
+		AvatarUrl: user.AvatarUrl,
 	})
 }

@@ -15,8 +15,9 @@ type UsersLoginRequest struct {
 }
 
 type UsersDefaultResponse struct {
-	Username string `json:"username"`
-	City     string `json:"city"`
+	Username  string `json:"username"`
+	City      string `json:"city"`
+	AvatarUrl string `json:"avatar_url"`
 }
 
 func (ur *UsersSignUpRequest) ToModel() model.User {

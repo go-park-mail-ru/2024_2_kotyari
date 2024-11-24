@@ -2,10 +2,9 @@ package user
 
 import (
 	"errors"
-	"net/http"
-
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
+	"net/http"
 )
 
 func (d *UsersHandler) GetUserById(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +36,8 @@ func (d *UsersHandler) GetUserById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJSON(w, http.StatusOK, UsersDefaultResponse{
-		Username: user.Username,
-		City:     user.City,
+		Username:  user.Username,
+		City:      user.City,
+		AvatarUrl: user.AvatarUrl,
 	})
 }
