@@ -86,6 +86,9 @@ all-run:
 back-refresh:
 	docker stop back_go && docker rm back_go && docker rmi back-go-image && docker compose up -d
 
+user-refresh:
+	docker stop user_go && docker rm user_go && docker rmi user-go-image && docker compose up -d
+
 pg-refresh:
 	docker stop pg_db && docker rm pg_db && docker compose up -d
 

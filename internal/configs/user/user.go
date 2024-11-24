@@ -1,15 +1,21 @@
 package user
 
-import "time"
+import "github.com/spf13/viper"
 
-type Config struct {
-	StoragePath    string     `yaml:"storage_path" env-required:"true"`
-	GRPC           GRPCConfig `yaml:"grpc"`
-	MigrationsPath string
-	TokenTTL       time.Duration `yaml:"token_ttl" env-default:"1h"`
-}
+const (
+	KeyAddress      = "address"
+	KeyPort         = "port"
+	ServicesConfigs = "services"
+	ConfigPath      = "configs"
+	EnvPath         = ".env"
+)
 
-type GRPCConfig struct {
-	Port    int           `yaml:"port"`
-	Timeout time.Duration `yaml:"timeout"`
+func SetupViper() (*viper.Viper, error) {
+	viper.AddConfigPath(ConfigPath)
+	viper.SetConfigName(ServicesConfigs)
+	if err := viper.ReadInConfig(); err != nil {
+		return nil, err
+	}
+
+	return viper.GetViper(), nil
 }
