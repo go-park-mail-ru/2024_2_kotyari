@@ -1,0 +1,11 @@
+env: local
+
+main_service:
+  domain: "main_go"
+  address: "0.0.0.0"
+  port: ":8000"
+
+user_go:
+  domain: "user_go"
+  address: "0.0.0.0"
+  port: ":8001"
