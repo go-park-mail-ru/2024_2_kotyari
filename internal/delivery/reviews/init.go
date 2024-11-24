@@ -10,22 +10,28 @@ import (
 )
 
 type reviewsManager interface {
-	GetProductReviews(ctx context.Context, productID uint32, sortField string, sortOrder string) (model.Reviews, error)
 	AddReview(ctx context.Context, productID uint32, userID uint32, review model.Review) error
 	UpdateReview(ctx context.Context, productID uint32, userID uint32, review model.Review) error
 	DeleteReview(ctx context.Context, productID uint32, userID uint32) error
 }
 
+type reviewsGetter interface {
+	GetProductReviewsNoLogin(ctx context.Context, productID uint32, sortField string, sortOrder string) (model.Reviews, error)
+	GetProductReviewsWithLogin(ctx context.Context, productID uint32, userID uint32, sortField string, sortOrder string) (model.Reviews, error)
+}
+
 type ReviewsHandler struct {
 	reviewsManager reviewsManager
+	reviewsGetter  reviewsGetter
 	inputValidator *utils.InputValidator
 	errResolver    errs.GetErrorCode
 	log            *slog.Logger
 }
 
-func NewReviewsHandler(manager reviewsManager, validator *utils.InputValidator, code errs.GetErrorCode, logger *slog.Logger) *ReviewsHandler {
+func NewReviewsHandler(manager reviewsManager, reviewsGetter reviewsGetter, validator *utils.InputValidator, code errs.GetErrorCode, logger *slog.Logger) *ReviewsHandler {
 	return &ReviewsHandler{
 		reviewsManager: manager,
+		reviewsGetter:  reviewsGetter,
 		inputValidator: validator,
 		errResolver:    code,
 		log:            logger,

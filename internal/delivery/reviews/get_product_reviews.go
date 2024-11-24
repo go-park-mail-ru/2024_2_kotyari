@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"github.com/gorilla/mux"
 )
@@ -32,11 +33,24 @@ func (h *ReviewsHandler) GetProductReviews(w http.ResponseWriter, r *http.Reques
 	sortField := r.URL.Query().Get(utils.SearchFieldParam)
 	sortOrder := r.URL.Query().Get(utils.SearchOrderParam)
 
-	reviews, err := h.reviewsManager.GetProductReviews(r.Context(), productID, sortField, sortOrder)
-	if err != nil {
-		utils.WriteErrorJSONByError(w, err, h.errResolver)
+	var reviews model.Reviews
 
-		return
+	userID, ok := utils.GetContextSessionUserID(r.Context())
+	if !ok {
+		reviews, err = h.reviewsGetter.GetProductReviewsNoLogin(r.Context(), productID, sortField, sortOrder)
+		if err != nil {
+			utils.WriteErrorJSONByError(w, err, h.errResolver)
+
+			return
+		}
+
+	} else {
+		reviews, err = h.reviewsGetter.GetProductReviewsWithLogin(r.Context(), productID, userID, sortField, sortOrder)
+		if err != nil {
+			utils.WriteErrorJSONByError(w, err, h.errResolver)
+
+			return
+		}
 	}
 
 	var resp GetProductReviewsResponseDTO
