@@ -11,7 +11,7 @@ import (
 type reviewsRepo interface {
 	GetProductReviews(ctx context.Context, productID uint32, sortField string, sortOrder string) (model.Reviews, error)
 	GetReview(ctx context.Context, productID uint32, userID uint32) (model.Review, error)
-	AddReview(ctx context.Context, productID uint32, userID uint32, review model.Review) (model.Review, error)
+	AddReview(ctx context.Context, productID uint32, userID uint32, review model.Review) error
 	UpdateReview(ctx context.Context, productID uint32, userID uint32, review model.Review) error
 	DeleteReview(ctx context.Context, productID uint32, userID uint32) error
 }
