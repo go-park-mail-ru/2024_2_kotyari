@@ -9,16 +9,17 @@ import (
 type profileRepository interface {
 	GetProfile(ctx context.Context, Id uint32) (model.Profile, error)
 	UpdateProfile(ctx context.Context, profileID uint32, profileModel model.Profile) error
-	ChangePassword(ctx context.Context, userId uint32, newPassword string) error
 }
 
-type userGetter interface {
+type userStore interface {
 	GetUserByUserID(ctx context.Context, id uint32) (model.User, error)
+	GetUserByEmail(ctx context.Context, userModel model.User) (model.User, error)
+	ChangePassword(ctx context.Context, userId uint32, newPassword string) error
 }
 
 type ProfilesService struct {
 	profileRepo profileRepository
-	userGetter  userGetter
+	userRepo    userStore
 	log         *slog.Logger
 }
 

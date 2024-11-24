@@ -1,10 +1,11 @@
 package main
 
 import (
+	"log"
+
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/apps/profile_service"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs"
 	"github.com/joho/godotenv"
-	"log"
 )
 
 const (

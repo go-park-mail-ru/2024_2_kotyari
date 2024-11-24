@@ -2,11 +2,12 @@ package profile
 
 import (
 	"context"
+	"log/slog"
+	"os"
+
 	profilegrpc "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/profile/gen"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
-	"log/slog"
-	"os"
 )
 
 type imageSaver interface {

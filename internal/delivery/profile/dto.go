@@ -50,3 +50,9 @@ type UpdateProfile struct {
 type AvatarResponse struct {
 	AvatarUrl string `json:"avatar_url"`
 }
+
+type UpdatePasswordRequest struct {
+	OldPassword    string `json:"old_password"`
+	NewPassword    string `json:"new_password"`
+	RepeatPassword string `json:"repeat_password"`
+}

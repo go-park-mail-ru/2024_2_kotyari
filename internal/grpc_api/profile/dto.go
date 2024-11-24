@@ -10,7 +10,6 @@ func toGrpcModel(p model.Profile) *profile_grpc.GetProfileResponse {
 		Email:     p.Email,
 		Username:  p.Username,
 		Gender:    p.Gender,
-		Age:       p.Age,
 		AvatarUrl: p.AvatarURL,
 	}
 }

@@ -15,6 +15,8 @@ func (p *ProfilesGrpc) ChangePassword(ctx context.Context, in *profilegrpc.Chang
 		in.GetRepeatPassword(),
 	)
 	if err != nil {
+		p.log.Error("[ ProfilesGrpc.ChangePassword ] ошибка при изменении пароля", "err", err)
+
 		return nil, err
 	}
 

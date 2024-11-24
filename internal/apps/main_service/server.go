@@ -1,15 +1,13 @@
-package apps
+package main_service
 
 import (
 	"context"
-	"fmt"
-	profilegrpc "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/profile/gen"
-	orders2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders"
+
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"log/slog"
 	"net/http"
 
+	profilegrpc "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/profile/gen"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/logger"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/postgres"
@@ -48,10 +46,12 @@ import (
 	ordersServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders"
 	profileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/profile"
 	reviewsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/reviews"
+	orders2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders"
 	sessionsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
 	userServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/user"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"github.com/gorilla/mux"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 const (

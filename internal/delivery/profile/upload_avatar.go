@@ -2,12 +2,13 @@ package profile
 
 import (
 	"errors"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"io"
 	"log/slog"
 	"mime/multipart"
 	"net/http"
 	"os"
+
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 )
 
 // uploadAvatarFromRequest загружает аватар из запроса.
