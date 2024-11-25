@@ -172,7 +172,7 @@ func NewServer() (*Server, error) {
 
 	reviewsRepo := reviewsRepoLib.NewReviewsStore(dbPool, log)
 	reviewsManager := reviewsServiceLib.NewReviewsService(reviewsRepo, inputValidator, log)
-	reviewsHandler := reviewsDeliveryLib.NewReviewsHandler(reviewsManager, inputValidator, errResolver, log)
+	reviewsHandler := reviewsDeliveryLib.NewReviewsHandler(reviewsManager, reviewsRepo, inputValidator, errResolver, log)
 	reviewsApp := NewReviewsApp(router, reviewsHandler)
 
 	searchRepo := searchRepoLib.NewSearchStore(dbPool, log)

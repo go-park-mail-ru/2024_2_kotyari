@@ -75,5 +75,6 @@ func (s *SearchStore) GetSearchTitleSuggestions(ctx context.Context, queryParam 
 
 func containsQueryParam(title, q string) bool {
 	title = strings.ToLower(title)
+	q = strings.ToLower(q)
 	return strings.Contains(title, q)
 }
