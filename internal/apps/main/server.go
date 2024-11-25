@@ -182,7 +182,7 @@ func NewServer() (*Server, error) {
 	csrfHandler := csrfDeliveryLib.NewCsrfDelivery(csrfUsecase, sessionsDelivery)
 
 	reviewsGRPCCfg := v.GetStringMap(ratingUpdaterService)
-	reviewsGRPC, err := reviewsDeliveryLib.NewRatingUpdaterGRPC(reviewsGRPCCfg)
+	reviewsGRPC, err := reviewsDeliveryLib.NewRatingUpdaterGRPC(reviewsGRPCCfg, log)
 	if err != nil {
 		return nil, err
 	}
@@ -193,7 +193,7 @@ func NewServer() (*Server, error) {
 		return nil, err
 	}
 
-	reviewsHandler := reviewsDeliveryLib.NewReviewsHandler(reviewsManager, reviewsRepo, inputValidator, errResolver, log)
+	reviewsHandler := reviewsDeliveryLib.NewReviewsHandler(reviewsManager, inputValidator, errResolver, log)
 	reviewsApp := NewReviewsApp(router, reviewsHandler)
 
 	searchRepo := searchRepoLib.NewSearchStore(dbPool, log)

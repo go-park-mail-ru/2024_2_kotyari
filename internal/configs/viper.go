@@ -5,6 +5,7 @@ import (
 )
 
 const (
+	KeyDomain       = "domain"
 	KeyAddress      = "address"
 	KeyPort         = "port"
 	ServicesConfigs = "services"
@@ -13,6 +14,7 @@ const (
 )
 
 type ServiceViperConfig struct {
+	Domain  string
 	Address string
 	Port    string
 }
@@ -30,6 +32,7 @@ func SetupViper() (*viper.Viper, error) {
 
 func ParseServiceViperConfig(config map[string]any) ServiceViperConfig {
 	return ServiceViperConfig{
+		Domain:  config[KeyDomain].(string),
 		Address: config[KeyAddress].(string),
 		Port:    config[KeyPort].(string),
 	}

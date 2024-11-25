@@ -12,7 +12,7 @@ type RatingUpdaterRepository interface {
 }
 
 type ReviewsGetter interface {
-	GetProductReviews(ctx context.Context, productID uint32, sortField string, sortOrder string) (model.Reviews, error)
+	GetProductReviewsNoLogin(ctx context.Context, productID uint32, sortField string, sortOrder string) (model.Reviews, error)
 }
 
 type RatingUpdaterService struct {
