@@ -8,7 +8,6 @@ import (
 )
 
 func (repo *FilesRepo) GetFile(filename string) (*os.File, error) {
-	log.Printf(" [ FilesRepo.GetFile ] Зашли")
 
 	fullPath, err := repo.buildPath(filename)
 	if err != nil {
@@ -16,8 +15,6 @@ func (repo *FilesRepo) GetFile(filename string) (*os.File, error) {
 		log.Printf("[ FilesRepo.GetFile ] ошибка %s", err.Error())
 		return nil, err
 	}
-
-	log.Printf(" [ FilesRepo.GetFile ] Getting file %s", fullPath)
 
 	file, err := os.Open(fullPath)
 	if err != nil {

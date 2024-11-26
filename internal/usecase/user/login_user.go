@@ -17,7 +17,7 @@ func (us *UsersService) LoginUser(ctx context.Context, user model.User) (model.U
 	}
 
 	if !utils.VerifyPassword(dbUser.Password, user.Password) {
-		us.log.Error("[ UsersService.LoginUser ] Не прошла валидация паролей", slog.String("error", err.Error()))
+		us.log.Info("[ UsersService.LoginUser ] Не прошла валидация паролей")
 		return model.User{}, errs.WrongCredentials
 	}
 

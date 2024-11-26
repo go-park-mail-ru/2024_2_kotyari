@@ -3,6 +3,8 @@ package go_main
 import (
 	"context"
 	grpc_gen "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/user/gen"
+	http2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/metrics/http"
+	metrics2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/middlewares/metrics"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -108,6 +110,16 @@ type csrfDelivery interface {
 func NewServer() (*Server, error) {
 	log := logger.InitLogger()
 	router := mux.NewRouter()
+
+	metrics, err := http2.CreateHTTPMetrics("main")
+	if err != nil {
+		return nil, err
+	}
+
+	metricsMiddleware := metrics2.CreateMetricsMiddleware(metrics)
+
+	router.Use(metricsMiddleware)
+	router.Use(middlewares.RequestIDMiddleware)
 
 	dbPool, err := postgres.LoadPgxPool()
 	if err != nil {
@@ -233,6 +245,7 @@ func (s *Server) setupRoutes() {
 	authSub := s.r.Methods(http.MethodGet, http.MethodPost, http.MethodPut).Subrouter()
 	authSub.HandleFunc("/csrf", s.csrf.GetCsrf).Methods(http.MethodGet)
 	authSub.HandleFunc("/", s.auth.GetUserById).Methods(http.MethodGet)
+	authSub.Use(middlewares.RequestIDMiddleware)
 	authSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 
 	s.r.HandleFunc("/files/{name}", s.files.GetImage).Methods(http.MethodGet)
@@ -245,6 +258,7 @@ func (s *Server) setupRoutes() {
 	csrfProtected.HandleFunc("/address", s.address.GetAddress).Methods(http.MethodGet)
 	csrfProtected.HandleFunc("/address", s.address.UpdateAddressData).Methods(http.MethodPut)
 	csrfProtected.Use(csrfMiddleware)
+	csrfProtected.Use(middlewares.RequestIDMiddleware)
 
 	subSearch := s.search.InitSearchRoutes()
 	subSearch.Use(middlewares.RequestIDMiddleware)
