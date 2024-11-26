@@ -1,28 +1,25 @@
-package grpc
+package http
 
-import (
-	"github.com/prometheus/client_golang/prometheus"
-)
+import "github.com/prometheus/client_golang/prometheus"
 
-func CreateGrpcMetrics(service string) *Metrics {
-	metrics := &Metrics{
+func CreateHTTPMetrics(service string) *HTTPMetrics {
+	return &HTTPMetrics{
 		serviceName: service,
 		totalHits: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
 				Name: service + "_total_hits_count",
-				Help: "Number of total gRPC requests",
+				Help: "Number of total HTTP requests",
 			},
-			[]string{"service", "method", "code"},
+			[]string{"path", "service", "code"},
 		),
 		duration: prometheus.NewHistogramVec(
 			prometheus.HistogramOpts{
-				Name:    service + "_duration_seconds",
-				Help:    "Request duration in seconds",
+				Name:    service + "_request_duration_seconds",
+				Help:    "Request time",
 				Buckets: prometheus.DefBuckets,
 			},
-			[]string{"service", "method", "code"},
+			[]string{"path", "service", "code"},
 		),
-
 		cpuUsage: prometheus.NewGaugeFunc(
 			prometheus.GaugeOpts{
 				Name: service + "_cpu_usage_percent",
@@ -52,11 +49,9 @@ func CreateGrpcMetrics(service string) *Metrics {
 			[]string{"path"},
 		),
 	}
-
-	return metrics
 }
 
-func InitGrpcMetrics(metrics *Metrics) error {
+func InitHTTPMetrics(metrics *HTTPMetrics) error {
 	if err := prometheus.Register(metrics.totalHits); err != nil {
 		return err
 	}

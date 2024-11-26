@@ -111,7 +111,7 @@ func NewServer() (*Server, error) {
 	log := logger.InitLogger()
 	router := mux.NewRouter()
 
-	metrics, err := http2.CreateHTTPMetrics("main")
+	metrics, err := http2.NewHTTPMetrics("main")
 	if err != nil {
 		return nil, err
 	}
