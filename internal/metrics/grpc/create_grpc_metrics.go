@@ -2,12 +2,13 @@ package grpc
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
+	"log"
 )
 
 func CreateGrpcMetrics(service string) *Metrics {
 	metrics := &Metrics{
 		serviceName: service,
-		totalHits: prometheus.NewCounterVec(
+		TotalHits: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
 				Name: service + "_total_hits_count",
 				Help: "Number of total gRPC requests",
@@ -57,7 +58,8 @@ func CreateGrpcMetrics(service string) *Metrics {
 }
 
 func InitGrpcMetrics(metrics *Metrics) error {
-	if err := prometheus.Register(metrics.totalHits); err != nil {
+	if err := prometheus.Register(metrics.TotalHits); err != nil {
+		log.Printf("Failed to register totalHits: %v", err)
 		return err
 	}
 	if err := prometheus.Register(metrics.duration); err != nil {
@@ -75,5 +77,7 @@ func InitGrpcMetrics(metrics *Metrics) error {
 	if err := prometheus.Register(metrics.diskUsageFree); err != nil {
 		return err
 	}
+
+	log.Printf("grpc metrics initialized")
 	return nil
 }

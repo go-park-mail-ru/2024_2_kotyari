@@ -18,16 +18,9 @@ func (m *Interceptor) ServerMetricsInterceptor(ctx context.Context,
 
 	if err != nil {
 		_, code := m.errResolver.Get(err)
-		//if errors.Is(err, ClientError) {
-		//	m.metrics.IncreaseTotal("400", info.FullMethod)
-		//	m.metrics.AddDuration("400", info.FullMethod, tm)
-		//}
-		//if errors.Is(err, ServerError) {
-		//	m.metrics.IncreaseTotal("404", info.FullMethod)
-		//	m.metrics.AddDuration("404", info.FullMethod, tm)
-		//}
 		m.metrics.IncreaseTotal(strconv.Itoa(code), info.FullMethod)
 		m.metrics.AddDuration(strconv.Itoa(code), info.FullMethod, tm)
+		m.metrics.TotalHits.WithLabelValues(strconv.Itoa(code)).Inc()
 	} else {
 		m.metrics.AddDuration("200", info.FullMethod, tm)
 	}

@@ -3,8 +3,15 @@ package rating_updater
 import (
 	"context"
 	"fmt"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
+	grpc2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/metrics/grpc"
+	metrics2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/middlewares/metrics"
+	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log/slog"
 	"net"
+	"net/http"
+	"time"
 
 	ratingUpdater "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/rating_updater/gen"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs"
@@ -38,8 +45,25 @@ func NewApp(config map[string]any) (*RatingUpdaterApp, error) {
 		return nil, err
 	}
 
-	grpcServer := grpc.NewServer()
 	log := logger.InitLogger()
+	errorResolver := errs.NewErrorStore()
+
+	metrics, err := grpc2.NewGrpcMetrics("rating_updater")
+	if err != nil {
+		log.Error("Ошибка при регистрации метрики", slog.String("error", err.Error()))
+	}
+
+	interceptor := metrics2.NewGrpcMiddleware(*metrics, errorResolver)
+	grpcServer := grpc.NewServer(grpc.ChainUnaryInterceptor(interceptor.ServerMetricsInterceptor))
+	router := mux.NewRouter()
+	router.PathPrefix("/metrics").Handler(promhttp.Handler())
+	serverProm := http.Server{Handler: router, Addr: fmt.Sprintf(":%d", 8084), ReadHeaderTimeout: 10 * time.Second}
+
+	go func() {
+		if err := serverProm.ListenAndServe(); err != nil {
+			log.Error("fail auth.ListenAndServe")
+		}
+	}()
 	productsRepo := productRepoLib.NewProductsStore(dbPool, log)
 	reviewsRepo := reviewsRepoLib.NewReviewsStore(dbPool, log)
 	ratingUpdaterManager := reviewsUpdaterServiceLib.NewRatingUpdateService(productsRepo, reviewsRepo, log)

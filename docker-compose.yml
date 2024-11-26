@@ -42,6 +42,7 @@ services:
       dockerfile: ./cmd/rating_updater/Dockerfile
     ports:
       - "8004:8004"
+      - "8084:8084"
     image: rating-updater-go-image
     container_name: rating_updater_go
     restart: unless-stopped
@@ -58,6 +59,7 @@ services:
       dockerfile: ./cmd/profile/Dockerfile
     ports:
       - "8003:8003"
+      - "8083:8083"
     image: profile-go-image
     container_name: profile_go
     restart: unless-stopped
