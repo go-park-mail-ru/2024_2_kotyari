@@ -2,6 +2,8 @@ package rating_updater
 
 import (
 	"context"
+	"errors"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"log/slog"
 	"math"
 
@@ -11,6 +13,20 @@ import (
 func (r *RatingUpdaterService) UpdateProductRating(ctx context.Context, productID uint32) error {
 	reviews, err := r.reviewsGetter.GetProductReviewsNoLogin(ctx, productID, utils.DefaultFieldParam, utils.DefaultOrderParam)
 	if err != nil {
+		if errors.Is(err, errs.NoReviewsForProduct) {
+			r.log.Error("[RatingUpdaterService.UpdateProductRating] No reviews for product, setting rating to 0",
+				slog.String("error", err.Error()))
+
+			err = r.repository.UpdateProductRating(ctx, productID, 0)
+			if err != nil {
+				r.log.Error("[RatingUpdaterService.UpdateProductRating] Error occurred when updating product rating",
+					slog.String("error", err.Error()))
+
+				return err
+			}
+
+			return nil
+		}
 		r.log.Error("[RatingUpdaterService.UpdateProductRating] Error occurred when fetching products",
 			slog.String("error", err.Error()))
 

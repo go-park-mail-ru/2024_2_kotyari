@@ -12,14 +12,14 @@ type RatingUpdaterManager interface {
 }
 
 type RatingUpdaterGRPC struct {
-	manager RatingUpdaterManager
-	log     *slog.Logger
+	ratingUpdaterManager RatingUpdaterManager
+	log                  *slog.Logger
 	ratingUpdater.UnimplementedRatingUpdaterServer
 }
 
 func NewRatingUpdaterGRPC(manager RatingUpdaterManager, logger *slog.Logger) *RatingUpdaterGRPC {
 	return &RatingUpdaterGRPC{
-		manager: manager,
-		log:     logger,
+		ratingUpdaterManager: manager,
+		log:                  logger,
 	}
 }
