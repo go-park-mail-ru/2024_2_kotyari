@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package user;
+option go_package = "https://github.com/go-park-mail-ru/2024_2_kotyari/user/grpc_gen";
+
+message UsersLoginRequest {
+  string email = 1;
+  string password = 2;
+}

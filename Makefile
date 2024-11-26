@@ -69,6 +69,34 @@ test-coverage:
 	go tool cover -func=coverage.out
 	go tool cover -html=coverage.out
 
+# Путь к папке с прототипами
+PROTO_DIR := ./api/protos
+
+# Путь к папке сгенерированных файлов
+GEN_DIR := gen
+
+# Команда protoc
+PROTOC := protoc
+
+# Список всех сущностей (названия подпапок в ./api/protos)
+ENTITIES := $(shell find $(PROTO_DIR) -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
+
+# Общая цель для генерации всех сущностей
+proto-build: $(ENTITIES)
+
+# Правило генерации для каждой сущности
+$(ENTITIES):
+	  @echo "Генерация кода для сущности $@..."
+	  @mkdir -p $(PROTO_DIR)/$@/$(GEN_DIR)
+	  @$(PROTOC) \
+		--proto_path=$(PROTO_DIR)/$@/proto \
+		--go_out=$(PROTO_DIR)/$@/$(GEN_DIR) \
+		--go_opt=paths=source_relative \
+		--go-grpc_out=$(PROTO_DIR)/$@/$(GEN_DIR) \
+		--go-grpc_opt=paths=source_relative \
+    	$(PROTO_DIR)/$@/proto/*.proto
+	  @echo "Генерация для $@ завершена."
+
 fmt:
 	go fmt ./...
 
@@ -83,6 +111,18 @@ main-refresh:
 
 rating-updater-refresh:
 	docker stop rating_updater_go && docker rm rating_updater_go && docker rmi rating-updater-go-image && docker compose up -d
+
+user-refresh:
+	docker stop user_go && docker rm user_go && docker rmi user-go-image && docker compose up -d
+
+profile-refresh:
+	docker stop profile_go && docker rm profile_go && docker rmi profile-go-image && docker compose up -d
+
+prometheus-refresh:
+	docker stop prometheus && docker rm prometheus && docker compose up -d
+
+grafana-refresh:
+	docker stop grafana && docker rm grafana && docker compose up -d
 
 pg-refresh:
 	docker stop pg_db && docker rm pg_db && docker compose up -d
@@ -102,9 +142,6 @@ recreate-redis:
 all-delete:
 	docker compose down -v
 
-profile-refresh:
-	docker stop profile_go && docker rm profile_go && docker rmi profile-go-image && docker compose up -d
-
 all-refresh: main-refresh pg-refresh redis-refresh
 
 apply-migrations:
@@ -116,7 +153,7 @@ revert-migrations:
 	@migrate -path $(MIGRATIONS_DIR) -database "$(DB_URL)" down
 
 
-back-refresh: main-refresh rating-updater-refresh profile-refresh
+back-refresh: main-refresh rating-updater-refresh profile-refresh user-refresh
 
 # Правило генерации для каждой сущности
 $(ENTITIES):

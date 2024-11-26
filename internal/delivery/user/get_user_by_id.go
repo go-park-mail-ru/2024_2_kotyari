@@ -1,43 +1,35 @@
 package user
 
 import (
-	"errors"
+	"log/slog"
+	"net/http"
+
+	grpc_gen "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/user/gen"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
-	"net/http"
 )
 
-func (d *UsersHandler) GetUserById(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie(utils.SessionName)
-	if err != nil {
-		if errors.Is(err, http.ErrNoCookie) {
-			utils.WriteJSON(w, http.StatusUnauthorized, errs.HTTPErrorResponse{
-				ErrorMessage: errs.UserNotAuthorized.Error(),
-			})
-
-			return
-		}
-
-		utils.WriteJSON(w, http.StatusInternalServerError, errs.HTTPErrorResponse{
-			ErrorMessage: errs.InternalServerError.Error(),
-		})
-
+func (u *UsersDelivery) GetUserById(w http.ResponseWriter, r *http.Request) {
+	userID, ok := utils.GetContextSessionUserID(r.Context())
+	if !ok {
+		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)
+		u.log.Error("[ UsersDelivery.GetUserById ] Пользователь не авторизован")
 		return
 	}
 
-	user, err := d.userManager.GetUserBySessionID(r.Context(), cookie.Value)
+	usersDefaultResponse, err := u.userClientGrpc.GetUserById(r.Context(), &grpc_gen.GetUserByIdRequest{UserId: userID})
 	if err != nil {
-		err, code := d.errResolver.Get(err)
+		err, code := u.errResolver.Get(err)
 		utils.WriteJSON(w, code, errs.HTTPErrorResponse{
 			ErrorMessage: err.Error(),
 		})
-
+		u.log.Error("[ UsersDelivery.GetUserById ] Ошибка при отправке на grpc", slog.String("error", err.Error()))
 		return
 	}
 
 	utils.WriteJSON(w, http.StatusOK, UsersDefaultResponse{
-		Username:  user.Username,
-		City:      user.City,
-		AvatarUrl: user.AvatarUrl,
+		Username:  usersDefaultResponse.Username,
+		City:      usersDefaultResponse.City,
+		AvatarUrl: usersDefaultResponse.AvatarUrl,
 	})
 }

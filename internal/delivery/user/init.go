@@ -2,28 +2,30 @@ package user
 
 import (
 	"context"
-
+	"github.com/go-park-mail-ru/2024_2_kotyari/api/protos/user/gen"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
+	"log/slog"
 )
 
-type usersManager interface {
-	CreateUser(ctx context.Context, user model.User) (string, model.User, error)
-	LoginUser(ctx context.Context, user model.User) (string, model.User, error)
-	GetUserBySessionID(ctx context.Context, sessionID string) (model.User, error)
+type sessionCreator interface {
+	Create(ctx context.Context, userID uint32) (string, error)
 }
 
-type UsersHandler struct {
-	userManager     usersManager
-	stringSanitizer utils.StringSanitizer
-	errResolver     errs.GetErrorCode
+type UsersDelivery struct {
+	userClientGrpc grpc_gen.UserServiceClient
+	inputValidator *utils.InputValidator
+	sessionService sessionCreator
+	errResolver    errs.GetErrorCode
+	log            *slog.Logger
 }
 
-func NewUsersHandler(userManager usersManager, stringSanitizer utils.StringSanitizer, errResolver errs.GetErrorCode) *UsersHandler {
-	return &UsersHandler{
-		userManager:     userManager,
-		stringSanitizer: stringSanitizer,
-		errResolver:     errResolver,
+func NewUsersDelivery(userManager grpc_gen.UserServiceClient, inputValidator *utils.InputValidator, sessionService sessionCreator, errResolver errs.GetErrorCode, log *slog.Logger) *UsersDelivery {
+	return &UsersDelivery{
+		userClientGrpc: userManager,
+		inputValidator: inputValidator,
+		sessionService: sessionService,
+		errResolver:    errResolver,
+		log:            log,
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	profilegrpc "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/profile/gen"
+	usergrpc "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/user/gen"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/logger"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/postgres"
@@ -24,7 +25,9 @@ import (
 	sessionsDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/sessions"
 	userDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/user"
 	errResolveLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
+	metrics "github.com/go-park-mail-ru/2024_2_kotyari/internal/metrics/http"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/middlewares"
+	metricsMiddleware "github.com/go-park-mail-ru/2024_2_kotyari/internal/middlewares/metrics"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	addressRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/address"
 	cartRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/cart"
@@ -35,7 +38,6 @@ import (
 	reviewsRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/reviews"
 	searchRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/search"
 	sessionsRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/sessions"
-	userRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/user"
 	addressServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/address"
 	cartServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/cart"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/csrf"
@@ -43,8 +45,7 @@ import (
 	imageServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/image"
 	ordersServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders"
 	reviewsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/reviews"
-	sessionsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
-	userServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/user"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"github.com/gorilla/mux"
 	"google.golang.org/grpc"
@@ -55,6 +56,7 @@ const (
 	mainService          = "main_service"
 	ratingUpdaterService = "rating_updater"
 	profileService       = "profile_go"
+	userService          = "user_go"
 )
 
 type categoryApp interface {
@@ -122,6 +124,16 @@ func NewServer() (*Server, error) {
 		return nil, err
 	}
 
+	httpMetrics, err := metrics.NewHTTPMetrics("main")
+	if err != nil {
+		return nil, err
+	}
+
+	metricsM := metricsMiddleware.CreateMetricsMiddleware(httpMetrics)
+
+	router.Use(metricsM)
+	router.Use(middlewares.RequestIDMiddleware)
+
 	dbPool, err := postgres.LoadPgxPool()
 	if err != nil {
 		return nil, err
@@ -143,13 +155,22 @@ func NewServer() (*Server, error) {
 	fileService := fileServiceLib.NewFilesUsecase(fileRepo, log)
 	imageService := imageServiceLib.NewImagesUsecase(fileService)
 
-	sessionsRepo := sessionsRepoLib.NewSessionRepo(redisClient)
-	sessionsService := sessionsServiceLib.NewSessionService(sessionsRepo)
+	sessionsRepo := sessionsRepoLib.NewSessionRepo(redisClient, log)
+	sessionService := sessions.NewSessionService(sessionsRepo, log)
 	sessionsDelivery := sessionsDeliveryLib.NewSessionDelivery(sessionsRepo, errResolver)
 
-	userRepo := userRepoLib.NewUsersStore(dbPool)
-	userService := userServiceLib.NewUserService(userRepo, sessionsService)
-	userHandler := userDeliveryLib.NewUsersHandler(userService, inputValidator, errResolver)
+	userGRPCCfg := v.GetStringMap(userService)
+	userCfg := configs.ParseServiceViperConfig(userGRPCCfg)
+	userConn, err := grpc.NewClient(fmt.Sprintf("%s:%s", userCfg.Domain, userCfg.Port),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	userClient := usergrpc.NewUserServiceClient(userConn)
+
+	userHandler := userDeliveryLib.NewUsersDelivery(userClient, inputValidator, sessionService, errResolver, log)
 
 	categoryRepo := categoryRepoLib.NewCategoriesStore(dbPool, log)
 	categoryDelivery := categoryDeliveryLib.NewCategoriesDelivery(categoryRepo, log, errResolver)
@@ -167,9 +188,9 @@ func NewServer() (*Server, error) {
 		return nil, err
 	}
 
-	client := profilegrpc.NewProfileClient(profileConn)
+	profileClient := profilegrpc.NewProfileClient(profileConn)
 
-	profileHandler := profileDeliveryLib.NewProfilesHandler(client, log, addressRepo, imageService, errResolver)
+	profileHandler := profileDeliveryLib.NewProfilesHandler(profileClient, log, addressRepo, imageService, errResolver)
 	prodRepo := productRepoLib.NewProductsStore(dbPool, log)
 	ca := NewCategoryApp(router, categoryDelivery)
 
@@ -256,6 +277,8 @@ func (s *Server) setupRoutes() {
 
 	authSub := s.r.Methods(http.MethodGet, http.MethodPost, http.MethodPut).Subrouter()
 	authSub.HandleFunc("/csrf", s.csrf.GetCsrf).Methods(http.MethodGet)
+	authSub.HandleFunc("/", s.auth.GetUserById).Methods(http.MethodGet)
+	authSub.Use(middlewares.RequestIDMiddleware)
 	authSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 
 	s.r.HandleFunc("/files/{name}", s.files.GetImage).Methods(http.MethodGet)
@@ -269,6 +292,7 @@ func (s *Server) setupRoutes() {
 	csrfProtected.HandleFunc("/address", s.address.GetAddress).Methods(http.MethodGet)
 	csrfProtected.HandleFunc("/address", s.address.UpdateAddressData).Methods(http.MethodPut)
 	csrfProtected.Use(csrfMiddleware)
+	csrfProtected.Use(middlewares.RequestIDMiddleware)
 
 	subSearch := s.search.InitSearchRoutes()
 	subSearch.Use(middlewares.RequestIDMiddleware)
@@ -277,7 +301,6 @@ func (s *Server) setupRoutes() {
 	reviewsSub.Use(middlewares.RequestIDMiddleware)
 	reviewsSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 
-	s.r.HandleFunc("/", s.auth.GetUserById).Methods(http.MethodGet)
 }
 
 func (s *Server) Run() error {

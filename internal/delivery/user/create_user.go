@@ -2,13 +2,13 @@ package user
 
 import (
 	"encoding/json"
-	"net/http"
-
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
+	"log/slog"
+	"net/http"
 )
 
-func (d *UsersHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
+func (u *UsersDelivery) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var req UsersSignUpRequest
 
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -16,30 +16,40 @@ func (d *UsersHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		utils.WriteJSON(w, http.StatusBadRequest, errs.HTTPErrorResponse{
 			ErrorMessage: errs.InvalidJSONFormat.Error(),
 		})
-
+		u.log.Error("[ UsersDelivery.CreateUser ] Ошибка при декодировании запроса", slog.String("error", err.Error()))
 		return
 	}
-
-	req.Username = d.stringSanitizer.SanitizeString(req.Username)
-	req.Email = d.stringSanitizer.SanitizeString(req.Email)
-	req.Password = d.stringSanitizer.SanitizeString(req.Password)
-	req.RepeatPassword = d.stringSanitizer.SanitizeString(req.RepeatPassword)
 
 	if err = utils.ValidateRegistration(req.Email, req.Username, req.Password, req.RepeatPassword); err != nil {
-		err, code := d.errResolver.Get(err)
+		err, code := u.errResolver.Get(err)
+		utils.WriteJSON(w, code, errs.HTTPErrorResponse{
+			ErrorMessage: err.Error(),
+		})
+		u.log.Error("[ UsersDelivery.CreateUser ] Валидация регистрации не прошла успешно", slog.String("error", err.Error()))
+		return
+	}
+	usersDefaultResponse, err := u.userClientGrpc.CreateUser(r.Context(), req.ToGrpcSignupRequest())
+	if err != nil {
+		err, code := u.errResolver.Get(err)
 		utils.WriteJSON(w, code, errs.HTTPErrorResponse{
 			ErrorMessage: err.Error(),
 		})
 
+		u.log.Error("[ UsersDelivery.CreateUser ] Ошибка при передаче на grpc", slog.String("error", err.Error()))
 		return
 	}
 
-	sessionID, user, err := d.userManager.CreateUser(r.Context(), req.ToModel())
+	sessionID, err := u.sessionService.Create(r.Context(), usersDefaultResponse.GetUserId())
 	if err != nil {
-		err, code := d.errResolver.Get(err)
+		err, code := u.errResolver.Get(err)
 		utils.WriteJSON(w, code, errs.HTTPErrorResponse{
 			ErrorMessage: err.Error(),
 		})
+
+		u.log.Error("[ UsersDelivery.CreateUser ] Ошибка при создании сессии ",
+			slog.String("error", err.Error()),
+			slog.Any("userId", usersDefaultResponse.UserId),
+		)
 
 		return
 	}
@@ -47,8 +57,8 @@ func (d *UsersHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, utils.SetSessionCookie(sessionID))
 
 	utils.WriteJSON(w, http.StatusOK, UsersDefaultResponse{
-		Username:  user.Username,
-		City:      user.City,
-		AvatarUrl: user.AvatarUrl,
+		UserID:   usersDefaultResponse.UserId,
+		Username: usersDefaultResponse.Username,
+		City:     usersDefaultResponse.City,
 	})
 }

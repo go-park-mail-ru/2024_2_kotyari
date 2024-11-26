@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package user;
+option go_package = "https://github.com/go-park-mail-ru/2024_2_kotyari/user/grpc_gen";
+
+
+message GetUserByIdRequest {
+  uint32 user_id = 1;
+}

@@ -8,7 +8,6 @@ import (
 
 func (app *ProfilesApp) Run() error {
 	lis, err := net.Listen("tcp",
-
 		fmt.Sprintf("%s:%s", app.config.Address, app.config.Port),
 	)
 	if err != nil {
