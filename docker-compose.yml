@@ -25,8 +25,22 @@ services:
     image: rating-updater-go-image
     container_name: rating_updater_go
     restart: unless-stopped
-    volumes:
-      - ./files:/delivery/files
+    networks:
+      - app-network
+    depends_on:
+      - pg_db
+      - redis_service
+      - main_go
+
+  profile_go:
+    build:
+      context: .
+      dockerfile: ./cmd/profile/Dockerfile
+    ports:
+      - "8003:8003"
+    image: profile-go-image
+    container_name: profile_go
+    restart: unless-stopped
     networks:
       - app-network
     depends_on:

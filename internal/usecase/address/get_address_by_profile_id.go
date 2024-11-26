@@ -14,8 +14,6 @@ func (as *AddressService) GetAddressByProfileID(ctx context.Context, userID uint
 		as.log.Error("[ AddressService.GetAddressByProfileID ] Ошибка при получении адреса", slog.String("error", err.Error()))
 		return model.Address{}, err
 	}
-	if address.Flat == nil {
-		*address.Flat = ""
-	}
+
 	return address, nil
 }

@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v3.21.12
-// source: init.proto
+// source: init_rating_updater.proto
 
 package rating_updater
 
@@ -118,5 +118,5 @@ var RatingUpdater_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "init.proto",
+	Metadata: "init_rating_updater.proto",
 }

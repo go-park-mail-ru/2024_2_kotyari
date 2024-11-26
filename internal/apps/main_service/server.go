@@ -1,4 +1,4 @@
-package apps
+package main_service
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	profilegrpc "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/profile/gen"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/logger"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/postgres"
@@ -31,7 +32,6 @@ import (
 	fileRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/file"
 	rorders "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/orders"
 	productRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/product"
-	profileRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/profile"
 	reviewsRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/reviews"
 	searchRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/search"
 	sessionsRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/sessions"
@@ -42,17 +42,19 @@ import (
 	fileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/file"
 	imageServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/image"
 	ordersServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders"
-	profileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/profile"
 	reviewsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/reviews"
 	sessionsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
 	userServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/user"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"github.com/gorilla/mux"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 const (
 	mainService          = "main_service"
 	ratingUpdaterService = "rating_updater"
+	profileService       = "profile_go"
 )
 
 type categoryApp interface {
@@ -73,6 +75,7 @@ type profilesDelivery interface {
 	GetProfile(writer http.ResponseWriter, request *http.Request)
 	UpdateProfileData(writer http.ResponseWriter, request *http.Request)
 	UpdateProfileAvatar(writer http.ResponseWriter, request *http.Request)
+	ChangePassword(writer http.ResponseWriter, request *http.Request)
 }
 
 type addressesDelivery interface {
@@ -151,16 +154,23 @@ func NewServer() (*Server, error) {
 	categoryRepo := categoryRepoLib.NewCategoriesStore(dbPool, log)
 	categoryDelivery := categoryDeliveryLib.NewCategoriesDelivery(categoryRepo, log, errResolver)
 
-	profileRepo := profileRepoLib.NewProfileRepo(dbPool, log)
-	profileService := profileServiceLib.NewProfileService(imageService, profileRepo, log)
-	profileHandler := profileDeliveryLib.NewProfilesHandler(profileService, inputValidator, log)
-
 	addressRepo := addressRepoLib.NewAddressRepo(dbPool, log)
 	addressService := addressServiceLib.NewAddressService(addressRepo, log)
 	addressHandler := addressDeliveryLib.NewAddressHandler(addressService, log)
 
-	prodRepo := productRepoLib.NewProductsStore(dbPool, log)
+	profileGRPCCfg := v.GetStringMap(profileService)
+	profileCfg := configs.ParseServiceViperConfig(profileGRPCCfg)
+	profileConn, err := grpc.NewClient(fmt.Sprintf("%s:%s", profileCfg.Domain, profileCfg.Port),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		return nil, err
+	}
 
+	client := profilegrpc.NewProfileClient(profileConn)
+
+	profileHandler := profileDeliveryLib.NewProfilesHandler(client, log, addressRepo, imageService, errResolver)
+	prodRepo := productRepoLib.NewProductsStore(dbPool, log)
 	ca := NewCategoryApp(router, categoryDelivery)
 
 	cartRepo := cartRepoLib.NewCartsStore(dbPool, log)
@@ -254,6 +264,7 @@ func (s *Server) setupRoutes() {
 
 	csrfProtected.HandleFunc("/account", s.profile.GetProfile).Methods(http.MethodGet)
 	csrfProtected.HandleFunc("/account", s.profile.UpdateProfileData).Methods(http.MethodPut)
+	csrfProtected.HandleFunc("/change_password", s.profile.ChangePassword).Methods(http.MethodPut)
 	csrfProtected.HandleFunc("/account/avatar", s.profile.UpdateProfileAvatar).Methods(http.MethodPut)
 	csrfProtected.HandleFunc("/address", s.address.GetAddress).Methods(http.MethodGet)
 	csrfProtected.HandleFunc("/address", s.address.UpdateAddressData).Methods(http.MethodPut)

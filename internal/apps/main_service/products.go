@@ -1,4 +1,4 @@
-package apps
+package main_service
 
 import (
 	"net/http"

@@ -6,7 +6,6 @@ import (
 )
 
 func (pr *ProfilesStore) UpdateProfileAvatar(ctx context.Context, profileID uint32, filePath string) error {
-
 	const query = `
 		UPDATE users 
 		SET avatar_url = $1
