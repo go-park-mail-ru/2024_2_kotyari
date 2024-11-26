@@ -5,9 +5,17 @@ import (
 	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
 func (cs *CartsStore) ChangeAllCartProductsState(ctx context.Context, userID uint32, isSelected bool) error {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return err
+	}
+
+	cs.log.Info("[CartsStore.ChangeAllCartProductsState] Started executing", slog.Any("request-id", requestID))
+
 	const query = `
 		update carts
 		set is_selected = $2

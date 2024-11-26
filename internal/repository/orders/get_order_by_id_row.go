@@ -2,12 +2,21 @@ package rorders
 
 import (
 	"context"
+	"log/slog"
+
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"log/slog"
 )
 
 func (r *OrdersRepo) GetOrderByIdRows(ctx context.Context, id uuid.UUID, _ uint32) (pgx.Rows, error) {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	r.logger.Info("[OrdersRepo.GetOrderByIdRows] Started executing", slog.Any("request-id", requestID))
+
 	const query = `
 		SELECT o.id, o.address, o.status, o.created_at, u.username,
        		op.delivery_date, p.id, p.price, op.count, p.image_url, p.weight, p.title

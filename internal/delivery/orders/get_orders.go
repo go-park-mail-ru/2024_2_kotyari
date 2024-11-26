@@ -9,6 +9,16 @@ import (
 )
 
 func (h *OrdersHandler) GetOrders(w http.ResponseWriter, r *http.Request) {
+	requestID, err := utils.GetContextRequestID(r.Context())
+	if err != nil {
+		h.logger.Error("[OrdersHandler.GetOrders] No request ID")
+		utils.WriteErrorJSONByError(w, err, h.errResolver)
+
+		return
+	}
+
+	h.logger.Info("[OrdersHandler.GetOrders] Started executing", slog.Any("request-id", requestID))
+
 	userID, ok := utils.GetContextSessionUserID(r.Context())
 	if !ok {
 		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)

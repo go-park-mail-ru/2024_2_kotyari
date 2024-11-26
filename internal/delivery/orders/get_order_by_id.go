@@ -2,16 +2,27 @@ package orders
 
 import (
 	"errors"
+	"log/slog"
+	"net/http"
+
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v5"
-	"log/slog"
-	"net/http"
 )
 
 func (h *OrdersHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
+	requestID, err := utils.GetContextRequestID(r.Context())
+	if err != nil {
+		h.logger.Error("[OrdersHandler.GetOrderByID] No request ID")
+		utils.WriteErrorJSONByError(w, err, h.errResolver)
+
+		return
+	}
+
+	h.logger.Info("[OrdersHandler.GetOrderByID] Started executing", slog.Any("request-id", requestID))
+
 	userID, ok := utils.GetContextSessionUserID(r.Context())
 	if !ok {
 		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)

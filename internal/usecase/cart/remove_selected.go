@@ -5,9 +5,17 @@ import (
 	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
 func (cm *CartManager) RemoveSelected(ctx context.Context, userID uint32) error {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return err
+	}
+
+	cm.log.Info("[CartManager.RemoveSelected] Started executing", slog.Any("request-id", requestID))
+
 	products, err := cm.cartRepository.GetSelectedCartItems(ctx, userID)
 	if err != nil {
 		cm.log.Error("[CartManager.RemoveSelected] Error getting selected from cart", slog.String("error", err.Error()))

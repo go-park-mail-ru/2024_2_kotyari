@@ -10,6 +10,16 @@ import (
 )
 
 func (u *UsersDelivery) GetUserById(w http.ResponseWriter, r *http.Request) {
+	requestID, err := utils.GetContextRequestID(r.Context())
+	if err != nil {
+		u.log.Error("[UsersDelivery.GetUserById] No request ID")
+		utils.WriteErrorJSONByError(w, err, u.errResolver)
+
+		return
+	}
+
+	u.log.Info("[UsersDelivery.GetUserById] Started executing", slog.Any("request-id", requestID))
+
 	userID, ok := utils.GetContextSessionUserID(r.Context())
 	if !ok {
 		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)
@@ -17,7 +27,15 @@ func (u *UsersDelivery) GetUserById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	usersDefaultResponse, err := u.userClientGrpc.GetUserById(r.Context(), &grpc_gen.GetUserByIdRequest{UserId: userID})
+	newCtx, err := utils.AddMetadataRequestID(r.Context())
+	if err != nil {
+		err, code := u.errResolver.Get(err)
+		utils.WriteJSON(w, code, errs.HTTPErrorResponse{
+			ErrorMessage: err.Error(),
+		})
+	}
+
+	usersDefaultResponse, err := u.userClientGrpc.GetUserById(newCtx, &grpc_gen.GetUserByIdRequest{UserId: userID})
 	if err != nil {
 		err, code := u.errResolver.Get(err)
 		utils.WriteJSON(w, code, errs.HTTPErrorResponse{

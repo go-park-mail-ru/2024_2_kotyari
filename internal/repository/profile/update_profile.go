@@ -5,9 +5,17 @@ import (
 	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
 func (pr *ProfilesStore) UpdateProfile(ctx context.Context, profileID uint32, profileModel model.Profile) error {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return err
+	}
+
+	pr.log.Info("[ProfilesStore.UpdateProfile] Started executing", slog.Any("request-id", requestID))
+
 	const query = `
 		UPDATE users 
 		SET email = $1, 
@@ -16,7 +24,7 @@ func (pr *ProfilesStore) UpdateProfile(ctx context.Context, profileID uint32, pr
 		WHERE id = $4;	
 	`
 
-	_, err := pr.db.Exec(ctx, query,
+	_, err = pr.db.Exec(ctx, query,
 		profileModel.Email,
 		profileModel.Username,
 		profileModel.Gender,

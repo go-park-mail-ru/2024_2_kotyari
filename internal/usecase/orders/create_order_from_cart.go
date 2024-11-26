@@ -3,15 +3,23 @@ package orders
 import (
 	"context"
 	"errors"
-	"github.com/google/uuid"
 	"log/slog"
 	"strconv"
 	"time"
 
 	order "github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
+	"github.com/google/uuid"
 )
 
 func (m *OrdersManager) CreateOrderFromCart(ctx context.Context, address string, userID uint32) (*order.Order, error) {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	m.logger.Info("[OrdersManager.CreateOrderFromCart] Started executing", slog.Any("request-id", requestID))
+
 	orderID := uuid.New()
 	orderDate := time.Now()
 	deliveryDate := orderDate.Add(72 * time.Hour)

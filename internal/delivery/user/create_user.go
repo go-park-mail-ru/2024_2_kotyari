@@ -2,16 +2,27 @@ package user
 
 import (
 	"encoding/json"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"log/slog"
 	"net/http"
+
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
 func (u *UsersDelivery) CreateUser(w http.ResponseWriter, r *http.Request) {
+	requestID, err := utils.GetContextRequestID(r.Context())
+	if err != nil {
+		u.log.Error("[UsersDelivery.CreateUser] No request ID")
+		utils.WriteErrorJSONByError(w, err, u.errResolver)
+
+		return
+	}
+
+	u.log.Info("[UsersDelivery.CreateUser] Started executing", slog.Any("request-id", requestID))
+
 	var req UsersSignUpRequest
 
-	err := json.NewDecoder(r.Body).Decode(&req)
+	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		utils.WriteJSON(w, http.StatusBadRequest, errs.HTTPErrorResponse{
 			ErrorMessage: errs.InvalidJSONFormat.Error(),
@@ -28,7 +39,15 @@ func (u *UsersDelivery) CreateUser(w http.ResponseWriter, r *http.Request) {
 		u.log.Error("[ UsersDelivery.CreateUser ] Валидация регистрации не прошла успешно", slog.String("error", err.Error()))
 		return
 	}
-	usersDefaultResponse, err := u.userClientGrpc.CreateUser(r.Context(), req.ToGrpcSignupRequest())
+	newCtx, err := utils.AddMetadataRequestID(r.Context())
+	if err != nil {
+		err, code := u.errResolver.Get(err)
+		utils.WriteJSON(w, code, errs.HTTPErrorResponse{
+			ErrorMessage: err.Error(),
+		})
+	}
+
+	usersDefaultResponse, err := u.userClientGrpc.CreateUser(newCtx, req.ToGrpcSignupRequest())
 	if err != nil {
 		err, code := u.errResolver.Get(err)
 		utils.WriteJSON(w, code, errs.HTTPErrorResponse{

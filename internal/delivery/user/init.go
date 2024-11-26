@@ -2,10 +2,11 @@ package user
 
 import (
 	"context"
+	"log/slog"
+
 	"github.com/go-park-mail-ru/2024_2_kotyari/api/protos/user/gen"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
-	"log/slog"
 )
 
 type sessionCreator interface {

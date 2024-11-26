@@ -3,14 +3,22 @@ package profile
 import (
 	"context"
 	"errors"
-	"github.com/jackc/pgx/v5"
 	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
+	"github.com/jackc/pgx/v5"
 )
 
 func (pr *ProfilesStore) GetProfile(ctx context.Context, id uint32) (model.Profile, error) {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return model.Profile{}, err
+	}
+
+	pr.log.Info("[ProfilesStore.GetProfile] Started executing", slog.Any("request-id", requestID))
+
 	const queryProfile = `
 		SELECT id, 
 		       email, 
@@ -24,7 +32,7 @@ func (pr *ProfilesStore) GetProfile(ctx context.Context, id uint32) (model.Profi
 
 	var profile model.Profile
 
-	err := pr.db.QueryRow(ctx, queryProfile, id).Scan(
+	err = pr.db.QueryRow(ctx, queryProfile, id).Scan(
 		&profile.ID,
 		&profile.Email,
 		&profile.Username,

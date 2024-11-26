@@ -11,6 +11,16 @@ import (
 )
 
 func (pd *ProfilesDelivery) ChangePassword(w http.ResponseWriter, r *http.Request) {
+	requestID, err := utils.GetContextRequestID(r.Context())
+	if err != nil {
+		pd.log.Error("[ProfilesDelivery.ChangePassword] No request ID")
+		utils.WriteErrorJSONByError(w, err, pd.errResolver)
+
+		return
+	}
+
+	pd.log.Info("[ProfilesDelivery.ChangePassword] Started executing", slog.Any("request-id", requestID))
+
 	userID, ok := utils.GetContextSessionUserID(r.Context())
 	if !ok {
 		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)
@@ -30,7 +40,15 @@ func (pd *ProfilesDelivery) ChangePassword(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	_, err := pd.client.ChangePassword(r.Context(), &profilegrpc.ChangePasswordRequest{
+	newCtx, err := utils.AddMetadataRequestID(r.Context())
+	if err != nil {
+		err, code := pd.errResolver.Get(err)
+		utils.WriteJSON(w, code, errs.HTTPErrorResponse{
+			ErrorMessage: err.Error(),
+		})
+	}
+
+	_, err = pd.client.ChangePassword(newCtx, &profilegrpc.ChangePasswordRequest{
 		UserId:         userID,
 		OldPassword:    req.OldPassword,
 		NewPassword:    req.NewPassword,

@@ -5,9 +5,17 @@ import (
 	"log/slog"
 
 	order "github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
 func (cs *CartsStore) GetSelectedCartItems(ctx context.Context, userID uint32) ([]order.ProductOrder, error) {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	cs.log.Info("[CartsStore.GetSelectedCartItems] Started executing", slog.Any("request-id", requestID))
+
 	const query = `
 		SELECT p.id, p.title, p.image_url, p.price, c.count, p.weight
 		FROM carts AS c

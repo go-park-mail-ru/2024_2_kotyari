@@ -6,9 +6,17 @@ import (
 	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
 func (ar *AddressStore) UpdateUsersAddress(ctx context.Context, addressID uint32, addressModel model.Address) error {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return err
+	}
+
+	ar.Log.Info("[AddressStore.UpdateUsersAddress] Started executing", slog.Any("request-id", requestID))
+
 	const query = `
 		WITH upsert_address AS (
 			INSERT INTO addresses (user_id, city, street, house, flat)
@@ -27,7 +35,7 @@ func (ar *AddressStore) UpdateUsersAddress(ctx context.Context, addressID uint32
 			WHERE users.id = upsert_address.user_id;
 	`
 
-	_, err := ar.Db.Exec(ctx, query,
+	_, err = ar.Db.Exec(ctx, query,
 		addressID,
 		addressModel.City,
 		addressModel.Street,

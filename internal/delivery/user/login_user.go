@@ -2,18 +2,29 @@ package user
 
 import (
 	"encoding/json"
+	"log/slog"
+	"net/http"
+
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"log/slog"
-	"net/http"
 )
 
 func (u *UsersDelivery) LoginUser(w http.ResponseWriter, r *http.Request) {
+	requestID, err := utils.GetContextRequestID(r.Context())
+	if err != nil {
+		u.log.Error("[UsersDelivery.LoginUser] No request ID")
+		utils.WriteErrorJSONByError(w, err, u.errResolver)
+
+		return
+	}
+
+	u.log.Info("[UsersDelivery.LoginUser] Started executing", slog.Any("request-id", requestID))
+
 	var req UsersLoginRequest
 
-	err := json.NewDecoder(r.Body).Decode(&req)
+	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		utils.WriteJSON(w, http.StatusBadRequest, errs.HTTPErrorResponse{
 			ErrorMessage: errs.InvalidJSONFormat.Error(),
@@ -22,7 +33,15 @@ func (u *UsersDelivery) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	usersDefaultResponse, err := u.userClientGrpc.LoginUser(r.Context(), req.ToGrpcLoginRequest())
+	newCtx, err := utils.AddMetadataRequestID(r.Context())
+	if err != nil {
+		err, code := u.errResolver.Get(err)
+		utils.WriteJSON(w, code, errs.HTTPErrorResponse{
+			ErrorMessage: err.Error(),
+		})
+	}
+
+	usersDefaultResponse, err := u.userClientGrpc.LoginUser(newCtx, req.ToGrpcLoginRequest())
 
 	if err != nil {
 		u.log.Error("[ UsersDelivery.LoginUser ] До вывода кода", slog.String("error", err.Error()), slog.String("func", "u.userClientGrpc.LoginUser"))

@@ -6,10 +6,18 @@ import (
 	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"github.com/jackc/pgx/v5"
 )
 
 func (ar *AddressStore) GetAddressByProfileID(ctx context.Context, profileID uint32) (model.Address, error) {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return model.Address{}, err
+	}
+
+	ar.Log.Info("[AddressStore.GetAddressByProfileID] Started executing", slog.Any("request-id", requestID))
+
 	const query = `
 		SELECT city, 
 		       street, 
@@ -20,7 +28,7 @@ func (ar *AddressStore) GetAddressByProfileID(ctx context.Context, profileID uin
 	`
 
 	var address AddressDTO
-	err := ar.Db.QueryRow(ctx, query, profileID).Scan(
+	err = ar.Db.QueryRow(ctx, query, profileID).Scan(
 		&address.City,
 		&address.Street,
 		&address.House,

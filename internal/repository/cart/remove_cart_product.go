@@ -5,6 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -20,17 +21,24 @@ func (cs *CartsStore) RemoveCartProduct(ctx context.Context, productID uint32, c
 
 	}
 
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return err
+	}
+
+	cs.log.Info("[CartsStore.RemoveCartProduct] Started executing", slog.Any("request-id", requestID))
+
 	defer func() {
 		if err != nil {
 			cs.log.Error("[CartStore.RemoveCartProduct] an error occurred", slog.String("error", err.Error()))
 
 			err = tx.Rollback(ctx)
-			cs.log.Error("[CartStore.ChangeProductCount] Transaction error occurred", slog.String("error", err.Error()))
+			cs.log.Error("[CartStore.RemoveCartProduct] Transaction error occurred", slog.String("error", err.Error()))
 		}
 
 		err = tx.Commit(ctx)
 		if err != nil {
-			cs.log.Error("[CartStore.ChangeProductCount] Transaction error occurred", slog.String("error", err.Error()))
+			cs.log.Error("[CartStore.RemoveCartProduct] Transaction error occurred", slog.String("error", err.Error()))
 		}
 	}()
 

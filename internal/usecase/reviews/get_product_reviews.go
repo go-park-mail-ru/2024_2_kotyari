@@ -2,18 +2,20 @@ package reviews
 
 import (
 	"context"
+	"log/slog"
 	"math"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
 func (s *ReviewsService) GetProductReviewsNoLogin(ctx context.Context, productID uint32, sortField string, sortOrder string) (model.Reviews, error) {
-	//requestID, err := utils.GetContextRequestID(ctx)
-	//if err != nil {
-	//	return model.Reviews{}, err
-	//}
-	//
-	//s.log.Info("[ReviewsService.GetProductReviews] Started executing, requestID", slog.Any("request-id", requestID))
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return model.Reviews{}, err
+	}
+
+	s.log.Info("[ReviewsService.GetProductReviewsNoLogin] Started executing, requestID", slog.Any("request-id", requestID))
 
 	reviews, err := s.reviewsRepo.GetProductReviewsNoLogin(ctx, productID, sortField, sortOrder)
 	if err != nil {
@@ -34,12 +36,12 @@ func (s *ReviewsService) GetProductReviewsNoLogin(ctx context.Context, productID
 }
 
 func (s *ReviewsService) GetProductReviewsWithLogin(ctx context.Context, productID uint32, userID uint32, sortField string, sortOrder string) (model.Reviews, error) {
-	//requestID, err := utils.GetContextRequestID(ctx)
-	//if err != nil {
-	//	return model.Reviews{}, err
-	//}
-	//
-	//s.log.Info("[ReviewsService.GetProductReviews] Started executing, requestID", slog.Any("request-id", requestID))
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return model.Reviews{}, err
+	}
+
+	s.log.Info("[ReviewsService.GetProductReviewsWithLogin] Started executing, requestID", slog.Any("request-id", requestID))
 
 	reviews, err := s.reviewsRepo.GetProductReviewsWithLogin(ctx, productID, userID, sortField, sortOrder)
 	if err != nil {

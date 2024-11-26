@@ -10,39 +10,49 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
-func (h *AddressDelivery) UpdateAddressData(writer http.ResponseWriter, request *http.Request) {
-	userID, ok := utils.GetContextSessionUserID(request.Context())
+func (h *AddressDelivery) UpdateAddressData(w http.ResponseWriter, r *http.Request) {
+	requestID, err := utils.GetContextRequestID(r.Context())
+	if err != nil {
+		h.log.Error("[AddressDelivery.UpdateAddressData] No r ID")
+		utils.WriteErrorJSONByError(w, err, h.errResolver)
+
+		return
+	}
+
+	h.log.Info("[AddressDelivery.UpdateAddressData] Started executing", slog.Any("r-id", requestID))
+
+	userID, ok := utils.GetContextSessionUserID(r.Context())
 	if !ok {
-		utils.WriteErrorJSON(writer, http.StatusUnauthorized, errs.UserNotAuthorized)
+		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)
 	}
 
 	var req UpdateAddressRequest
 
-	if err := json.NewDecoder(request.Body).Decode(&req); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		h.log.Error("[ AddressDelivery.UpdateAddressData ] Ошибка десериализации запроса",
 			slog.String("error", err.Error()),
 		)
 
-		utils.WriteErrorJSON(writer, http.StatusBadRequest, errs.InvalidJSONFormat)
+		utils.WriteErrorJSON(w, http.StatusBadRequest, errs.InvalidJSONFormat)
 		return
 	}
 
 	newAddressData := req.ToModel()
 
-	if err := h.addressManager.UpdateUsersAddress(request.Context(), userID, newAddressData); err != nil {
+	if err := h.addressManager.UpdateUsersAddress(r.Context(), userID, newAddressData); err != nil {
 		h.log.Warn("[ AddressDelivery.UpdateAddressData ] Не удалось обновить данные профиля", slog.String("error", err.Error()))
 
 		switch {
 		case errors.Is(err, errs.InvalidEmailFormat):
-			utils.WriteErrorJSON(writer, http.StatusBadRequest, err)
+			utils.WriteErrorJSON(w, http.StatusBadRequest, err)
 		case errors.Is(err, errs.InvalidUsernameFormat):
-			utils.WriteErrorJSON(writer, http.StatusBadRequest, err)
+			utils.WriteErrorJSON(w, http.StatusBadRequest, err)
 		default:
-			utils.WriteErrorJSON(writer, http.StatusInternalServerError, errs.InternalServerError)
+			utils.WriteErrorJSON(w, http.StatusInternalServerError, errs.InternalServerError)
 		}
 
 		return
 	}
 
-	utils.WriteJSON(writer, http.StatusOK, req)
+	utils.WriteJSON(w, http.StatusOK, req)
 }

@@ -9,6 +9,13 @@ import (
 )
 
 func (ps *ProfilesService) ChangePassword(ctx context.Context, userId uint32, oldPassword, newPassword, repeatPassword string) error {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return err
+	}
+
+	ps.log.Info("[ProfilesService.ChangePassword] Started executing", slog.Any("request-id", requestID))
+
 	user, err := ps.userRepo.GetUserByUserID(ctx, userId)
 	if err != nil {
 		ps.log.Error("[ ProfilesService.ChangePassword ] GetUserByUserID ]", slog.String("error", err.Error()))

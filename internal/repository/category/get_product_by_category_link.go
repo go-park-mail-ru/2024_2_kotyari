@@ -11,6 +11,12 @@ import (
 )
 
 func (cs *CategoriesStore) GetProductsByCategoryLink(ctx context.Context, categoryLink string, sortField string, sortOrder string) ([]model.ProductCatalog, error) {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	cs.log.Info("[CategoriesStore.GetProductsByCategoryLink] Started executing", slog.Any("request-id", requestID))
 
 	fieldSortOptions := map[string]string{
 		"rating": "p.rating",

@@ -3,14 +3,21 @@ package rating_updater
 import (
 	"context"
 	"errors"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"log/slog"
 	"math"
 
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
 func (r *RatingUpdaterService) UpdateProductRating(ctx context.Context, productID uint32) error {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return err
+	}
+
+	r.log.Info("[RatingUpdaterService.UpdateProductRating] Started executing", slog.Any("request-id", requestID))
+
 	reviews, err := r.reviewsGetter.GetProductReviewsNoLogin(ctx, productID, utils.DefaultFieldParam, utils.DefaultOrderParam)
 	if err != nil {
 		if errors.Is(err, errs.NoReviewsForProduct) {
