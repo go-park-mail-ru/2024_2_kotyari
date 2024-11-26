@@ -23,7 +23,7 @@ func (a *UpdateAddressRequest) ToModel() model.Address {
 		City:   a.City,
 		Street: a.Street,
 		House:  a.House,
-		Flat:   &a.Flat,
+		Flat:   a.Flat,
 	}
 }
 
@@ -32,6 +32,6 @@ func FromModel(address model.Address) AddressResponse {
 		City:   address.City,
 		Street: address.Street,
 		House:  address.House,
-		Flat:   *address.Flat,
+		Flat:   address.Flat,
 	}
 }

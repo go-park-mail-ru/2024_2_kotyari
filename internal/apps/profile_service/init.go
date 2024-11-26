@@ -25,30 +25,22 @@ type profilesDelivery interface {
 	GetProfile(ctx context.Context, in *profilegrpc.GetProfileRequest) (*profilegrpc.GetProfileResponse, error)
 }
 
-type config struct {
-	Address string
-	Port    string
-}
-
 type ProfilesApp struct {
 	log        *slog.Logger
 	gRPCServer *grpc.Server
 
 	delivery profilesDelivery
-	config   config
+	config   configs.ServiceViperConfig
 }
 
 func NewProfilesApp(
 	conf map[string]any,
 ) (*ProfilesApp, error) {
-	c := config{
-		Address: conf[configs.KeyAddress].(string),
-		Port:    conf[configs.KeyPort].(string),
-	}
+	cfg := configs.ParseServiceViperConfig(conf)
 
 	slogLog := logger.InitLogger()
 
-	if c.Address == "" || c.Port == "" {
+	if cfg.Address == "" || cfg.Port == "" {
 		return nil, errors.New("[ ERROR ] пустая конфигурация сервиса Profile")
 	}
 
@@ -68,6 +60,6 @@ func NewProfilesApp(
 		log:        slogLog,
 		gRPCServer: grpcServer,
 		delivery:   delivery,
-		config:     c,
+		config:     cfg,
 	}, nil
 }

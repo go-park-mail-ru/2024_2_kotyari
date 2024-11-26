@@ -1,4 +1,4 @@
-package apps
+package main_service
 
 import (
 	"net/http"
@@ -12,7 +12,6 @@ type reviewsDelivery interface {
 	UpdateReview(w http.ResponseWriter, r *http.Request)
 	DeleteReview(w http.ResponseWriter, r *http.Request)
 }
-
 type ReviewsApp struct {
 	reviewsDelivery reviewsDelivery
 	router          *mux.Router
@@ -24,13 +23,11 @@ func NewReviewsApp(router *mux.Router, delivery reviewsDelivery) ReviewsApp {
 		router:          router,
 	}
 }
-
 func (app *ReviewsApp) InitRoutes() *mux.Router {
 	sub := app.router.Methods(http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete).Subrouter()
 	sub.HandleFunc("/product/{id}/reviews", app.reviewsDelivery.GetProductReviews).Methods(http.MethodGet)
 	sub.HandleFunc("/product/{id}/reviews", app.reviewsDelivery.AddReview).Methods(http.MethodPost)
 	sub.HandleFunc("/product/{id}/reviews", app.reviewsDelivery.UpdateReview).Methods(http.MethodPut)
 	sub.HandleFunc("/product/{id}/reviews", app.reviewsDelivery.DeleteReview).Methods(http.MethodDelete)
-
 	return sub
 }

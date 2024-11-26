@@ -1,13 +1,15 @@
 package profile_service
 
 import (
+	"fmt"
 	"log/slog"
 	"net"
 )
 
 func (app *ProfilesApp) Run() error {
 	lis, err := net.Listen("tcp",
-		app.config.Address+app.config.Port,
+
+		fmt.Sprintf("%s:%s", app.config.Address, app.config.Port),
 	)
 	if err != nil {
 		app.log.Error("[  ProfilesApp.Run ] ",

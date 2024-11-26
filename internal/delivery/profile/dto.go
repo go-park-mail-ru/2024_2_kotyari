@@ -22,10 +22,6 @@ type ProfilesResponse struct {
 }
 
 func fromGrpcResponse(p *profilegrpc.GetProfileResponse, addr model.Address) ProfilesResponse {
-	if addr.Flat == nil {
-		*addr.Flat = ""
-	}
-
 	return ProfilesResponse{
 		ID:        p.UserId,
 		Email:     p.Email,
@@ -36,7 +32,7 @@ func fromGrpcResponse(p *profilegrpc.GetProfileResponse, addr model.Address) Pro
 			City:   addr.City,
 			Street: addr.Street,
 			House:  addr.House,
-			Flat:   *addr.Flat,
+			Flat:   addr.Flat,
 		},
 	}
 }

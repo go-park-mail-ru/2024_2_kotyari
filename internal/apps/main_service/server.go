@@ -2,8 +2,7 @@ package main_service
 
 import (
 	"context"
-
-	"google.golang.org/grpc"
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -33,7 +32,6 @@ import (
 	fileRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/file"
 	rorders "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/orders"
 	productRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/product"
-	profileRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/profile"
 	reviewsRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/reviews"
 	searchRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/search"
 	sessionsRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/sessions"
@@ -44,19 +42,19 @@ import (
 	fileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/file"
 	imageServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/image"
 	ordersServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders"
-	profileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/profile"
 	reviewsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/reviews"
-	orders2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders"
 	sessionsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
 	userServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/user"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"github.com/gorilla/mux"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 const (
 	mainService          = "main_service"
 	ratingUpdaterService = "rating_updater"
+	profileService       = "profile_go"
 )
 
 type categoryApp interface {
@@ -160,8 +158,10 @@ func NewServer() (*Server, error) {
 	addressService := addressServiceLib.NewAddressService(addressRepo, log)
 	addressHandler := addressDeliveryLib.NewAddressHandler(addressService, log)
 
-	profileConn, err := grpc.NewClient(
-		"profile_go:8003", grpc.WithTransportCredentials(insecure.NewCredentials()),
+	profileGRPCCfg := v.GetStringMap(profileService)
+	profileCfg := configs.ParseServiceViperConfig(profileGRPCCfg)
+	profileConn, err := grpc.NewClient(fmt.Sprintf("%s:%s", profileCfg.Domain, profileCfg.Port),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
 		return nil, err

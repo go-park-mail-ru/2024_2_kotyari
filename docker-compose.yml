@@ -33,11 +33,13 @@ services:
       - main_go
 
   profile_go:
-    build: cmd/profile/Dockerfile
+    build:
+      context: .
+      dockerfile: ./cmd/profile/Dockerfile
     ports:
       - "8003:8003"
-    image: back-go-image
-    container_name: back_go
+    image: profile-go-image
+    container_name: profile_go
     restart: unless-stopped
     networks:
       - app-network

@@ -59,7 +59,6 @@ func (s *ReviewsService) AddReview(ctx context.Context, productID uint32, userID
 
 						return nil
 					}
-
 				}
 
 				s.log.Error("[ReviewsService.AddReview] Failed to retrieve error code",

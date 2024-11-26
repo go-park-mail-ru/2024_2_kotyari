@@ -18,12 +18,12 @@ func main() {
 		log.Fatal("[ Error ] отсутствует .env файл")
 	}
 
-	viper, err := configs.SetupViper()
+	v, err := configs.SetupViper()
 	if err != nil {
 		log.Fatal("Error setting up viper")
 	}
 
-	conf := viper.GetStringMap(profilesService)
+	conf := v.GetStringMap(profilesService)
 
 	app, err := profile_service.NewProfilesApp(conf)
 	if err != nil {

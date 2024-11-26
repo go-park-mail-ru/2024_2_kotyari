@@ -18,7 +18,7 @@ func (r *RatingUpdaterGRPC) UpdateRating(ctx context.Context, request *ratingUpd
 		if errors.Is(err, errs.ProductNotFound) {
 			r.log.Error("[RatingUpdaterGRPC.UpdateRating] Product not found", slog.String("error", err.Error()))
 
-			return nil, status.Error(codes.NotFound, "Product not found")
+			return nil, status.Error(codes.NotFound, errs.ProductNotFound.Error())
 		}
 
 		r.log.Error("[RatingUpdaterGRPC.UpdateRating] Unexpected error occurred", slog.String("error", err.Error()))

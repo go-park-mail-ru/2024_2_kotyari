@@ -103,7 +103,7 @@ all-delete:
 	docker compose down -v
 
 profile-refresh:
-	docker stop profile_go && docker rm profile_go && docker rmi profile-go-image
+	docker stop profile_go && docker rm profile_go && docker rmi profile-go-image && docker compose up -d
 
 all-refresh: main-refresh pg-refresh redis-refresh
 
