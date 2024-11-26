@@ -132,7 +132,7 @@ func NewServer() (*Server, error) {
 		return nil, err
 	}
 
-	metrics, err := http2.CreateHTTPMetrics("main")
+	metrics, err := http2.NewHTTPMetrics("main")
 	if err != nil {
 		return nil, err
 	}

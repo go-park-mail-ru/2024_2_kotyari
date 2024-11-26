@@ -1,13 +1,13 @@
-package grpc
+package http
 
 import (
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-type Metrics struct {
-	serviceName    string
+type HTTPMetrics struct {
 	totalHits      *prometheus.CounterVec
+	serviceName    string
 	duration       *prometheus.HistogramVec
 	cpuUsage       prometheus.GaugeFunc
 	memoryUsage    prometheus.GaugeFunc
@@ -15,11 +15,11 @@ type Metrics struct {
 	diskUsageFree  *prometheus.GaugeVec
 }
 
-func NewGrpcMetrics(service string) (*Metrics, error) {
-	metrics := CreateGrpcMetrics(service)
+func NewHTTPMetrics(service string) (*HTTPMetrics, error) {
+	metrics := CreateHTTPMetrics(service)
 
-	if err := InitGrpcMetrics(metrics); err != nil {
-		return nil, fmt.Errorf("failed to register gRPC metrics: %w", err)
+	if err := InitHTTPMetrics(metrics); err != nil {
+		return nil, fmt.Errorf("failed to register HTTP metrics: %w", err)
 	}
 
 	go updateDiskMetrics(metrics.diskUsageTotal, metrics.diskUsageFree)
