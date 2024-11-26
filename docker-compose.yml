@@ -5,7 +5,7 @@ services:
       dockerfile: ./cmd/user/Dockerfile
     ports:
       - "8001:8001"
-      - "8082:8082"
+      - "8081:8081"
     image: user-go-image
     container_name: user_go
     restart: unless-stopped
@@ -24,6 +24,7 @@ services:
       dockerfile: ./cmd/main/Dockerfile
     ports:
       - "8000:8000"
+      - "8080:8080"
     image: main-go-image
     container_name: main_go
     restart: unless-stopped
@@ -113,12 +114,23 @@ services:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
     #      - '--web.external-url=prometheus'
+    container_name: prometheus
+    networks:
+      - app-network
 
   grafana:
-    image: grafana/grafana
-    restart: always
+    image: grafana/grafana:10.4.2-ubuntu
+    container_name: grafana
     ports:
-      - "8008:3000"
+      - "8050:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./configs:/etc/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - app-network
 
 volumes:
   pg_data:
@@ -127,6 +139,9 @@ volumes:
   prometheus:
   grafana:
   prometheus_data:
+  grafana_data:
+
+
 
 networks:
   app-network:

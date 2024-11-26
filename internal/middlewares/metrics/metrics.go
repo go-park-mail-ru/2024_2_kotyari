@@ -2,12 +2,12 @@ package metrics
 
 import (
 	"context"
-	"errors"
 	"google.golang.org/grpc"
+	"strconv"
 	"time"
 )
 
-func (m *GrpcMiddleware) ServerMetricsInterceptor(ctx context.Context,
+func (m *Interceptor) ServerMetricsInterceptor(ctx context.Context,
 	req interface{},
 	info *grpc.UnaryServerInfo,
 	handler grpc.UnaryHandler) (interface{}, error) {
@@ -17,14 +17,17 @@ func (m *GrpcMiddleware) ServerMetricsInterceptor(ctx context.Context,
 	tm := time.Since(start)
 
 	if err != nil {
-		if errors.Is(err, ClientError) {
-			m.metrics.IncreaseTotal("400", info.FullMethod)
-			m.metrics.AddDuration("400", info.FullMethod, tm)
-		}
-		if errors.Is(err, ServerError) {
-			m.metrics.IncreaseTotal("429", info.FullMethod)
-			m.metrics.AddDuration("429", info.FullMethod, tm)
-		}
+		_, code := m.errResolver.Get(err)
+		//if errors.Is(err, ClientError) {
+		//	m.metrics.IncreaseTotal("400", info.FullMethod)
+		//	m.metrics.AddDuration("400", info.FullMethod, tm)
+		//}
+		//if errors.Is(err, ServerError) {
+		//	m.metrics.IncreaseTotal("404", info.FullMethod)
+		//	m.metrics.AddDuration("404", info.FullMethod, tm)
+		//}
+		m.metrics.IncreaseTotal(strconv.Itoa(code), info.FullMethod)
+		m.metrics.AddDuration(strconv.Itoa(code), info.FullMethod, tm)
 	} else {
 		m.metrics.AddDuration("200", info.FullMethod, tm)
 	}

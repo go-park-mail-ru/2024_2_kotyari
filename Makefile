@@ -115,6 +115,12 @@ rating-updater-refresh:
 user-refresh:
 	docker stop user_go && docker rm user_go && docker rmi user-go-image && docker compose up -d
 
+prometheus-refresh:
+	docker stop prometheus && docker rm prometheus && docker compose up -d
+
+grafana-refresh:
+	docker stop grafana && docker rm grafana && docker compose up -d
+
 pg-refresh:
 	docker stop pg_db && docker rm pg_db && docker compose up -d
 
