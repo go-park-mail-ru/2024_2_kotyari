@@ -115,6 +115,9 @@ rating-updater-refresh:
 user-refresh:
 	docker stop user_go && docker rm user_go && docker rmi user-go-image && docker compose up -d
 
+profile-refresh:
+	docker stop profile_go && docker rm profile_go && docker rmi profile-go-image && docker compose up -d
+
 prometheus-refresh:
 	docker stop prometheus && docker rm prometheus && docker compose up -d
 
@@ -139,9 +142,6 @@ recreate-redis:
 all-delete:
 	docker compose down -v
 
-profile-refresh:
-	docker stop profile_go && docker rm profile_go && docker rmi profile-go-image && docker compose up -d
-
 all-refresh: main-refresh pg-refresh redis-refresh
 
 apply-migrations:
@@ -153,7 +153,7 @@ revert-migrations:
 	@migrate -path $(MIGRATIONS_DIR) -database "$(DB_URL)" down
 
 
-back-refresh: main-refresh rating-updater-refresh profile-refresh
+back-refresh: main-refresh rating-updater-refresh profile-refresh user-refresh
 
 # Правило генерации для каждой сущности
 $(ENTITIES):

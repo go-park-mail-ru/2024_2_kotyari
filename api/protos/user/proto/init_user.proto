@@ -17,4 +17,5 @@ message UsersDefaultResponse {
   uint32 userId = 1;
   string username = 2;
   string city = 3;
+  string avatar_url = 4;
 }

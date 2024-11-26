@@ -1,8 +1,4 @@
-<<<<<<<< HEAD:internal/apps/main_service/cart.go
 package main_service
-========
-package go_main
->>>>>>>> bffcdd5 ([OZON-126][improve] микросервис авторизации):internal/app/go_main/cart.go
 
 import (
 	"net/http"

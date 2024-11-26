@@ -1,25 +1,13 @@
-<<<<<<<< HEAD:internal/apps/main_service/server.go
 package main_service
 
 import (
 	"context"
 	"fmt"
-========
-package go_main
-
-import (
-	"context"
-	grpc_gen "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/user/gen"
-	http2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/metrics/http"
-	metrics2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/middlewares/metrics"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
->>>>>>>> bffcdd5 ([OZON-126][improve] микросервис авторизации):internal/app/go_main/http_server.go
 	"log/slog"
 	"net/http"
 
 	profilegrpc "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/profile/gen"
+	usergrpc "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/user/gen"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/logger"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/postgres"
@@ -37,7 +25,9 @@ import (
 	sessionsDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/sessions"
 	userDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/user"
 	errResolveLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
+	metrics "github.com/go-park-mail-ru/2024_2_kotyari/internal/metrics/http"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/middlewares"
+	metricsMiddleware "github.com/go-park-mail-ru/2024_2_kotyari/internal/middlewares/metrics"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	addressRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/address"
 	cartRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/cart"
@@ -55,6 +45,7 @@ import (
 	imageServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/image"
 	ordersServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders"
 	reviewsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/reviews"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"github.com/gorilla/mux"
 	"google.golang.org/grpc"
@@ -65,6 +56,7 @@ const (
 	mainService          = "main_service"
 	ratingUpdaterService = "rating_updater"
 	profileService       = "profile_go"
+	userService          = "user_go"
 )
 
 type categoryApp interface {
@@ -132,14 +124,14 @@ func NewServer() (*Server, error) {
 		return nil, err
 	}
 
-	metrics, err := http2.NewHTTPMetrics("main")
+	httpMetrics, err := metrics.NewHTTPMetrics("main")
 	if err != nil {
 		return nil, err
 	}
 
-	metricsMiddleware := metrics2.CreateMetricsMiddleware(metrics)
+	metricsM := metricsMiddleware.CreateMetricsMiddleware(httpMetrics)
 
-	router.Use(metricsMiddleware)
+	router.Use(metricsM)
 	router.Use(middlewares.RequestIDMiddleware)
 
 	dbPool, err := postgres.LoadPgxPool()
@@ -167,17 +159,18 @@ func NewServer() (*Server, error) {
 	sessionService := sessions.NewSessionService(sessionsRepo, log)
 	sessionsDelivery := sessionsDeliveryLib.NewSessionDelivery(sessionsRepo, errResolver)
 
-	// todo + config
-	userConn, err := grpc.NewClient(
-		"user_go:8001", grpc.WithTransportCredentials(insecure.NewCredentials()),
+	userGRPCCfg := v.GetStringMap(userService)
+	userCfg := configs.ParseServiceViperConfig(userGRPCCfg)
+	userConn, err := grpc.NewClient(fmt.Sprintf("%s:%s", userCfg.Domain, userCfg.Port),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	client := grpc_gen.NewUserServiceClient(userConn)
+	userClient := usergrpc.NewUserServiceClient(userConn)
 
-	userHandler := userDeliveryLib.NewUsersDelivery(client, inputValidator, sessionService, errResolver, log)
+	userHandler := userDeliveryLib.NewUsersDelivery(userClient, inputValidator, sessionService, errResolver, log)
 
 	categoryRepo := categoryRepoLib.NewCategoriesStore(dbPool, log)
 	categoryDelivery := categoryDeliveryLib.NewCategoriesDelivery(categoryRepo, log, errResolver)
@@ -195,9 +188,9 @@ func NewServer() (*Server, error) {
 		return nil, err
 	}
 
-	client := profilegrpc.NewProfileClient(profileConn)
+	profileClient := profilegrpc.NewProfileClient(profileConn)
 
-	profileHandler := profileDeliveryLib.NewProfilesHandler(client, log, addressRepo, imageService, errResolver)
+	profileHandler := profileDeliveryLib.NewProfilesHandler(profileClient, log, addressRepo, imageService, errResolver)
 	prodRepo := productRepoLib.NewProductsStore(dbPool, log)
 	ca := NewCategoryApp(router, categoryDelivery)
 

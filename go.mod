@@ -9,6 +9,7 @@ require (
 	github.com/caarlos0/env v3.5.0+incompatible
 	github.com/disintegration/imaging v1.6.2
 	github.com/go-faker/faker/v4 v4.5.0
+	github.com/golang/mock v1.6.0
 	github.com/golang/protobuf v1.5.4
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1

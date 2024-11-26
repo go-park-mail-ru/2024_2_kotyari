@@ -3,7 +3,6 @@ package user
 import (
 	"context"
 	"errors"
-	"fmt"
 	proto "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/user/gen"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"google.golang.org/grpc/codes"
@@ -14,12 +13,17 @@ import (
 func (um *UsersGrpc) LoginUser(ctx context.Context, in *proto.UsersLoginRequest) (*proto.UsersDefaultResponse, error) {
 	userModel, err := um.usersManager.LoginUser(ctx, toUserModel(in))
 	if err != nil {
-		if errors.Is(err, errs.UserDoesNotExist) {
+		switch {
+		case errors.Is(err, errs.UserDoesNotExist):
 			um.log.Error("[ UsersGrpc.LoginUser ] ", slog.String("error", err.Error()))
 
-			return &proto.UsersDefaultResponse{}, status.Error(codes.NotFound, errs.UserDoesNotExist.Error())
+			return &proto.UsersDefaultResponse{}, status.Error(codes.NotFound, err.Error())
+		case errors.Is(err, errs.WrongCredentials):
+			um.log.Error("[ UsersGrpc.LoginUser ] ", slog.String("error", err.Error()))
+
+			return &proto.UsersDefaultResponse{}, status.Error(codes.InvalidArgument, err.Error())
 		}
-		fmt.Println("KEKEKEKKEKEKKEKEK SUKASUKASUKA SKKSKSUAUAAUA", err.Error())
+
 		um.log.Error("[ UsersGrpc.LoginUser ] ", slog.String("error", err.Error()))
 
 		return &proto.UsersDefaultResponse{}, status.Error(codes.Internal, errs.InternalServerError.Error())

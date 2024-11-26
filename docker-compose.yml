@@ -16,7 +16,7 @@ services:
     depends_on:
       - pg_db
       - redis_service
-      - go_back
+      - main_go
 
   main_go:
     build:

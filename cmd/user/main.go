@@ -2,9 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/app/user"
+	"log"
+	"log/slog"
+	"net/http"
+	"time"
+
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/apps/user"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/logger"
-	configs "github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/user"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	grpc2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/metrics/grpc"
 	metrics2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/middlewares/metrics"
@@ -12,10 +17,6 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
-	"log"
-	"log/slog"
-	"net/http"
-	"time"
 )
 
 const (

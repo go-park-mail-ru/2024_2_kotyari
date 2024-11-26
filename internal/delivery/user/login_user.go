@@ -40,6 +40,14 @@ func (u *UsersDelivery) LoginUser(w http.ResponseWriter, r *http.Request) {
 					ErrorMessage: err.Error(),
 				})
 				return
+
+			case codes.InvalidArgument:
+				err, code := u.errResolver.Get(errs.WrongCredentials)
+				utils.WriteJSON(w, code, errs.HTTPErrorResponse{
+					ErrorMessage: err.Error(),
+				})
+				return
+
 			default:
 				err, code := u.errResolver.Get(errs.InternalServerError)
 				utils.WriteJSON(w, code, errs.HTTPErrorResponse{

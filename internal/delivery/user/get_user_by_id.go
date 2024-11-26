@@ -1,10 +1,10 @@
 package user
 
 import (
-	grpc_gen "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/user/gen"
 	"log/slog"
 	"net/http"
 
+	grpc_gen "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/user/gen"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
@@ -16,6 +16,7 @@ func (u *UsersDelivery) GetUserById(w http.ResponseWriter, r *http.Request) {
 		u.log.Error("[ UsersDelivery.GetUserById ] Пользователь не авторизован")
 		return
 	}
+
 	usersDefaultResponse, err := u.userClientGrpc.GetUserById(r.Context(), &grpc_gen.GetUserByIdRequest{UserId: userID})
 	if err != nil {
 		err, code := u.errResolver.Get(err)
@@ -29,6 +30,6 @@ func (u *UsersDelivery) GetUserById(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSON(w, http.StatusOK, UsersDefaultResponse{
 		Username:  usersDefaultResponse.Username,
 		City:      usersDefaultResponse.City,
-		AvatarUrl: user.AvatarUrl,
+		AvatarUrl: usersDefaultResponse.AvatarUrl,
 	})
 }

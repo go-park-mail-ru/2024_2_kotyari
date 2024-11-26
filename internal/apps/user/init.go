@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	proto "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/user/gen"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/postgres"
-	configs "github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/user"
 	user2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/grpc_api/user"
 	userRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/user"
 	userServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/user"
@@ -22,23 +22,15 @@ type usersDelivery interface {
 	CreateUser(ctx context.Context, in *proto.UsersSignUpRequest) (*proto.UsersDefaultResponse, error)
 }
 
-type config struct {
-	Address string
-	Port    string
-}
-
 type UsersApp struct {
 	log        *slog.Logger
 	gRPCServer *grpc.Server
 	delivery   usersDelivery
-	config     config
+	config     configs.ServiceViperConfig
 }
 
 func NewUsersApp(log *slog.Logger, grpcServer *grpc.Server, conf map[string]any) (*UsersApp, error) {
-	c := config{
-		Address: conf[configs.KeyAddress].(string),
-		Port:    conf[configs.KeyPort].(string),
-	}
+	c := configs.ParseServiceViperConfig(conf)
 	if c.Address == "" || c.Port == "" {
 		return nil, errors.New("config is empty")
 	}

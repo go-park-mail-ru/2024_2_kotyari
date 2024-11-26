@@ -1,8 +1,4 @@
-<<<<<<<< HEAD:internal/apps/main_service/search.go
 package main_service
-========
-package go_main
->>>>>>>> bffcdd5 ([OZON-126][improve] микросервис авторизации):internal/app/go_main/search.go
 
 import (
 	"github.com/gorilla/mux"
