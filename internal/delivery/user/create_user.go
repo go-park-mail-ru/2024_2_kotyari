@@ -20,10 +20,10 @@ func (d *UsersHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	req.Username = d.inputValidator.SanitizeString(req.Username)
-	req.Email = d.inputValidator.SanitizeString(req.Email)
-	req.Password = d.inputValidator.SanitizeString(req.Password)
-	req.RepeatPassword = d.inputValidator.SanitizeString(req.RepeatPassword)
+	req.Username = d.stringSanitizer.SanitizeString(req.Username)
+	req.Email = d.stringSanitizer.SanitizeString(req.Email)
+	req.Password = d.stringSanitizer.SanitizeString(req.Password)
+	req.RepeatPassword = d.stringSanitizer.SanitizeString(req.RepeatPassword)
 
 	if err = utils.ValidateRegistration(req.Email, req.Username, req.Password, req.RepeatPassword); err != nil {
 		err, code := d.errResolver.Get(err)

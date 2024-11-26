@@ -3,6 +3,8 @@ package reviews
 import (
 	"context"
 	"errors"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
@@ -34,10 +36,42 @@ func (s *ReviewsService) AddReview(ctx context.Context, productID uint32, userID
 				return err
 			}
 
+			err = s.ratingUpdater.UpdateRating(ctx, productID)
+			if err != nil {
+				grpcErr, ok := status.FromError(err)
+				if ok {
+					switch grpcErr.Code() {
+					case codes.NotFound:
+						s.log.Error("[ReviewsService.AddReview] Product not found",
+							slog.String("error", err.Error()))
+
+						return errs.FailedToChangeProductRating
+					case codes.Unavailable:
+						s.log.Error("[ReviewsService.AddReview] Service unavailable",
+							slog.String("error", err.Error()))
+
+						return nil
+
+					default:
+						s.log.Error("[ReviewsService.AddReview] Error happened when updating product rating, "+
+							"intentionally ignoring",
+							slog.String("error", err.Error()))
+
+						return nil
+					}
+
+				}
+
+				s.log.Error("[ReviewsService.AddReview] Failed to retrieve error code",
+					slog.String("error", err.Error()))
+
+				return nil
+			}
+
 			return nil
 		}
 
-		s.log.Error("[ReviewsService.AddReview] Unexpected Error happened when fetching review", slog.String("error", err.Error()))
+		s.log.Error("[ReviewsService.AddReview] Unexpected Error happened when getting review", slog.String("error", err.Error()))
 
 		return err
 	}

@@ -46,7 +46,7 @@ func (h *ReviewsHandler) AddReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	req.Text = h.inputValidator.SanitizeString(req.Text)
+	req.Text = h.stringSanitizer.SanitizeString(req.Text)
 
 	err = h.reviewsManager.AddReview(r.Context(), productID, userID, req.ToModel())
 	if err != nil {

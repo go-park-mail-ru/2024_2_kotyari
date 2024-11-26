@@ -15,15 +15,15 @@ type usersManager interface {
 }
 
 type UsersHandler struct {
-	userManager    usersManager
-	inputValidator *utils.InputValidator
-	errResolver    errs.GetErrorCode
+	userManager     usersManager
+	stringSanitizer utils.StringSanitizer
+	errResolver     errs.GetErrorCode
 }
 
-func NewUsersHandler(userManager usersManager, inputValidator *utils.InputValidator, errResolver errs.GetErrorCode) *UsersHandler {
+func NewUsersHandler(userManager usersManager, stringSanitizer utils.StringSanitizer, errResolver errs.GetErrorCode) *UsersHandler {
 	return &UsersHandler{
-		userManager:    userManager,
-		inputValidator: inputValidator,
-		errResolver:    errResolver,
+		userManager:     userManager,
+		stringSanitizer: stringSanitizer,
+		errResolver:     errResolver,
 	}
 }

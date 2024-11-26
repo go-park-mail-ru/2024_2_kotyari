@@ -16,15 +16,15 @@ type profileManager interface {
 }
 
 type ProfilesDelivery struct {
-	profileManager profileManager
-	inputValidator *utils.InputValidator
-	log            *slog.Logger
+	profileManager  profileManager
+	stringSanitizer utils.StringSanitizer
+	log             *slog.Logger
 }
 
-func NewProfilesHandler(profileManager profileManager, inputValidator *utils.InputValidator, logger *slog.Logger) *ProfilesDelivery {
+func NewProfilesHandler(profileManager profileManager, stringSanitizer utils.StringSanitizer, logger *slog.Logger) *ProfilesDelivery {
 	return &ProfilesDelivery{
-		profileManager: profileManager,
-		inputValidator: inputValidator,
-		log:            logger,
+		profileManager:  profileManager,
+		stringSanitizer: stringSanitizer,
+		log:             logger,
 	}
 }

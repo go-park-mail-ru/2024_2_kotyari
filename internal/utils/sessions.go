@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -12,6 +13,8 @@ const (
 	DefaultSessionLifetime = 10 * time.Hour // 10 часов в секундах
 	deleteSessionLifetime  = -1             // Удалить сессию
 )
+
+var DefaultSessionLifetimeString = strconv.Itoa(int(DefaultSessionLifetime.Seconds()))
 
 func SetSessionCookie(cookieValue string) *http.Cookie {
 	return &http.Cookie{

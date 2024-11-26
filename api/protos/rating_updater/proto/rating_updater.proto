@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package rating_updater;
+
+option go_package = "https://github.com/go-park-mail-ru/2024_2_kotyari/api/protos/rating_updater";
+
+message UpdateRatingRequest {
+  uint32 product_id = 1;
+}

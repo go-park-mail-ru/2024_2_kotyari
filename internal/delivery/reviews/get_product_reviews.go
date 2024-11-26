@@ -37,7 +37,7 @@ func (h *ReviewsHandler) GetProductReviews(w http.ResponseWriter, r *http.Reques
 
 	userID, ok := utils.GetContextSessionUserID(r.Context())
 	if !ok {
-		reviews, err = h.reviewsGetter.GetProductReviewsNoLogin(r.Context(), productID, sortField, sortOrder)
+		reviews, err = h.reviewsManager.GetProductReviewsNoLogin(r.Context(), productID, sortField, sortOrder)
 		if err != nil {
 			utils.WriteErrorJSONByError(w, err, h.errResolver)
 
@@ -45,7 +45,7 @@ func (h *ReviewsHandler) GetProductReviews(w http.ResponseWriter, r *http.Reques
 		}
 
 	} else {
-		reviews, err = h.reviewsGetter.GetProductReviewsWithLogin(r.Context(), productID, userID, sortField, sortOrder)
+		reviews, err = h.reviewsManager.GetProductReviewsWithLogin(r.Context(), productID, userID, sortField, sortOrder)
 		if err != nil {
 			utils.WriteErrorJSONByError(w, err, h.errResolver)
 

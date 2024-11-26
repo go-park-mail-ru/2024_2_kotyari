@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package rating_updater;
+
+option go_package = "https://github.com/go-park-mail-ru/2024_2_kotyari/api/protos/rating_updater";
+
+import "rating_updater.proto";
+import "google/protobuf/empty.proto";
+
+service RatingUpdater {
+  rpc UpdateRating(UpdateRatingRequest) returns (google.protobuf.Empty);
+}

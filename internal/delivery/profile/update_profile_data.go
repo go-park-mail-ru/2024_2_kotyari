@@ -18,9 +18,9 @@ func (pd *ProfilesDelivery) UpdateProfileData(writer http.ResponseWriter, reques
 
 	var req UpdateProfileRequest
 
-	req.Email = pd.inputValidator.SanitizeString(req.Email)
-	req.Username = pd.inputValidator.SanitizeString(req.Username)
-	req.Gender = pd.inputValidator.SanitizeString(req.Gender)
+	req.Email = pd.stringSanitizer.SanitizeString(req.Email)
+	req.Username = pd.stringSanitizer.SanitizeString(req.Username)
+	req.Gender = pd.stringSanitizer.SanitizeString(req.Gender)
 
 	if err := json.NewDecoder(request.Body).Decode(&req); err != nil {
 		pd.log.Error("[ ProfilesDelivery.UpdateProfileData ] Ошибка десериализации запроса", slog.String("error", err.Error()))
