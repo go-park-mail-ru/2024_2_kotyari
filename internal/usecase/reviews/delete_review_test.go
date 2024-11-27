@@ -31,6 +31,7 @@ func TestReviewsService_DeleteReview(t *testing.T) {
 			userID:    1,
 			setupFunc: func(ctrl *gomock.Controller) *ReviewsService {
 				reviewsRepositoryMock := mocks.NewMockreviewsRepo(ctrl)
+				ratingUpdaterMock := mocks.NewMockratingUpdater(ctrl)
 				logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 				reviewsRepositoryMock.EXPECT().GetReview(
@@ -47,10 +48,15 @@ func TestReviewsService_DeleteReview(t *testing.T) {
 					uint32(1),
 					uint32(1)).Return(nil)
 
+				ratingUpdaterMock.EXPECT().UpdateRating(
+					gomock.Any(),
+					uint32(1)).Return(nil)
+
 				return &ReviewsService{
-					reviewsRepo:    reviewsRepositoryMock,
-					inputValidator: nil,
-					log:            logger,
+					reviewsRepo:     reviewsRepositoryMock,
+					ratingUpdater:   ratingUpdaterMock,
+					stringSanitizer: nil,
+					log:             logger,
 				}
 			},
 			want: nil,
@@ -61,6 +67,8 @@ func TestReviewsService_DeleteReview(t *testing.T) {
 			userID:    1,
 			setupFunc: func(ctrl *gomock.Controller) *ReviewsService {
 				reviewsRepositoryMock := mocks.NewMockreviewsRepo(ctrl)
+				ratingUpdaterMock := mocks.NewMockratingUpdater(ctrl)
+
 				logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 				reviewsRepositoryMock.EXPECT().GetReview(
@@ -69,9 +77,10 @@ func TestReviewsService_DeleteReview(t *testing.T) {
 					uint32(1)).Return(model.Review{}, errs.ReviewNotFound)
 
 				return &ReviewsService{
-					reviewsRepo:    reviewsRepositoryMock,
-					inputValidator: nil,
-					log:            logger,
+					reviewsRepo:     reviewsRepositoryMock,
+					ratingUpdater:   ratingUpdaterMock,
+					stringSanitizer: nil,
+					log:             logger,
 				}
 			},
 			want: errs.ReviewNotFound,
@@ -82,6 +91,8 @@ func TestReviewsService_DeleteReview(t *testing.T) {
 			userID:    1,
 			setupFunc: func(ctrl *gomock.Controller) *ReviewsService {
 				reviewsRepositoryMock := mocks.NewMockreviewsRepo(ctrl)
+				ratingUpdaterMock := mocks.NewMockratingUpdater(ctrl)
+
 				logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 				reviewsRepositoryMock.EXPECT().GetReview(
@@ -90,9 +101,10 @@ func TestReviewsService_DeleteReview(t *testing.T) {
 					uint32(1)).Return(model.Review{}, testDBError)
 
 				return &ReviewsService{
-					reviewsRepo:    reviewsRepositoryMock,
-					inputValidator: nil,
-					log:            logger,
+					reviewsRepo:     reviewsRepositoryMock,
+					ratingUpdater:   ratingUpdaterMock,
+					stringSanitizer: nil,
+					log:             logger,
 				}
 			},
 			want: testDBError,
@@ -103,6 +115,7 @@ func TestReviewsService_DeleteReview(t *testing.T) {
 			userID:    1,
 			setupFunc: func(ctrl *gomock.Controller) *ReviewsService {
 				reviewsRepositoryMock := mocks.NewMockreviewsRepo(ctrl)
+				ratingUpdaterMock := mocks.NewMockratingUpdater(ctrl)
 				logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 				reviewsRepositoryMock.EXPECT().GetReview(
@@ -120,12 +133,49 @@ func TestReviewsService_DeleteReview(t *testing.T) {
 					uint32(1)).Return(testDBError)
 
 				return &ReviewsService{
-					reviewsRepo:    reviewsRepositoryMock,
-					inputValidator: nil,
-					log:            logger,
+					reviewsRepo:     reviewsRepositoryMock,
+					ratingUpdater:   ratingUpdaterMock,
+					stringSanitizer: nil,
+					log:             logger,
 				}
 			},
 			want: testDBError,
+		},
+		{
+			name:      "Ошибка при обновлении рейтинга продукта",
+			productID: 1,
+			userID:    1,
+			setupFunc: func(ctrl *gomock.Controller) *ReviewsService {
+				reviewsRepositoryMock := mocks.NewMockreviewsRepo(ctrl)
+				ratingUpdaterMock := mocks.NewMockratingUpdater(ctrl)
+				logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+
+				reviewsRepositoryMock.EXPECT().GetReview(
+					gomock.Any(),
+					uint32(1),
+					uint32(1)).Return(model.Review{
+					Text:      "Классный продукт",
+					Rating:    5,
+					IsPrivate: false,
+				}, nil)
+
+				reviewsRepositoryMock.EXPECT().DeleteReview(
+					gomock.Any(),
+					uint32(1),
+					uint32(1)).Return(nil)
+
+				ratingUpdaterMock.EXPECT().UpdateRating(
+					gomock.Any(),
+					uint32(1)).Return(testGRPCInternalServerError)
+
+				return &ReviewsService{
+					reviewsRepo:     reviewsRepositoryMock,
+					ratingUpdater:   ratingUpdaterMock,
+					stringSanitizer: nil,
+					log:             logger,
+				}
+			},
+			want: testGRPCInternalServerError,
 		},
 	}
 
