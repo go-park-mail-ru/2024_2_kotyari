@@ -10,6 +10,16 @@ import (
 )
 
 func (h *OrdersHandler) CreateOrderFromCart(w http.ResponseWriter, r *http.Request) {
+	requestID, err := utils.GetContextRequestID(r.Context())
+	if err != nil {
+		h.logger.Error("[OrdersHandler.CreateOrderFromCart] No request ID")
+		utils.WriteErrorJSONByError(w, err, h.errResolver)
+
+		return
+	}
+
+	h.logger.Info("[OrdersHandler.CreateOrderFromCart] Started executing", slog.Any("request-id", requestID))
+
 	userID, ok := utils.GetContextSessionUserID(r.Context())
 	if !ok {
 		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)

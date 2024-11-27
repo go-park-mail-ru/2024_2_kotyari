@@ -10,6 +10,13 @@ import (
 )
 
 func (ps *ProfilesService) UpdateProfile(ctx context.Context, oldProfileData model.Profile, newProfileData model.Profile) error {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return err
+	}
+
+	ps.log.Info("[ProfilesService.UpdateProfile] Started executing", slog.Any("request-id", requestID))
+
 	newProfile := oldProfileData
 
 	if newProfileData.Email != "" {
@@ -32,7 +39,7 @@ func (ps *ProfilesService) UpdateProfile(ctx context.Context, oldProfileData mod
 		newProfile.Gender = newProfileData.Gender
 	}
 
-	err := ps.profileRepo.UpdateProfile(ctx, oldProfileData.ID, newProfile)
+	err = ps.profileRepo.UpdateProfile(ctx, oldProfileData.ID, newProfile)
 	if err != nil {
 		ps.log.Error("[ ProfilesService.UpdateProfile ] Не удалось обновить профиль",
 			slog.String("error", err.Error()),

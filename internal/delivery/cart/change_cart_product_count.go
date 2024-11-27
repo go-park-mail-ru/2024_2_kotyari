@@ -2,6 +2,7 @@ package cart
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
@@ -10,6 +11,16 @@ import (
 )
 
 func (ch *CartHandler) ChangeCartProductQuantity(w http.ResponseWriter, r *http.Request) {
+	requestID, err := utils.GetContextRequestID(r.Context())
+	if err != nil {
+		ch.log.Error("[CartHandler.ChangeCartProductQuantity] No request ID")
+		utils.WriteErrorJSONByError(w, err, ch.errResolver)
+
+		return
+	}
+
+	ch.log.Info("[CartHandler.ChangeCartProductQuantity] Started executing", slog.Any("request-id", requestID))
+
 	vars := mux.Vars(r)
 	productID, err := utils.StrToUint32(vars["id"])
 	if err != nil {

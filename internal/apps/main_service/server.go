@@ -177,7 +177,7 @@ func NewServer() (*Server, error) {
 
 	addressRepo := addressRepoLib.NewAddressRepo(dbPool, log)
 	addressService := addressServiceLib.NewAddressService(addressRepo, log)
-	addressHandler := addressDeliveryLib.NewAddressHandler(addressService, log)
+	addressHandler := addressDeliveryLib.NewAddressHandler(addressService, errResolver, log)
 
 	profileGRPCCfg := v.GetStringMap(profileService)
 	profileCfg := configs.ParseServiceViperConfig(profileGRPCCfg)
@@ -259,15 +259,17 @@ func (s *Server) setupRoutes() {
 
 	subProd := s.product.InitProductsRoutes()
 	subProd.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
+	subProd.Use(middlewares.RequestIDMiddleware)
 	subProd.Use(csrfMiddleware)
-
 	s.category.InitCategoriesRoutes()
 
 	subCart := s.cart.InitCartRoutes()
 	subCart.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
+	subCart.Use(middlewares.RequestIDMiddleware)
 	subCart.Use(csrfMiddleware)
 
 	subOrder := s.order.InitOrderApp()
+	subOrder.Use(middlewares.RequestIDMiddleware)
 	subOrder.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 	subOrder.Use(csrfMiddleware)
 

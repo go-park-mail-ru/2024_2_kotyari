@@ -6,10 +6,16 @@ import (
 	"sort"
 
 	order "github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
 func (m *OrdersManager) GetOrders(ctx context.Context, userID uint32) ([]order.Order, error) {
-	m.logger.Info("get: ", slog.Uint64("u_id", uint64(userID)))
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	m.logger.Info("[OrdersManager.GetOrders] Started executing", slog.Any("request-id", requestID))
 
 	orders, err := m.repo.GetOrders(ctx, userID)
 	if err != nil {

@@ -2,12 +2,21 @@ package cart
 
 import (
 	"context"
+	"log/slog"
 	"time"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
 func (cm *CartManager) GetSelectedFromCart(ctx context.Context, userID uint32) (model.CartForOrder, error) {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return model.CartForOrder{}, err
+	}
+
+	cm.log.Info("[CartManager.GetSelectedFromCart] Started executing", slog.Any("request-id", requestID))
+
 	products, err := cm.cartRepository.GetSelectedFromCart(ctx, userID)
 	if err != nil {
 		return model.CartForOrder{}, err

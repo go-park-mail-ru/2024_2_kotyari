@@ -10,33 +10,51 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
-func (pd *ProfilesDelivery) UpdateProfileData(writer http.ResponseWriter, request *http.Request) {
-	userId, ok := utils.GetContextSessionUserID(request.Context())
+func (pd *ProfilesDelivery) UpdateProfileData(w http.ResponseWriter, r *http.Request) {
+	requestID, err := utils.GetContextRequestID(r.Context())
+	if err != nil {
+		pd.log.Error("[ProfilesDelivery.UpdateProfileData] No request ID")
+		utils.WriteErrorJSONByError(w, err, pd.errResolver)
+
+		return
+	}
+
+	pd.log.Info("[ProfilesDelivery.UpdateProfileData] Started executing", slog.Any("request-id", requestID))
+
+	userId, ok := utils.GetContextSessionUserID(r.Context())
 	if !ok {
-		utils.WriteErrorJSON(writer, http.StatusUnauthorized, errs.UserNotAuthorized)
+		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)
 
 		return
 	}
 	var req UpdateProfile
 
-	if err := json.NewDecoder(request.Body).Decode(&req); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		pd.log.Error("[ ProfilesDelivery.UpdateProfileData ] Ошибка десериализации запроса",
 			slog.String("error", err.Error()),
 		)
 
-		utils.WriteJSON(writer, http.StatusBadRequest, &errs.HTTPErrorResponse{ErrorMessage: errs.InvalidJSONFormat.Error()})
+		utils.WriteJSON(w, http.StatusBadRequest, &errs.HTTPErrorResponse{ErrorMessage: errs.InvalidJSONFormat.Error()})
 
 		return
 	}
 
-	_, err := pd.client.UpdateProfileData(request.Context(), &profile_grpc.UpdateProfileDataRequest{
+	newCtx, err := utils.AddMetadataRequestID(r.Context())
+	if err != nil {
+		err, code := pd.errResolver.Get(err)
+		utils.WriteJSON(w, code, errs.HTTPErrorResponse{
+			ErrorMessage: err.Error(),
+		})
+	}
+
+	_, err = pd.client.UpdateProfileData(newCtx, &profile_grpc.UpdateProfileDataRequest{
 		UserId:   userId,
 		Email:    req.Email,
 		Username: req.Username,
 		Gender:   req.Gender})
 	if err != nil {
 		_, code := pd.errResolver.Get(err)
-		utils.WriteErrorJSON(writer, code, err)
+		utils.WriteErrorJSON(w, code, err)
 
 		return
 	}
@@ -47,5 +65,5 @@ func (pd *ProfilesDelivery) UpdateProfileData(writer http.ResponseWriter, reques
 		Gender:   req.Gender,
 	}
 
-	utils.WriteJSON(writer, http.StatusOK, res)
+	utils.WriteJSON(w, http.StatusOK, res)
 }

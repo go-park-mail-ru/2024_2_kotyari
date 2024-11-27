@@ -10,6 +10,13 @@ import (
 
 // todo сессиии тут
 func (us *UsersService) CreateUser(ctx context.Context, user model.User) (model.User, error) {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return model.User{}, err
+	}
+
+	us.log.Info("[UsersService.CreateUser] Started executing, requestID", slog.Any("request-id", requestID))
+
 	user.Username = us.inputValidator.SanitizeString(user.Username)
 	user.Email = us.inputValidator.SanitizeString(user.Email)
 	user.Password = us.inputValidator.SanitizeString(user.Password)

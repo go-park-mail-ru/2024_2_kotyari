@@ -6,16 +6,24 @@ import (
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
 func (us *UsersStore) CreateUser(ctx context.Context, userModel model.User) (model.User, error) {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return model.User{}, err
+	}
+
+	us.log.Info("[UsersStore.CreateUser] Started executing", slog.Any("request-id", requestID))
+
 	const insertQuery = `
 		insert into users(email, username, password) 
 		values ($1, $2, $3)
 		returning id, city, username, avatar_url;
 	`
 
-	_, err := us.GetUserByEmail(ctx, userModel)
+	_, err = us.GetUserByEmail(ctx, userModel)
 	if err == nil {
 		us.log.Info("[ UsersStore.CreateUser ] пользователь уже существует")
 

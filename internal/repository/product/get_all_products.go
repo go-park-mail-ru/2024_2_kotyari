@@ -7,10 +7,18 @@ import (
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"github.com/jackc/pgx/v5"
 )
 
 func (ps *ProductsStore) GetAllProducts(ctx context.Context) ([]model.ProductCatalog, error) {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	ps.log.Info("[ProductsStore.GetAllProducts] Started executing", slog.Any("request-id", requestID))
+
 	const query = `
 		SELECT p.id, p.title, p.price, p.original_price, p.rating,
 		       p.discount, p.image_url, p.description

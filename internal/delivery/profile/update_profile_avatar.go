@@ -12,45 +12,63 @@ import (
 
 const maxUploadSize = 1024 * 1024 * 10
 
-func (pd *ProfilesDelivery) UpdateProfileAvatar(writer http.ResponseWriter, request *http.Request) {
-	userID, ok := utils.GetContextSessionUserID(request.Context())
-	if !ok {
-		utils.WriteErrorJSON(writer, http.StatusUnauthorized, errs.UserNotAuthorized)
+func (pd *ProfilesDelivery) UpdateProfileAvatar(w http.ResponseWriter, r *http.Request) {
+	requestID, err := utils.GetContextRequestID(r.Context())
+	if err != nil {
+		pd.log.Error("[ProfilesDelivery.UpdateProfileAvatar] No request ID")
+		utils.WriteErrorJSONByError(w, err, pd.errResolver)
 
 		return
 	}
 
-	avatarPath, msg, err := pd.uploadAvatarFromRequest(request)
+	pd.log.Info("[ProfilesDelivery.UpdateProfileAvatar] Started executing", slog.Any("request-id", requestID))
+
+	userID, ok := utils.GetContextSessionUserID(r.Context())
+	if !ok {
+		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)
+
+		return
+	}
+
+	avatarPath, msg, err := pd.uploadAvatarFromRequest(r)
 	if err != nil {
 		pd.log.Error("UpdateProfileAvatar",
 			slog.String("error", err.Error()),
 			"user", userID,
 		)
 
-		utils.WriteErrorJSON(writer, http.StatusInternalServerError, msg)
+		utils.WriteErrorJSON(w, http.StatusInternalServerError, msg)
 
 		return
 	}
 
+	newCtx, err := utils.AddMetadataRequestID(r.Context())
+	if err != nil {
+		err, code := pd.errResolver.Get(err)
+		utils.WriteJSON(w, code, errs.HTTPErrorResponse{
+			ErrorMessage: err.Error(),
+		})
+	}
+
 	_, err = pd.client.UpdateProfileAvatar(
-		request.Context(),
+		newCtx,
 		&profilegrpc.UpdateAvatarRequest{
 			UserId:   userID,
 			Filepath: avatarPath})
 	if err != nil {
 		pd.log.Error("[ ProfilesDelivery.UpdateProfileAvatar ]", slog.String("error", err.Error()))
 		if errors.Is(err, errs.ErrFileTypeNotAllowed) {
-			utils.WriteErrorJSON(writer, http.StatusBadRequest, errs.ErrFileTypeNotAllowed)
+			utils.WriteErrorJSON(w, http.StatusBadRequest, errs.ErrFileTypeNotAllowed)
 
 			return
 		}
 
-		utils.WriteErrorJSON(writer, http.StatusInternalServerError, errors.New("не удалось обновить аватар профиля, попробуйте позже"))
+		utils.WriteErrorJSON(w, http.StatusInternalServerError, errors.New("не удалось обновить аватар профиля, попробуйте позже"))
 
 		return
 	}
 
 	res := AvatarResponse{AvatarUrl: avatarPath}
 
-	utils.WriteJSON(writer, http.StatusOK, res)
+	utils.WriteJSON(w, http.StatusOK, res)
 }

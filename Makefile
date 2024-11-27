@@ -153,7 +153,12 @@ revert-migrations:
 	@migrate -path $(MIGRATIONS_DIR) -database "$(DB_URL)" down
 
 
-back-refresh: main-refresh rating-updater-refresh profile-refresh user-refresh
+back-refresh:
+	docker stop main_go && docker rm main_go && docker rmi main-go-image && \
+	docker stop rating_updater_go && docker rm rating_updater_go && docker rmi rating-updater-go-image && \
+	docker stop user_go && docker rm user_go && docker rmi user-go-image && \
+	docker stop profile_go && docker rm profile_go && docker rmi profile-go-image && \
+	docker compose up -d
 
 # Правило генерации для каждой сущности
 $(ENTITIES):

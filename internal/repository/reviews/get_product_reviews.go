@@ -13,12 +13,12 @@ import (
 )
 
 func (r *ReviewsStore) GetProductReviewsNoLogin(ctx context.Context, productID uint32, sortField string, sortOrder string) (model.Reviews, error) {
-	//requestID, err := utils.GetContextRequestID(ctx)
-	//if err != nil {
-	//	return model.Reviews{}, err
-	//}
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return model.Reviews{}, err
+	}
 
-	//r.log.Info("[ReviewsStore.GetProductReviewsNoLogin] Started executing", slog.Any("request-id", requestID))
+	r.log.Info("[ReviewsStore.GetProductReviewsNoLogin] Started executing", slog.Any("request-id", requestID))
 
 	var reviews model.Reviews
 	const countReviews = `
@@ -27,7 +27,7 @@ func (r *ReviewsStore) GetProductReviewsNoLogin(ctx context.Context, productID u
 		where product_id = $1;
 	`
 
-	err := r.db.QueryRow(ctx, countReviews, productID).Scan(&reviews.TotalReviewCount)
+	err = r.db.QueryRow(ctx, countReviews, productID).Scan(&reviews.TotalReviewCount)
 	if err != nil {
 		r.log.Error("[ReviewsStore.GetProductReviewsNoLogin] Error getting total review count", slog.String("error", err.Error()))
 
@@ -84,12 +84,12 @@ func (r *ReviewsStore) GetProductReviewsNoLogin(ctx context.Context, productID u
 }
 
 func (r *ReviewsStore) GetProductReviewsWithLogin(ctx context.Context, productID uint32, userID uint32, sortField string, sortOrder string) (model.Reviews, error) {
-	//requestID, err := utils.GetContextRequestID(ctx)
-	//if err != nil {
-	//	return model.Reviews{}, err
-	//}
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return model.Reviews{}, err
+	}
 
-	//r.log.Info("[ReviewsStore.GetProductReviewsWithLogin] Started executing", slog.Any("request-id", requestID))
+	r.log.Info("[ReviewsStore.GetProductReviewsWithLogin] Started executing", slog.Any("request-id", requestID))
 
 	var reviews model.Reviews
 	const countReviews = `
@@ -98,7 +98,7 @@ func (r *ReviewsStore) GetProductReviewsWithLogin(ctx context.Context, productID
 		where product_id = $1;
 	`
 
-	err := r.db.QueryRow(ctx, countReviews, productID).Scan(&reviews.TotalReviewCount)
+	err = r.db.QueryRow(ctx, countReviews, productID).Scan(&reviews.TotalReviewCount)
 	if err != nil {
 		r.log.Error("[ReviewsStore.GetProductReviewsWithLogin] Error getting total review count", slog.String("error", err.Error()))
 

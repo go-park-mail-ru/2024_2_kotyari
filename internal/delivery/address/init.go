@@ -2,6 +2,7 @@ package address
 
 import (
 	"context"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
@@ -14,12 +15,14 @@ type addressManager interface {
 
 type AddressDelivery struct {
 	addressManager addressManager
+	errResolver    errs.GetErrorCode
 	log            *slog.Logger
 }
 
-func NewAddressHandler(addressManager addressManager, logger *slog.Logger) *AddressDelivery {
+func NewAddressHandler(addressManager addressManager, errResolver errs.GetErrorCode, logger *slog.Logger) *AddressDelivery {
 	return &AddressDelivery{
 		addressManager: addressManager,
+		errResolver:    errResolver,
 		log:            logger,
 	}
 }

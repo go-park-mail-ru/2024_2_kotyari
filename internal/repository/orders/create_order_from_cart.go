@@ -2,12 +2,13 @@ package rorders
 
 import (
 	"context"
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 	"log/slog"
 	"time"
 
 	order "github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 const defaultStatus = "awaiting_payment"
@@ -15,9 +16,16 @@ const defaultStatus = "awaiting_payment"
 func (r *OrdersRepo) CreateOrderFromCart(ctx context.Context, orderData *order.OrderFromCart) (*order.Order, error) {
 	tx, err := r.db.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
-		r.logger.Error("[OrdersRepo.RemoveSelectedCartItems] Failed to start transaction", slog.String("error", err.Error()))
+		r.logger.Error("[OrdersRepo.CreateOrderFromCart] Failed to start transaction", slog.String("error", err.Error()))
 		return nil, err
 	}
+
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	r.logger.Info("[OrdersRepo.CreateOrderFromCart] Started executing", slog.Any("request-id", requestID))
 
 	defer func() {
 		if p := recover(); p != nil || err != nil {

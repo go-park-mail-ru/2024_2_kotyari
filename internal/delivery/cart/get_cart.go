@@ -1,6 +1,7 @@
 package cart
 
 import (
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -9,6 +10,16 @@ import (
 )
 
 func (ch *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
+	requestID, err := utils.GetContextRequestID(r.Context())
+	if err != nil {
+		ch.log.Error("[CartHandler.GetCart] No request ID")
+		utils.WriteErrorJSONByError(w, err, ch.errResolver)
+
+		return
+	}
+
+	ch.log.Info("[CartHandler.GetCart] Started executing", slog.Any("request-id", requestID))
+
 	userID, ok := utils.GetContextSessionUserID(r.Context())
 	if !ok {
 		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)

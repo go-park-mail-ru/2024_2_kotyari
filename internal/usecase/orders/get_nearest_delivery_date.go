@@ -5,10 +5,17 @@ import (
 	"errors"
 	"log/slog"
 	"time"
+
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
 func (m *OrdersManager) GetNearestDeliveryDate(ctx context.Context, userID uint32) (time.Time, error) {
-	m.logger.Info("GetNearestDeliveryDate called", slog.Uint64("user_id", uint64(userID)))
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return time.Time{}, err
+	}
+
+	m.logger.Info("[OrdersManager.GetNearestDeliveryDate] Started executing", slog.Any("request-id", requestID))
 
 	deliveryDate, err := m.repo.GetNearestDeliveryDate(ctx, userID)
 	if err != nil {

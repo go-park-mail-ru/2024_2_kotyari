@@ -13,6 +13,12 @@ import (
 )
 
 func (s *SearchStore) ProductSuggestion(ctx context.Context, searchQuery string, sortField string, sortOrder string) ([]model.ProductCatalog, error) {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	s.log.Info("[SearchStore.ProductSuggestion] Started executing", slog.Any("request-id", requestID))
 
 	fieldSortOptions := map[string]string{
 		"rating": "p.rating",

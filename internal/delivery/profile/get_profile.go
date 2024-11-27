@@ -10,6 +10,16 @@ import (
 )
 
 func (pd *ProfilesDelivery) GetProfile(w http.ResponseWriter, r *http.Request) {
+	requestID, err := utils.GetContextRequestID(r.Context())
+	if err != nil {
+		pd.log.Error("[ProfilesDelivery.GetProfile] No request ID")
+		utils.WriteErrorJSONByError(w, err, pd.errResolver)
+
+		return
+	}
+
+	pd.log.Info("[ProfilesDelivery.GetProfile] Started executing", slog.Any("request-id", requestID))
+
 	userID, ok := utils.GetContextSessionUserID(r.Context())
 	if !ok {
 		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)
@@ -17,7 +27,15 @@ func (pd *ProfilesDelivery) GetProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	profile, err := pd.client.GetProfile(r.Context(), &profilegrpc.GetProfileRequest{UserId: userID})
+	newCtx, err := utils.AddMetadataRequestID(r.Context())
+	if err != nil {
+		err, code := pd.errResolver.Get(err)
+		utils.WriteJSON(w, code, errs.HTTPErrorResponse{
+			ErrorMessage: err.Error(),
+		})
+	}
+
+	profile, err := pd.client.GetProfile(newCtx, &profilegrpc.GetProfileRequest{UserId: userID})
 	if err != nil {
 		pd.log.Error("[ ProfilesDelivery.GetProfile ]",
 			slog.String("error", err.Error()),

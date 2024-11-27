@@ -5,6 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
 const queryGetProductCategories = `
@@ -16,6 +17,13 @@ const queryGetProductCategories = `
 	`
 
 func (ps *ProductsStore) getProductCategories(ctx context.Context, productID uint64) ([]model.Category, error) {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	ps.log.Info("[ProductsStore.getProductCategories] Started executing", slog.Any("request-id", requestID))
+
 	rowsCategories, err := ps.db.Query(ctx, queryGetProductCategories, productID)
 	if err != nil {
 		ps.log.Error("[ ProductsStore.GetProductCardByID ] Error executing categories query", slog.String("error", err.Error()))

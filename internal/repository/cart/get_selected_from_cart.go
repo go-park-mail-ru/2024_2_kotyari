@@ -3,10 +3,12 @@ package cart
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"strconv"
 	"time"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -39,6 +41,13 @@ func mapRowToCartProduct(
 }
 
 func (cs *CartsStore) GetSelectedFromCart(ctx context.Context, userID uint32) (*model.CartProductsForOrderWithUser, error) {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	cs.log.Info("[CartsStore.GetSelectedFromCart] Started executing", slog.Any("request-id", requestID))
+
 	const query = `
 		SELECT p.id, p.title, p.price, p.image_url, p.weight, c.count, c.delivery_date, u.username, u.preferred_payment_method,
            a.city, a.street, a.house, a.flat

@@ -1,12 +1,23 @@
 package search
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
 func (s *SearchHandler) GetSearchTitleSuggestions(w http.ResponseWriter, r *http.Request) {
+	requestID, err := utils.GetContextRequestID(r.Context())
+	if err != nil {
+		s.log.Error("[SearchHandler.GetSearchTitleSuggestions] No request ID")
+		utils.WriteErrorJSONByError(w, err, s.errResolver)
+
+		return
+	}
+
+	s.log.Info("[SearchHandler.GetSearchTitleSuggestions] Started executing", slog.Any("request-id", requestID))
+
 	query := utils.GetSearchQuery(r)
 
 	titles, err := s.searchRepository.GetSearchTitleSuggestions(r.Context(), query)
