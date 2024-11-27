@@ -2,11 +2,12 @@ package rorders
 
 import (
 	"context"
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 	"log/slog"
 
 	order "github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 func (r *OrdersRepo) scanOrderRow(rows pgx.Row) (getOrdersRow, error) {
@@ -57,10 +58,18 @@ func (r *OrdersRepo) convertOrdersMapToSlice(ordersMap map[uuid.UUID]map[string]
 			orders = append(orders, ord)
 		}
 	}
+
 	return orders
 }
 
 func (r *OrdersRepo) GetOrders(ctx context.Context, userID uint32) ([]order.Order, error) {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	r.logger.Info("[OrdersRepo.GetOrders] Started executing", slog.Any("request-id", requestID))
+
 	rows, err := r.GetOrdersRows(ctx, userID)
 	if err != nil {
 		return nil, err

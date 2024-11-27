@@ -1,18 +1,12 @@
 package middlewares
 
 import (
-	"context"
 	"errors"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
-
-type sessionGetter interface {
-	Get(ctx context.Context, sessionID string) (model.Session, error)
-}
 
 func AuthMiddleware(sessionGetter sessionGetter, errResolver errs.GetErrorCode) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {

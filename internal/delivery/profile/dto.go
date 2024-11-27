@@ -1,40 +1,43 @@
 package profile
 
 import (
+	profilegrpc "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/profile/gen"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/address"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
-type ProfileResponse struct {
+type UsersDefaultResponse struct {
+	Username  string `json:"username"`
+	City      string `json:"city"`
+	AvatarUrl string `json:"avatar_url"`
+}
+
+type ProfilesResponse struct {
 	ID        uint32 `json:"id"`
 	Email     string `json:"email"`
 	Username  string `json:"username"`
 	Gender    string `json:"gender"`
-	Age       uint8  `json:"age"`
 	AvatarUrl string `json:"avatar_url"`
 	Address   address.AddressResponse
 }
 
-func FromModel(profile model.Profile) ProfileResponse {
-
-	return ProfileResponse{
-		ID:       profile.ID,
-		Email:    profile.Email,
-		Username: profile.Username,
-		Age:      profile.Age,
+func fromGrpcResponse(p *profilegrpc.GetProfileResponse, addr model.Address) ProfilesResponse {
+	return ProfilesResponse{
+		ID:        p.UserId,
+		Email:     p.Email,
+		Username:  p.Username,
+		Gender:    p.Gender,
+		AvatarUrl: p.AvatarUrl,
 		Address: address.AddressResponse{
-			ID:     profile.Address.Id,
-			City:   profile.Address.City,
-			Street: profile.Address.Street,
-			House:  profile.Address.House,
-			Flat:   *profile.Address.Flat,
+			City:   addr.City,
+			Street: addr.Street,
+			House:  addr.House,
+			Flat:   addr.Flat,
 		},
-		Gender:    profile.Gender,
-		AvatarUrl: profile.AvatarURL,
 	}
 }
 
-type UpdateProfileRequest struct {
+type UpdateProfile struct {
 	Email    string `json:"email"`
 	Username string `json:"username"`
 	Gender   string `json:"gender"`
@@ -42,4 +45,10 @@ type UpdateProfileRequest struct {
 
 type AvatarResponse struct {
 	AvatarUrl string `json:"avatar_url"`
+}
+
+type UpdatePasswordRequest struct {
+	OldPassword    string `json:"old_password"`
+	NewPassword    string `json:"new_password"`
+	RepeatPassword string `json:"repeat_password"`
 }

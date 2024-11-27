@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
 const queryGetOptions = `
@@ -17,6 +18,13 @@ const queryGetOptions = `
 `
 
 func (ps *ProductsStore) getProductOptions(ctx context.Context, productID uint64) (model.Options, error) {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return model.Options{}, err
+	}
+
+	ps.log.Info("[ProductsStore.getProductOptions] Started executing", slog.Any("request-id", requestID))
+
 	rows, err := ps.db.Query(ctx, queryGetOptions, productID)
 	if err != nil {
 		ps.log.Error("[ ProductsStore.getProductOptions ] ошибка выполнения запроса", slog.String("error", err.Error()))

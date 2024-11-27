@@ -1,6 +1,9 @@
 package user
 
-import "github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+import (
+	grpc_gen "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/user/gen"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+)
 
 type UsersSignUpRequest struct {
 	Email          string `json:"email"`
@@ -15,20 +18,37 @@ type UsersLoginRequest struct {
 }
 
 type UsersDefaultResponse struct {
-	Username string `json:"username"`
-	City     string `json:"city"`
+	UserID   uint32 `json:"user_id"`
+	Username  string `json:"username"`
+	City      string `json:"city"`
+	AvatarUrl string `json:"avatar_url"`
 }
 
-func (ur *UsersSignUpRequest) ToModel() model.User {
+func (us *UsersSignUpRequest) ToModel() model.User {
 	return model.User{
-		Email:    ur.Email,
-		Username: ur.Username,
-		Password: ur.Password,
+		Email:    us.Email,
+		Username: us.Username,
+		Password: us.Password,
 	}
 }
 
 func (ul *UsersLoginRequest) ToModel() model.User {
 	return model.User{
+		Email:    ul.Email,
+		Password: ul.Password,
+	}
+}
+
+func (us *UsersSignUpRequest) ToGrpcSignupRequest() *grpc_gen.UsersSignUpRequest {
+	return &grpc_gen.UsersSignUpRequest{
+		Username: us.Username,
+		Email:    us.Email,
+		Password: us.Password,
+	}
+}
+
+func (ul *UsersLoginRequest) ToGrpcLoginRequest() *grpc_gen.UsersLoginRequest {
+	return &grpc_gen.UsersLoginRequest{
 		Email:    ul.Email,
 		Password: ul.Password,
 	}

@@ -49,6 +49,15 @@ var (
 	ErrFileTypeNotAllowed         = errors.New("тип файла не допустим")
 	RequestIDNotFound             = errors.New("не удалось получить request-id")
 	NoSelectedProducts            = errors.New("не выбрано ни одного продукта")
+	AvatarFileReadError           = errors.New("не удалось прочитать файл, попробуйте позже")
+	AvatarFileSizeExceedsLimit    = errors.New("размер файла превышает 10 МБ")
+	AvatarUploadError             = errors.New("не удалось загрузить фотографию")
+	AvatarImageSaveError          = errors.New("не удалось сохранить изображение")
+	NoReviewsForProduct           = errors.New("для этого продукта нет отзывов")
+	ReviewNotFound                = errors.New("отзыв не найден")
+	ReviewAlreadyExists           = errors.New("отзыв уже существует")
+	NoTitlesToSuggest             = errors.New("отсутствуют продукты для саджестов")
+	FailedToChangeProductRating   = errors.New("не удалось изменить рейтинг продукта")
 )
 
 type ErrorStore struct {
@@ -106,6 +115,11 @@ func NewErrorStore() *ErrorStore {
 			ErrGetNearestDeliveryDate:     http.StatusNotFound,
 			RequestIDNotFound:             http.StatusBadRequest,
 			NoSelectedProducts:            http.StatusBadRequest,
+			NoReviewsForProduct:           http.StatusNotFound,
+			ReviewNotFound:                http.StatusNotFound,
+			ReviewAlreadyExists:           http.StatusConflict,
+			NoTitlesToSuggest:             http.StatusNotFound,
+			FailedToChangeProductRating:   http.StatusInternalServerError,
 		},
 	}
 }

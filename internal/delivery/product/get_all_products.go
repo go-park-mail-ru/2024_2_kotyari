@@ -9,7 +9,15 @@ import (
 )
 
 func (pd *ProductsDelivery) GetAllProducts(w http.ResponseWriter, r *http.Request) {
-	pd.log.Debug("[ ProductsDelivery.GetAllProducts ] is running ]")
+	requestID, err := utils.GetContextRequestID(r.Context())
+	if err != nil {
+		pd.log.Error("[ProductsDelivery.GetAllProducts] No request ID")
+		utils.WriteErrorJSONByError(w, err, pd.errResolver)
+
+		return
+	}
+
+	pd.log.Info("[ProductsDelivery.GetAllProducts] Started executing", slog.Any("request-id", requestID))
 
 	products, err := pd.repo.GetAllProducts(r.Context())
 	if err != nil {

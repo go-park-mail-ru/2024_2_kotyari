@@ -2,9 +2,10 @@ package user
 
 import (
 	"context"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
+	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
 )
 
 type usersRepository interface {
@@ -15,12 +16,14 @@ type usersRepository interface {
 
 type UsersService struct {
 	userRepo       usersRepository
-	sessionService *sessions.SessionService
+	inputValidator *utils.InputValidator
+	log            *slog.Logger
 }
 
-func NewUserService(usersRepository usersRepository, sessionService *sessions.SessionService) *UsersService {
+func NewUserService(usersRepository usersRepository, inputValidator *utils.InputValidator, log *slog.Logger) *UsersService {
 	return &UsersService{
 		userRepo:       usersRepository,
-		sessionService: sessionService,
+		inputValidator: inputValidator,
+		log:            log,
 	}
 }

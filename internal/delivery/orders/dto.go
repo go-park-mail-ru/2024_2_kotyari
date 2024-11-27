@@ -1,10 +1,10 @@
 package orders
 
 import (
-	"github.com/google/uuid"
 	"time"
 
 	order "github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/google/uuid"
 )
 
 type CreateOrderRequest struct {
@@ -19,7 +19,7 @@ type OrderResponse struct {
 	ID           uuid.UUID    `json:"id"`
 	OrderDate    time.Time    `json:"order_date"`
 	DeliveryDate time.Time    `json:"delivery_date"`
-	TotalPrice   uint16       `json:"total_price,omitempty"`
+	TotalPrice   uint32       `json:"total_price,omitempty"`
 	Address      string       `json:"address"`
 	Status       string       `json:"status,omitempty"`
 	Products     []ProductDTO `json:"products"`
@@ -37,12 +37,12 @@ type OrderMaxResponse struct {
 }
 
 type ProductDTO struct {
-	ID       uint32 `json:"id"`
-	Cost     uint16 `json:"cost,omitempty"`
-	Count    uint16 `json:"count,omitempty"`
-	Weight   uint16 `json:"weight,omitempty"`
-	ImageURL string `json:"image_url"`
-	Name     string `json:"name"`
+	ID       uint32  `json:"id"`
+	Cost     uint32  `json:"cost,omitempty"`
+	Count    uint32  `json:"count,omitempty"`
+	Weight   float32 `json:"weight,omitempty"`
+	ImageURL string  `json:"image_url"`
+	Name     string  `json:"name"`
 }
 
 func ToOrderResponse(o *order.Order) OrderResponse {

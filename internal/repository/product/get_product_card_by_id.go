@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
@@ -12,7 +13,12 @@ import (
 )
 
 func (ps *ProductsStore) GetProductByID(ctx context.Context, productID uint64) (model.ProductCard, error) {
-	ps.log.Debug("[ ProductsStore.GetProductByID ] is running")
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return model.ProductCard{}, err
+	}
+
+	ps.log.Info("[ProductsStore.GetProductByID] Started executing", slog.Any("request-id", requestID))
 
 	card, err := ps.getProductInfo(ctx, productID)
 	if err != nil {

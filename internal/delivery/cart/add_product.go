@@ -1,6 +1,7 @@
 package cart
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
@@ -9,6 +10,16 @@ import (
 )
 
 func (ch *CartHandler) AddProduct(w http.ResponseWriter, r *http.Request) {
+	requestID, err := utils.GetContextRequestID(r.Context())
+	if err != nil {
+		ch.log.Error("[CartHandler.AddProduct] No request ID")
+		utils.WriteErrorJSONByError(w, err, ch.errResolver)
+
+		return
+	}
+
+	ch.log.Info("[CartHandler.AddProduct] Started executing", slog.Any("request-id", requestID))
+
 	vars := mux.Vars(r)
 	productID, err := utils.StrToUint32(vars["id"])
 	if err != nil {
@@ -30,5 +41,5 @@ func (ch *CartHandler) AddProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, nil)
+	utils.WriteJSON(w, http.StatusNoContent, nil)
 }

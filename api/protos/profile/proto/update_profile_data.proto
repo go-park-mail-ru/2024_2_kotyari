@@ -1,0 +1,13 @@
+syntax="proto3";
+
+package profile;
+
+option go_package = "https://github.com/go-park-mail-ru/2024_2_kotyari/api/protos/profile_grpc";
+
+
+message UpdateProfileDataRequest {
+  uint32 user_id = 1;
+  string email = 2;
+  string username = 3;
+  string gender = 4;
+}

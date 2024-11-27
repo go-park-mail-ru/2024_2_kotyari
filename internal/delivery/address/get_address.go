@@ -1,20 +1,30 @@
 package address
 
 import (
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"log/slog"
 	"net/http"
 
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
-func (h *AddressDelivery) GetAddress(writer http.ResponseWriter, request *http.Request) {
-	userID, ok := utils.GetContextSessionUserID(request.Context())
-	if !ok {
-		utils.WriteErrorJSON(writer, http.StatusUnauthorized, errs.UserNotAuthorized)
+func (h *AddressDelivery) GetAddress(w http.ResponseWriter, r *http.Request) {
+	requestID, err := utils.GetContextRequestID(r.Context())
+	if err != nil {
+		h.log.Error("[AddressDelivery.GetAddress] No r ID")
+		utils.WriteErrorJSONByError(w, err, h.errResolver)
+
+		return
 	}
 
-	address, err := h.addressManager.GetAddressByProfileID(request.Context(), userID)
+	h.log.Info("[AddressDelivery.GetAddress] Started executing", slog.Any("request-id", requestID))
+
+	userID, ok := utils.GetContextSessionUserID(r.Context())
+	if !ok {
+		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)
+	}
+
+	address, err := h.addressManager.GetAddressByProfileID(r.Context(), userID)
 
 	if err != nil {
 		h.log.Error("[ AddressDelivery.GetAddress ] Ошибка при получении адреса на уровне деливери", slog.String("error", err.Error()))
@@ -23,5 +33,5 @@ func (h *AddressDelivery) GetAddress(writer http.ResponseWriter, request *http.R
 
 	addressResponse := FromModel(address)
 
-	utils.WriteJSON(writer, http.StatusOK, addressResponse)
+	utils.WriteJSON(w, http.StatusOK, addressResponse)
 }

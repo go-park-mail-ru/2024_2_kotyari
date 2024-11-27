@@ -4,14 +4,21 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"github.com/jackc/pgx/v5"
 )
 
 func (cs *CategoriesStore) GetAllCategories(ctx context.Context) ([]model.Category, error) {
-	cs.log.Debug("[ CategoriesStore.GetAllCategories ] Entering ]")
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	cs.log.Info("[CategoriesStore.GetAllCategories] Started executing", slog.Any("request-id", requestID))
 
 	const query = `SELECT name, link_to, picture
                    FROM categories

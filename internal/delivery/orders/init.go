@@ -12,7 +12,7 @@ import (
 
 type ordersManager interface {
 	GetOrders(ctx context.Context, userID uint32) ([]order.Order, error)
-	GetOrderById(ctx context.Context, id uuid.UUID, deliveryDate time.Time, userID uint32) (*order.Order, error)
+	GetOrderById(ctx context.Context, id uuid.UUID, userID uint32) (*order.Order, error)
 	CreateOrderFromCart(ctx context.Context, address string, userID uint32) (*order.Order, error)
 	GetNearestDeliveryDate(ctx context.Context, userID uint32) (time.Time, error)
 }

@@ -5,7 +5,6 @@ type Profile struct {
 	Email     string
 	Username  string
 	Gender    string
-	Address   Address
-	Age       uint8
+	Age       uint32
 	AvatarURL string
 }

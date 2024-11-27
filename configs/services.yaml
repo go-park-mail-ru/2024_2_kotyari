@@ -1,0 +1,21 @@
+env: local
+
+main_service:
+  domain: "main_go"
+  address: "0.0.0.0"
+  port: "8000"
+
+rating_updater:
+  domain: "rating_updater_go"
+  address: "0.0.0.0"
+  port: "8004"
+
+profile_go:
+  domain: "profile_go"
+  address: "0.0.0.0"
+  port: "8003"
+
+user_go:
+  domain: "user_go"
+  address: "0.0.0.0"
+  port: "8001"

@@ -1,17 +1,25 @@
-package morders
+package orders
 
 import (
 	"context"
 	"errors"
-	"github.com/google/uuid"
 	"log/slog"
 	"strconv"
 	"time"
 
 	order "github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
+	"github.com/google/uuid"
 )
 
 func (m *OrdersManager) CreateOrderFromCart(ctx context.Context, address string, userID uint32) (*order.Order, error) {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	m.logger.Info("[OrdersManager.CreateOrderFromCart] Started executing", slog.Any("request-id", requestID))
+
 	orderID := uuid.New()
 	orderDate := time.Now()
 	deliveryDate := orderDate.Add(72 * time.Hour)
@@ -27,7 +35,7 @@ func (m *OrdersManager) CreateOrderFromCart(ctx context.Context, address string,
 		return nil, errors.New("cart is empty for user: " + strconv.Itoa(int(userID)))
 	}
 
-	var totalPrice uint16
+	var totalPrice uint32
 	productOrders := make([]order.ProductOrder, 0, len(cartItems))
 
 	for _, item := range cartItems {
@@ -44,12 +52,12 @@ func (m *OrdersManager) CreateOrderFromCart(ctx context.Context, address string,
 		Products:     cartItems,
 	}
 
-	order, err := m.repo.CreateOrderFromCart(ctx, orderData)
+	orderFromCart, err := m.repo.CreateOrderFromCart(ctx, orderData)
 	if err != nil {
-		m.logger.Error("failed to create order in repo", slog.String("error", err.Error()), slog.Uint64("user_id", uint64(userID)))
+		m.logger.Error("failed to create orderFromCart in repo", slog.String("error", err.Error()), slog.Uint64("user_id", uint64(userID)))
 		return nil, err
 	}
 
 	m.logger.Info("CreateOrderFromCart completed successfully", slog.String("order_id", orderID.String()), slog.Uint64("user_id", uint64(userID)))
-	return order, nil
+	return orderFromCart, nil
 }

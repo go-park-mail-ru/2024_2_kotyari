@@ -1,6 +1,7 @@
 package product
 
 import (
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -10,7 +11,15 @@ import (
 )
 
 func (pd *ProductsDelivery) GetProductById(w http.ResponseWriter, r *http.Request) {
-	pd.log.Debug("[ ProductsDelivery.GetProductById ] is running ]")
+	requestID, err := utils.GetContextRequestID(r.Context())
+	if err != nil {
+		pd.log.Error("[ProductsDelivery.GetProductById] No request ID")
+		utils.WriteErrorJSONByError(w, err, pd.errResolver)
+
+		return
+	}
+
+	pd.log.Info("[ProductsDelivery.GetProductById] Started executing", slog.Any("request-id", requestID))
 
 	vars := mux.Vars(r)
 	id, err := strconv.ParseUint(vars["id"], 10, 32)

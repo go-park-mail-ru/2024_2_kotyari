@@ -2,12 +2,21 @@ package cart
 
 import (
 	"context"
+	"log/slog"
 	"time"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
 func (cm *CartManager) GetSelectedFromCart(ctx context.Context, userID uint32) (model.CartForOrder, error) {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return model.CartForOrder{}, err
+	}
+
+	cm.log.Info("[CartManager.GetSelectedFromCart] Started executing", slog.Any("request-id", requestID))
+
 	products, err := cm.cartRepository.GetSelectedFromCart(ctx, userID)
 	if err != nil {
 		return model.CartForOrder{}, err
@@ -21,7 +30,7 @@ func (cm *CartManager) GetSelectedFromCart(ctx context.Context, userID uint32) (
 		totalProductWeight := product.Weight * float32(product.Quantity)
 		cart.TotalItems += product.Quantity
 		cart.TotalWeight += totalProductWeight
-		cart.FinalPrice += product.Price * float32(product.Quantity)
+		cart.FinalPrice += product.Price * product.Quantity
 
 		if _, exists := deliveryDatesMap[product.DeliveryDate]; !exists {
 			deliveryDatesMap[product.DeliveryDate] = &model.DeliveryDateForOrder{

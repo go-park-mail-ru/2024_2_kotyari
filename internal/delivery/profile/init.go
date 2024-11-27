@@ -5,26 +5,42 @@ import (
 	"log/slog"
 	"os"
 
+	profilegrpc "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/profile/gen"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
-type profileManager interface {
-	GetProfile(ctx context.Context, id uint32) (model.Profile, error)
-	UpdateProfile(ctx context.Context, oldProfileData model.Profile, newProfileData model.Profile) error
-	UpdateProfileAvatar(ctx context.Context, id uint32, file *os.File) (string, error)
+type imageSaver interface {
+	SaveImage(filename string, file *os.File) (string, error)
+}
+
+type addressGetter interface {
+	GetAddressByProfileID(ctx context.Context, profileID uint32) (model.Address, error)
 }
 
 type ProfilesDelivery struct {
-	profileManager profileManager
-	inputValidator *utils.InputValidator
-	log            *slog.Logger
+	log *slog.Logger
+
+	addressGetter addressGetter
+	imageSaver    imageSaver
+	errResolver   errs.GetErrorCode
+
+	client profilegrpc.ProfileClient
 }
 
-func NewProfilesHandler(profileManager profileManager, inputValidator *utils.InputValidator, logger *slog.Logger) *ProfilesDelivery {
+func NewProfilesHandler(
+	client profilegrpc.ProfileClient,
+	logger *slog.Logger,
+	addressGetter addressGetter,
+	imageSaver imageSaver,
+	errResolver errs.GetErrorCode,
+) *ProfilesDelivery {
+
 	return &ProfilesDelivery{
-		profileManager: profileManager,
-		inputValidator: inputValidator,
-		log:            logger,
+		log:           logger,
+		addressGetter: addressGetter,
+		imageSaver:    imageSaver,
+		errResolver:   errResolver,
+		client:        client,
 	}
 }

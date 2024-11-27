@@ -2,6 +2,7 @@ package sessions
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
@@ -14,10 +15,12 @@ type sessionRepository interface {
 
 type SessionService struct {
 	SessionRepo sessionRepository
+	log         *slog.Logger
 }
 
-func NewSessionService(sessionRepo sessionRepository) *SessionService {
+func NewSessionService(sessionRepo sessionRepository, log *slog.Logger) *SessionService {
 	return &SessionService{
 		SessionRepo: sessionRepo,
+		log:         log,
 	}
 }

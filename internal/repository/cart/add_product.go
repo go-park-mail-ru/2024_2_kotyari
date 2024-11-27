@@ -5,6 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -18,6 +19,12 @@ func (cs *CartsStore) AddProduct(ctx context.Context, productID uint32, userID u
 		return errs.InternalServerError
 
 	}
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return err
+	}
+
+	cs.log.Info("[CartsStore.AddProduct] Started executing", slog.Any("request-id", requestID))
 
 	const query = `
 		insert into carts(user_id, product_id, count, is_selected, is_deleted)

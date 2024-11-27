@@ -3,17 +3,23 @@ package profile
 import (
 	"context"
 	"errors"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/address"
-	"github.com/jackc/pgx/v5"
 	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
+	"github.com/jackc/pgx/v5"
 )
 
 func (pr *ProfilesStore) GetProfile(ctx context.Context, id uint32) (model.Profile, error) {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return model.Profile{}, err
+	}
 
-	const query_profile = `
+	pr.log.Info("[ProfilesStore.GetProfile] Started executing", slog.Any("request-id", requestID))
+
+	const queryProfile = `
 		SELECT id, 
 		       email, 
 		       username, 
@@ -26,7 +32,7 @@ func (pr *ProfilesStore) GetProfile(ctx context.Context, id uint32) (model.Profi
 
 	var profile model.Profile
 
-	err := pr.db.QueryRow(ctx, query_profile, id).Scan(
+	err = pr.db.QueryRow(ctx, queryProfile, id).Scan(
 		&profile.ID,
 		&profile.Email,
 		&profile.Username,
@@ -37,30 +43,19 @@ func (pr *ProfilesStore) GetProfile(ctx context.Context, id uint32) (model.Profi
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			pr.log.Warn("[ ProfilesStore.GetProfile ] Пользователь не найден", slog.String("error", err.Error()))
+			pr.log.Warn("[ ProfilesStore.GetProfile ] Пользователь не найден",
+				slog.String("error", err.Error()),
+			)
+
 			return model.Profile{}, errs.UserDoesNotExist
 		}
-		pr.log.Error("[ ProfilesStore.GetProfile ] Ошибка при получении профиля в бд", slog.String("error", err.Error()))
+
+		pr.log.Error("[ ProfilesStore.GetProfile ] Ошибка при получении профиля в бд",
+			slog.String("error", err.Error()),
+		)
+
 		return model.Profile{}, err
 	}
-
-	addressStore := address.AddressStore{Db: pr.db, Log: pr.log}
-	address, err := addressStore.GetAddressByProfileID(ctx, profile.ID)
-	if err != nil {
-		if errors.Is(err, errs.AddressNotFound) {
-			pr.log.Warn("[ ProfilesStore.GetProfile ] Адрес не найден для пользователя", slog.String("error", err.Error()))
-			return model.Profile{}, nil
-		}
-
-		pr.log.Error("[ ProfilesStore.GetProfile ] Ошибка при получении адреса", slog.String("error", err.Error()))
-		return model.Profile{}, err
-	}
-
-	if address.Flat == nil {
-		*address.Flat = ""
-	}
-
-	profile.Address = address
 
 	return profile, nil
 }

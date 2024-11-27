@@ -1,10 +1,13 @@
 services:
-  go_back:
-    build: .
+  user_go:
+    build:
+      context: .
+      dockerfile: ./cmd/user/Dockerfile
     ports:
-      - "8000:8000"
-    image: back-go-image
-    container_name: back_go
+      - "8001:8001"
+      - "8081:8081"
+    image: user-go-image
+    container_name: user_go
     restart: unless-stopped
     volumes:
       - ./files:/app/files
@@ -13,6 +16,59 @@ services:
     depends_on:
       - pg_db
       - redis_service
+      - main_go
+
+  main_go:
+    build:
+      context: .
+      dockerfile: ./cmd/main/Dockerfile
+    ports:
+      - "8000:8000"
+      - "8080:8080"
+    image: main-go-image
+    container_name: main_go
+    restart: unless-stopped
+    volumes:
+      - ./files:/delivery/files
+    networks:
+      - app-network
+    depends_on:
+      - pg_db
+      - redis_service
+
+  rating_updater_go:
+    build:
+      context: .
+      dockerfile: ./cmd/rating_updater/Dockerfile
+    ports:
+      - "8004:8004"
+      - "8084:8084"
+    image: rating-updater-go-image
+    container_name: rating_updater_go
+    restart: unless-stopped
+    networks:
+      - app-network
+    depends_on:
+      - pg_db
+      - redis_service
+      - main_go
+
+  profile_go:
+    build:
+      context: .
+      dockerfile: ./cmd/profile/Dockerfile
+    ports:
+      - "8003:8003"
+      - "8083:8083"
+    image: profile-go-image
+    container_name: profile_go
+    restart: unless-stopped
+    networks:
+      - app-network
+    depends_on:
+      - pg_db
+      - redis_service
+      - main_go
 
   pg_db:
     image: postgres:16.4
@@ -48,10 +104,45 @@ services:
     networks:
       - app-network
 
+  prometheus:
+    image: prom/prometheus:latest
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    container_name: prometheus
+    networks:
+      - app-network
+
+  grafana:
+    image: grafana/grafana:10.4.2-ubuntu
+    container_name: grafana
+    ports:
+      - "8050:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./configs:/etc/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - app-network
+
 volumes:
   pg_data:
   redis_data:
   go_back:
+  prometheus:
+  grafana:
+  prometheus_data:
+  grafana_data:
+
+
 
 networks:
   app-network:

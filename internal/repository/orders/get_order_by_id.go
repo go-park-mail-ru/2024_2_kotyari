@@ -2,15 +2,22 @@ package rorders
 
 import (
 	"context"
-	"github.com/google/uuid"
 	"log/slog"
-	"time"
 
 	order "github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
+	"github.com/google/uuid"
 )
 
-func (r *OrdersRepo) GetOrderById(ctx context.Context, id uuid.UUID, userID uint32, deliveryDate time.Time) (*order.Order, error) {
-	rows, err := r.GetOrderByIdRows(ctx, id, userID, deliveryDate)
+func (r *OrdersRepo) GetOrderById(ctx context.Context, id uuid.UUID, userID uint32) (*order.Order, error) {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	r.logger.Info("[OrdersRepo.GetOrderById] Started executing", slog.Any("request-id", requestID))
+
+	rows, err := r.GetOrderByIdRows(ctx, id, userID)
 	if err != nil {
 		return nil, err
 	}

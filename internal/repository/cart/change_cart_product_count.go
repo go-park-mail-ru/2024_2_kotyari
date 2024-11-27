@@ -2,10 +2,11 @@ package cart
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5"
 	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
+	"github.com/jackc/pgx/v5"
 )
 
 func (cs *CartsStore) ChangeCartProductCount(ctx context.Context, productID uint32, count int32, userID uint32) error {
@@ -14,11 +15,18 @@ func (cs *CartsStore) ChangeCartProductCount(ctx context.Context, productID uint
 	})
 
 	if err != nil {
-		cs.log.Error("[CartStore.RemoveCartProduct] failed to start transaction", "error", slog.String("error", err.Error()))
+		cs.log.Error("[CartStore.ChangeCartProductCount] failed to start transaction", "error", slog.String("error", err.Error()))
 
 		return errs.InternalServerError
 
 	}
+
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return err
+	}
+
+	cs.log.Info("[CartsStore.ChangeCartProductCount] Started executing", slog.Any("request-id", requestID))
 
 	err = cs.updateProductCount(ctx, productID, count)
 	if err != nil {
@@ -52,6 +60,13 @@ func (cs *CartsStore) ChangeCartProductCount(ctx context.Context, productID uint
 }
 
 func (cs *CartsStore) updateProductCount(ctx context.Context, productID uint32, count int32) error {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return err
+	}
+
+	cs.log.Info("[CartsStore.updateProductCount] Started executing", slog.Any("request-id", requestID))
+
 	const updateProductCount = `
 		update products 
 		set count = count - $2
@@ -75,6 +90,13 @@ func (cs *CartsStore) updateProductCount(ctx context.Context, productID uint32, 
 }
 
 func (cs *CartsStore) updateCartProductCount(ctx context.Context, productID uint32, count int32, userID uint32) error {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		return err
+	}
+
+	cs.log.Info("[CartsStore.updateCartProductCount] Started executing", slog.Any("request-id", requestID))
+
 	const updateCartProductCount = `
         update carts
         set count = count + $2
