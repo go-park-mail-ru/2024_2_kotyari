@@ -41,7 +41,7 @@ func (suite *OrdersRepoGetOrderByIdSuite) TestGetOrderById_Success() {
 		WithArgs(orderID, userID, deliveryDate.Truncate(time.Millisecond), deliveryDate.Truncate(time.Millisecond).Add(time.Millisecond)).
 		WillReturnRows(rows)
 
-	order, err := suite.repo.GetOrderById(ctx, orderID, userID, deliveryDate)
+	order, err := suite.repo.GetOrderById(ctx, orderID, userID)
 	require.NoError(suite.T(), err)
 	require.NotNil(suite.T(), order)
 	require.Equal(suite.T(), orderID, order.ID)

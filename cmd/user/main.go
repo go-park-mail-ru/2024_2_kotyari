@@ -57,7 +57,7 @@ func main() {
 	serverProm := http.Server{Handler: router, Addr: fmt.Sprintf(":%d", 8081), ReadHeaderTimeout: 10 * time.Second}
 
 	go func() {
-		if err := serverProm.ListenAndServe(); err != nil {
+		if err = serverProm.ListenAndServe(); err != nil {
 			log.Println("fail auth.ListenAndServe")
 		}
 	}()
