@@ -7,7 +7,7 @@ import (
 
 type Metrics struct {
 	serviceName    string
-	TotalHits      *prometheus.CounterVec
+	totalHits      *prometheus.CounterVec
 	duration       *prometheus.HistogramVec
 	cpuUsage       prometheus.GaugeFunc
 	memoryUsage    prometheus.GaugeFunc

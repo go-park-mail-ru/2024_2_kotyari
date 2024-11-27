@@ -8,7 +8,7 @@ import (
 func CreateGrpcMetrics(service string) *Metrics {
 	metrics := &Metrics{
 		serviceName: service,
-		TotalHits: prometheus.NewCounterVec(
+		totalHits: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
 				Name: service + "_total_hits_count",
 				Help: "Number of total gRPC requests",
@@ -58,7 +58,7 @@ func CreateGrpcMetrics(service string) *Metrics {
 }
 
 func InitGrpcMetrics(metrics *Metrics) error {
-	if err := prometheus.Register(metrics.TotalHits); err != nil {
+	if err := prometheus.Register(metrics.totalHits); err != nil {
 		log.Printf("Failed to register totalHits: %v", err)
 		return err
 	}

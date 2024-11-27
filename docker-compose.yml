@@ -115,7 +115,6 @@ services:
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
-    #      - '--web.external-url=prometheus'
     container_name: prometheus
     networks:
       - app-network

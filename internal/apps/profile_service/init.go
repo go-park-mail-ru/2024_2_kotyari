@@ -63,6 +63,14 @@ func NewProfilesApp(
 	}
 
 	interceptor := metrics2.NewGrpcMiddleware(*metrics, errorResolver)
+
+	profileRepo := profileRepoLib.NewProfileRepo(dbPool, slogLog)
+	profileService := profileServiceLib.NewProfileService(profileRepo, slogLog)
+
+	delivery := profile.NewProfilesGrpc(profileRepo, profileService, slogLog)
+
+	grpcServer := grpc.NewServer(grpc.ChainUnaryInterceptor(interceptor.ServerMetricsInterceptor))
+
 	router := mux.NewRouter()
 	router.PathPrefix("/metrics").Handler(promhttp.Handler())
 	serverProm := http.Server{Handler: router, Addr: fmt.Sprintf(":%d", 8083), ReadHeaderTimeout: 10 * time.Second}
@@ -72,13 +80,6 @@ func NewProfilesApp(
 			slogLog.Error("fail auth.ListenAndServe")
 		}
 	}()
-
-	profileRepo := profileRepoLib.NewProfileRepo(dbPool, slogLog)
-	profileService := profileServiceLib.NewProfileService(profileRepo, slogLog)
-
-	delivery := profile.NewProfilesGrpc(profileRepo, profileService, slogLog)
-
-	grpcServer := grpc.NewServer(grpc.ChainUnaryInterceptor(interceptor.ServerMetricsInterceptor))
 
 	return &ProfilesApp{
 		log:        slogLog,
