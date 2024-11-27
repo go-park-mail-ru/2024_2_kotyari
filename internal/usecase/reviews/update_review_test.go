@@ -58,9 +58,9 @@ func TestReviewsService_UpdateReview(t *testing.T) {
 					review).Return(nil)
 
 				return &ReviewsService{
-					reviewsRepo:    reviewsRepositoryMock,
-					inputValidator: nil,
-					log:            logger,
+					reviewsRepo:     reviewsRepositoryMock,
+					stringSanitizer: nil,
+					log:             logger,
 				}
 			},
 			want: nil,
@@ -83,9 +83,9 @@ func TestReviewsService_UpdateReview(t *testing.T) {
 					uint32(1)).Return(model.Review{}, errs.ReviewNotFound)
 
 				return &ReviewsService{
-					reviewsRepo:    reviewsRepositoryMock,
-					inputValidator: nil,
-					log:            logger,
+					reviewsRepo:     reviewsRepositoryMock,
+					stringSanitizer: nil,
+					log:             logger,
 				}
 			},
 			want: errs.ReviewNotFound,
@@ -108,9 +108,9 @@ func TestReviewsService_UpdateReview(t *testing.T) {
 					uint32(1)).Return(model.Review{}, testDBError)
 
 				return &ReviewsService{
-					reviewsRepo:    reviewsRepositoryMock,
-					inputValidator: nil,
-					log:            logger,
+					reviewsRepo:     reviewsRepositoryMock,
+					stringSanitizer: nil,
+					log:             logger,
 				}
 			},
 			want: testDBError,
@@ -147,9 +147,9 @@ func TestReviewsService_UpdateReview(t *testing.T) {
 					review).Return(testDBError)
 
 				return &ReviewsService{
-					reviewsRepo:    reviewsRepositoryMock,
-					inputValidator: nil,
-					log:            logger,
+					reviewsRepo:     reviewsRepositoryMock,
+					stringSanitizer: nil,
+					log:             logger,
 				}
 			},
 			want: testDBError,
@@ -167,9 +167,9 @@ func TestReviewsService_UpdateReview(t *testing.T) {
 				logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 				return &ReviewsService{
-					reviewsRepo:    reviewsRepositoryMock,
-					inputValidator: nil,
-					log:            logger,
+					reviewsRepo:     reviewsRepositoryMock,
+					stringSanitizer: nil,
+					log:             logger,
 				}
 			},
 			want: errs.BadRequest,

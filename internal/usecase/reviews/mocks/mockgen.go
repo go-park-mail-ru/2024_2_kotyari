@@ -69,19 +69,34 @@ func (mr *MockreviewsRepoMockRecorder) DeleteReview(ctx, productID, userID any) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteReview", reflect.TypeOf((*MockreviewsRepo)(nil).DeleteReview), ctx, productID, userID)
 }
 
-// GetProductReviews mocks base method.
-func (m *MockreviewsRepo) GetProductReviews(ctx context.Context, productID uint32) (model.Reviews, error) {
+// GetProductReviewsNoLogin mocks base method.
+func (m *MockreviewsRepo) GetProductReviewsNoLogin(ctx context.Context, productID uint32, sortField, sortOrder string) (model.Reviews, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetProductReviews", ctx, productID)
+	ret := m.ctrl.Call(m, "GetProductReviewsNoLogin", ctx, productID, sortField, sortOrder)
 	ret0, _ := ret[0].(model.Reviews)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetProductReviews indicates an expected call of GetProductReviews.
-func (mr *MockreviewsRepoMockRecorder) GetProductReviews(ctx, productID any) *gomock.Call {
+// GetProductReviewsNoLogin indicates an expected call of GetProductReviewsNoLogin.
+func (mr *MockreviewsRepoMockRecorder) GetProductReviewsNoLogin(ctx, productID, sortField, sortOrder any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProductReviews", reflect.TypeOf((*MockreviewsRepo)(nil).GetProductReviews), ctx, productID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProductReviewsNoLogin", reflect.TypeOf((*MockreviewsRepo)(nil).GetProductReviewsNoLogin), ctx, productID, sortField, sortOrder)
+}
+
+// GetProductReviewsWithLogin mocks base method.
+func (m *MockreviewsRepo) GetProductReviewsWithLogin(ctx context.Context, productID, userID uint32, sortField, sortOrder string) (model.Reviews, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetProductReviewsWithLogin", ctx, productID, userID, sortField, sortOrder)
+	ret0, _ := ret[0].(model.Reviews)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetProductReviewsWithLogin indicates an expected call of GetProductReviewsWithLogin.
+func (mr *MockreviewsRepoMockRecorder) GetProductReviewsWithLogin(ctx, productID, userID, sortField, sortOrder any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProductReviewsWithLogin", reflect.TypeOf((*MockreviewsRepo)(nil).GetProductReviewsWithLogin), ctx, productID, userID, sortField, sortOrder)
 }
 
 // GetReview mocks base method.
@@ -111,4 +126,42 @@ func (m *MockreviewsRepo) UpdateReview(ctx context.Context, productID, userID ui
 func (mr *MockreviewsRepoMockRecorder) UpdateReview(ctx, productID, userID, review any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateReview", reflect.TypeOf((*MockreviewsRepo)(nil).UpdateReview), ctx, productID, userID, review)
+}
+
+// MockratingUpdater is a mock of ratingUpdater interface.
+type MockratingUpdater struct {
+	ctrl     *gomock.Controller
+	recorder *MockratingUpdaterMockRecorder
+	isgomock struct{}
+}
+
+// MockratingUpdaterMockRecorder is the mock recorder for MockratingUpdater.
+type MockratingUpdaterMockRecorder struct {
+	mock *MockratingUpdater
+}
+
+// NewMockratingUpdater creates a new mock instance.
+func NewMockratingUpdater(ctrl *gomock.Controller) *MockratingUpdater {
+	mock := &MockratingUpdater{ctrl: ctrl}
+	mock.recorder = &MockratingUpdaterMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockratingUpdater) EXPECT() *MockratingUpdaterMockRecorder {
+	return m.recorder
+}
+
+// UpdateRating mocks base method.
+func (m *MockratingUpdater) UpdateRating(ctx context.Context, productID uint32) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateRating", ctx, productID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateRating indicates an expected call of UpdateRating.
+func (mr *MockratingUpdaterMockRecorder) UpdateRating(ctx, productID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRating", reflect.TypeOf((*MockratingUpdater)(nil).UpdateRating), ctx, productID)
 }
