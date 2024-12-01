@@ -36,10 +36,10 @@ func (m *MockaddressRepository) EXPECT() *MockaddressRepositoryMockRecorder {
 }
 
 // GetAddressByProfileID mocks base method.
-func (m *MockaddressRepository) GetAddressByProfileID(ctx context.Context, profileID uint32) (model.Address, error) {
+func (m *MockaddressRepository) GetAddressByProfileID(ctx context.Context, profileID uint32) (model.Addresses, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAddressByProfileID", ctx, profileID)
-	ret0, _ := ret[0].(model.Address)
+	ret0, _ := ret[0].(model.Addresses)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -51,7 +51,7 @@ func (mr *MockaddressRepositoryMockRecorder) GetAddressByProfileID(ctx, profileI
 }
 
 // UpdateUsersAddress mocks base method.
-func (m *MockaddressRepository) UpdateUsersAddress(ctx context.Context, addressID uint32, addressModel model.Address) error {
+func (m *MockaddressRepository) UpdateUsersAddress(ctx context.Context, addressID uint32, addressModel model.Addresses) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateUsersAddress", ctx, addressID, addressModel)
 	ret0, _ := ret[0].(error)

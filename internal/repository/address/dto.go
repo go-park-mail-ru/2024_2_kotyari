@@ -6,17 +6,11 @@ import (
 )
 
 type AddressDTO struct {
-	City   string
-	Street string
-	House  string
-	Flat   pgtype.Text
+	Address pgtype.Text
 }
 
-func (a *AddressDTO) ToModel() model.Address {
-	return model.Address{
-		City:   a.City,
-		Street: a.Street,
-		House:  a.House,
-		Flat:   a.Flat.String,
+func (a *AddressDTO) ToModel() model.Addresses {
+	return model.Addresses{
+		Address: a.Address.String,
 	}
 }

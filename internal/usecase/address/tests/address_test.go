@@ -18,14 +18,14 @@ func TestAddressService_GetAddressByProfileID(t *testing.T) {
 	tests := []struct {
 		name            string
 		userID          uint32
-		expectedAddress model.Address
+		expectedAddress model.Addresses
 		expectedError   error
 		mockSetup       func(mockRepo *mocks.MockaddressRepository)
 	}{
 		{
 			name:   "Success",
 			userID: 2,
-			expectedAddress: model.Address{
+			expectedAddress: model.Addresses{
 				Id:     2,
 				City:   "Казань",
 				Street: "Ломоносова",
@@ -34,7 +34,7 @@ func TestAddressService_GetAddressByProfileID(t *testing.T) {
 			},
 			expectedError: nil,
 			mockSetup: func(mockRepo *mocks.MockaddressRepository) {
-				mockRepo.EXPECT().GetAddressByProfileID(gomock.Any(), uint32(2)).Return(model.Address{
+				mockRepo.EXPECT().GetAddressByProfileID(gomock.Any(), uint32(2)).Return(model.Addresses{
 					Id:     2,
 					City:   "Казань",
 					Street: "Ломоносова",
@@ -44,12 +44,12 @@ func TestAddressService_GetAddressByProfileID(t *testing.T) {
 			},
 		},
 		{
-			name:            "Address not found",
+			name:            "Addresses not found",
 			userID:          7,
-			expectedAddress: model.Address{Id: 0, City: "", Street: "", House: "", Flat: func() *string { s := ""; return &s }()},
+			expectedAddress: model.Addresses{Id: 0, City: "", Street: "", House: "", Flat: func() *string { s := ""; return &s }()},
 			expectedError:   nil,
 			mockSetup: func(mockRepo *mocks.MockaddressRepository) {
-				mockRepo.EXPECT().GetAddressByProfileID(gomock.Any(), uint32(7)).Return(model.Address{
+				mockRepo.EXPECT().GetAddressByProfileID(gomock.Any(), uint32(7)).Return(model.Addresses{
 					Id:     0,
 					City:   "",
 					Street: "",
@@ -89,14 +89,14 @@ func TestAddressService_UpdateUsersAddress(t *testing.T) {
 	tests := []struct {
 		name          string
 		addressID     uint32
-		newAddress    model.Address
+		newAddress    model.Addresses
 		expectedError error
 		mockSetup     func(mockRepo *mocks.MockaddressRepository)
 	}{
 		{
 			name:      "Success",
 			addressID: 2,
-			newAddress: model.Address{
+			newAddress: model.Addresses{
 				Id:     2,
 				City:   "Москва",
 				Street: "Тверская",
@@ -105,7 +105,7 @@ func TestAddressService_UpdateUsersAddress(t *testing.T) {
 			},
 			expectedError: nil,
 			mockSetup: func(mockRepo *mocks.MockaddressRepository) {
-				mockRepo.EXPECT().UpdateUsersAddress(gomock.Any(), uint32(2), model.Address{
+				mockRepo.EXPECT().UpdateUsersAddress(gomock.Any(), uint32(2), model.Addresses{
 					Id:     2,
 					City:   "Москва",
 					Street: "Тверская",
@@ -117,7 +117,7 @@ func TestAddressService_UpdateUsersAddress(t *testing.T) {
 		{
 			name:      "RepositoryError",
 			addressID: 3,
-			newAddress: model.Address{
+			newAddress: model.Addresses{
 				Id:     3,
 				City:   "Санкт-Петербург",
 				Street: "Невский проспект",
@@ -126,7 +126,7 @@ func TestAddressService_UpdateUsersAddress(t *testing.T) {
 			},
 			expectedError: errors.New("ошибка обновления адреса"),
 			mockSetup: func(mockRepo *mocks.MockaddressRepository) {
-				mockRepo.EXPECT().UpdateUsersAddress(gomock.Any(), uint32(3), model.Address{
+				mockRepo.EXPECT().UpdateUsersAddress(gomock.Any(), uint32(3), model.Addresses{
 					Id:     3,
 					City:   "Санкт-Петербург",
 					Street: "Невский проспект",

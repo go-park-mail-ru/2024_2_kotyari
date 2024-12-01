@@ -15,7 +15,7 @@ type imageSaver interface {
 }
 
 type addressGetter interface {
-	GetAddressByProfileID(ctx context.Context, profileID uint32) (model.Address, error)
+	GetAddressByProfileID(ctx context.Context, profileID uint32) (model.Addresses, error)
 }
 
 type ProfilesDelivery struct {

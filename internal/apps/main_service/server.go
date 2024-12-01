@@ -3,8 +3,10 @@ package main_service
 import (
 	"context"
 	"fmt"
+	addressAdapterLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/adapter/address"
 	"log/slog"
 	"net/http"
+	"os"
 
 	profilegrpc "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/profile/gen"
 	usergrpc "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/user/gen"
@@ -57,6 +59,7 @@ const (
 	ratingUpdaterService = "rating_updater"
 	profileService       = "profile_go"
 	userService          = "user_go"
+	AddressesApiKey      = "ADDRESSES_API_KEY"
 )
 
 type categoryApp interface {
@@ -80,11 +83,6 @@ type profilesDelivery interface {
 	ChangePassword(writer http.ResponseWriter, request *http.Request)
 }
 
-type addressesDelivery interface {
-	UpdateAddressData(writer http.ResponseWriter, request *http.Request)
-	GetAddress(writer http.ResponseWriter, request *http.Request)
-}
-
 type SessionDelivery interface {
 	Delete(w http.ResponseWriter, r *http.Request)
 	Get(ctx context.Context, sessionID string) (model.Session, error)
@@ -95,21 +93,22 @@ type productsApp interface {
 }
 
 type Server struct {
-	r        *mux.Router
-	sessions SessionDelivery
-	auth     usersDelivery
-	product  productsApp
-	category categoryApp
-	profile  profilesDelivery
-	address  addressesDelivery
-	cfg      configs.ServiceViperConfig
-	log      *slog.Logger
-	files    filesDelivery
-	cart     CartApp
-	order    OrderApp
-	csrf     csrfDelivery
-	reviews  ReviewsApp
-	search   SearchApp
+	r         *mux.Router
+	sessions  SessionDelivery
+	auth      usersDelivery
+	product   productsApp
+	category  categoryApp
+	profile   profilesDelivery
+	address   addressesDelivery
+	cfg       configs.ServiceViperConfig
+	log       *slog.Logger
+	files     filesDelivery
+	cart      CartApp
+	order     OrderApp
+	csrf      csrfDelivery
+	reviews   ReviewsApp
+	search    SearchApp
+	addresses AddressApp
 }
 
 type csrfDelivery interface {
@@ -176,8 +175,11 @@ func NewServer() (*Server, error) {
 	categoryDelivery := categoryDeliveryLib.NewCategoriesDelivery(categoryRepo, log, errResolver)
 
 	addressRepo := addressRepoLib.NewAddressRepo(dbPool, log)
-	addressService := addressServiceLib.NewAddressService(addressRepo, log)
-	addressHandler := addressDeliveryLib.NewAddressHandler(addressService, errResolver, log)
+	addressAdapter := addressAdapterLib.NewAddressAdapter(os.Getenv(AddressesApiKey), log)
+
+	addressService := addressServiceLib.NewAddressService(addressRepo, addressAdapter, log)
+	addressHandler := addressDeliveryLib.NewAddressHandler(addressService, addressAdapter, errResolver, inputValidator, log)
+	addressApp := NewAddressApp(addressHandler, errResolver, log, router)
 
 	profileGRPCCfg := v.GetStringMap(profileService)
 	profileCfg := configs.ParseServiceViperConfig(profileGRPCCfg)
@@ -234,21 +236,22 @@ func NewServer() (*Server, error) {
 	cfg := v.GetStringMap(mainService)
 
 	return &Server{
-		r:        router,
-		auth:     userHandler,
-		product:  pa,
-		profile:  profileHandler,
-		address:  addressHandler,
-		category: ca,
-		cfg:      configs.ParseServiceViperConfig(cfg),
-		log:      log,
-		sessions: sessionsDelivery,
-		files:    fileDelivery,
-		cart:     cartApp,
-		order:    orderApp,
-		csrf:     csrfHandler,
-		reviews:  reviewsApp,
-		search:   searchApp,
+		r:         router,
+		auth:      userHandler,
+		product:   pa,
+		profile:   profileHandler,
+		address:   addressHandler,
+		category:  ca,
+		cfg:       configs.ParseServiceViperConfig(cfg),
+		log:       log,
+		sessions:  sessionsDelivery,
+		files:     fileDelivery,
+		cart:      cartApp,
+		order:     orderApp,
+		csrf:      csrfHandler,
+		reviews:   reviewsApp,
+		search:    searchApp,
+		addresses: addressApp,
 	}, nil
 }
 
@@ -291,8 +294,7 @@ func (s *Server) setupRoutes() {
 	csrfProtected.HandleFunc("/account", s.profile.UpdateProfileData).Methods(http.MethodPut)
 	csrfProtected.HandleFunc("/change_password", s.profile.ChangePassword).Methods(http.MethodPut)
 	csrfProtected.HandleFunc("/account/avatar", s.profile.UpdateProfileAvatar).Methods(http.MethodPut)
-	csrfProtected.HandleFunc("/address", s.address.GetAddress).Methods(http.MethodGet)
-	csrfProtected.HandleFunc("/address", s.address.UpdateAddressData).Methods(http.MethodPut)
+
 	csrfProtected.Use(csrfMiddleware)
 	csrfProtected.Use(middlewares.RequestIDMiddleware)
 
@@ -303,6 +305,11 @@ func (s *Server) setupRoutes() {
 	reviewsSub.Use(middlewares.RequestIDMiddleware)
 	reviewsSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 
+	addressesSub := s.addresses.InitRoutes()
+	addressesSub.Use(middlewares.RequestIDMiddleware)
+	//addressesSub.Use(csrfMiddleware)
+	addressesSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
+
 }
 
 func (s *Server) Run() error {
@@ -310,6 +317,6 @@ func (s *Server) Run() error {
 
 	handler := middlewares.CorsMiddleware(s.r)
 
-	s.log.Info("starting  server", slog.String("address:", s.cfg.Port))
+	s.log.Info("starting  server", slog.String("addressAdapterLib:", s.cfg.Port))
 	return http.ListenAndServe(fmt.Sprintf(":%s", s.cfg.Port), handler)
 }

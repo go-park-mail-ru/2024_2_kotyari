@@ -58,6 +58,8 @@ var (
 	ReviewAlreadyExists           = errors.New("отзыв уже существует")
 	NoTitlesToSuggest             = errors.New("отсутствуют продукты для саджестов")
 	FailedToChangeProductRating   = errors.New("не удалось изменить рейтинг продукта")
+	NoAddressesToSuggest          = errors.New("нет адресов для саджеста")
+	InvalidAddressFormat          = errors.New("неправильный формат адреса")
 )
 
 type ErrorStore struct {
@@ -120,6 +122,8 @@ func NewErrorStore() *ErrorStore {
 			ReviewAlreadyExists:           http.StatusConflict,
 			NoTitlesToSuggest:             http.StatusNotFound,
 			FailedToChangeProductRating:   http.StatusInternalServerError,
+			NoAddressesToSuggest:          http.StatusBadRequest,
+			InvalidAddressFormat:          http.StatusBadRequest,
 		},
 	}
 }

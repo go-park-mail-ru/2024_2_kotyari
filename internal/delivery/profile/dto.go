@@ -18,21 +18,18 @@ type ProfilesResponse struct {
 	Username  string `json:"username"`
 	Gender    string `json:"gender"`
 	AvatarUrl string `json:"avatar_url"`
-	Address   address.AddressResponse
+	Address   address.GetAddressResponse
 }
 
-func fromGrpcResponse(p *profilegrpc.GetProfileResponse, addr model.Address) ProfilesResponse {
+func fromGrpcResponse(p *profilegrpc.GetProfileResponse, addr model.Addresses) ProfilesResponse {
 	return ProfilesResponse{
 		ID:        p.UserId,
 		Email:     p.Email,
 		Username:  p.Username,
 		Gender:    p.Gender,
 		AvatarUrl: p.AvatarUrl,
-		Address: address.AddressResponse{
-			City:   addr.City,
-			Street: addr.Street,
-			House:  addr.House,
-			Flat:   addr.Flat,
+		Address: address.GetAddressResponse{
+			Address: addr.Address,
 		},
 	}
 }

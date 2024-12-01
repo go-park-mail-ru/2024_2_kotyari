@@ -63,3 +63,14 @@ func isValidPassword(password string) bool {
 
 	return hasMinLen && hasNumber && hasUpper && hasLower
 }
+
+func IsValidAddress(address string) error {
+	const addressRegex = `^[а-яА-ЯёЁ0-9,.: ]+$`
+	re := regexp.MustCompile(addressRegex)
+
+	if ok := re.MatchString(address); !ok {
+		return errs.InvalidAddressFormat
+	}
+
+	return nil
+}

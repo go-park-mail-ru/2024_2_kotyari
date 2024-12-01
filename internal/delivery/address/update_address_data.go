@@ -28,7 +28,7 @@ func (h *AddressDelivery) UpdateAddressData(w http.ResponseWriter, r *http.Reque
 
 	var req UpdateAddressRequest
 
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err = json.NewDecoder(r.Body).Decode(&req); err != nil {
 		h.log.Error("[ AddressDelivery.UpdateAddressData ] Ошибка десериализации запроса",
 			slog.String("error", err.Error()),
 		)
@@ -37,9 +37,11 @@ func (h *AddressDelivery) UpdateAddressData(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	req.Address = h.stringSanitizer.SanitizeString(req.Address)
+
 	newAddressData := req.ToModel()
 
-	if err := h.addressManager.UpdateUsersAddress(r.Context(), userID, newAddressData); err != nil {
+	if err = h.addressManager.UpdateUsersAddress(r.Context(), userID, newAddressData); err != nil {
 		h.log.Warn("[ AddressDelivery.UpdateAddressData ] Не удалось обновить данные профиля", slog.String("error", err.Error()))
 
 		switch {
