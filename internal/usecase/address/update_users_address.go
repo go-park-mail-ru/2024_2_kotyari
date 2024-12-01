@@ -8,7 +8,7 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
-func (as *AddressService) UpdateUsersAddress(ctx context.Context, addressID uint32, newAddress model.Address) error {
+func (as *AddressService) UpdateUsersAddress(ctx context.Context, userID uint32, newAddress model.Addresses) error {
 	requestID, err := utils.GetContextRequestID(ctx)
 	if err != nil {
 		return err
@@ -16,7 +16,21 @@ func (as *AddressService) UpdateUsersAddress(ctx context.Context, addressID uint
 
 	as.log.Info("[AddressService.UpdateUsersAddress] Started executing", slog.Any("request-id", requestID))
 
-	err = as.addressRepo.UpdateUsersAddress(ctx, addressID, newAddress)
+	err = utils.IsValidAddress(newAddress.Address)
+	if err != nil {
+		as.log.Error("[ AddressService.UpdateUsersAddress ] Неправильный формат адреса", slog.String("error", err.Error()))
+
+		return err
+	}
+
+	confirmedAddress, err := as.addressFetcher.FetchAddress(ctx, newAddress)
+	if err != nil {
+		as.log.Error("[ AddressService.UpdateUsersAddress ] Ошибка при получении обновленного адреса", slog.String("error", err.Error()))
+
+		return err
+	}
+
+	err = as.addressRepo.UpdateUsersAddress(ctx, userID, confirmedAddress)
 	if err != nil {
 		as.log.Error("[ AddressService.UpdateUsersAddress ] Ошибка при обновлении адреса", slog.String("error", err.Error()))
 		return err

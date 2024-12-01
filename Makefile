@@ -84,19 +84,6 @@ ENTITIES := $(shell find $(PROTO_DIR) -mindepth 1 -maxdepth 1 -type d -exec base
 # Общая цель для генерации всех сущностей
 proto-build: $(ENTITIES)
 
-# Правило генерации для каждой сущности
-$(ENTITIES):
-	  @echo "Генерация кода для сущности $@..."
-	  @mkdir -p $(PROTO_DIR)/$@/$(GEN_DIR)
-	  @$(PROTOC) \
-		--proto_path=$(PROTO_DIR)/$@/proto \
-		--go_out=$(PROTO_DIR)/$@/$(GEN_DIR) \
-		--go_opt=paths=source_relative \
-		--go-grpc_out=$(PROTO_DIR)/$@/$(GEN_DIR) \
-		--go-grpc_opt=paths=source_relative \
-    	$(PROTO_DIR)/$@/proto/*.proto
-	  @echo "Генерация для $@ завершена."
-
 fmt:
 	go fmt ./...
 
@@ -159,20 +146,5 @@ back-refresh:
 	docker stop user_go && docker rm user_go && docker rmi user-go-image && \
 	docker stop profile_go && docker rm profile_go && docker rmi profile-go-image && \
 	docker compose up -d
-
-# Правило генерации для каждой сущности
-$(ENTITIES):
-	  @echo "Генерация кода для сущности $@..."
-	  @mkdir -p $(PROTO_DIR)/$@/$(GEN_DIR)
-	  @$(PROTOC) \
-		--proto_path=$(PROTO_DIR)/$@/proto \
-		--go_out=$(PROTO_DIR)/$@/$(GEN_DIR) \
-		--go_opt=paths=source_relative \
-		--go-grpc_out=$(PROTO_DIR)/$@/$(GEN_DIR) \
-		--go-grpc_opt=paths=source_relative \
-		$(PROTO_DIR)/$@/proto/*.proto
-	  @echo "Генерация для $@ завершена."
-
-
 
 .PHONY: clean build

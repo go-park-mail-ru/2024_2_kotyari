@@ -31,7 +31,7 @@ func (h *AddressDelivery) GetAddress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	addressResponse := FromModel(address)
+	addressResponse := addressFromModel(address)
 
 	utils.WriteJSON(w, http.StatusOK, addressResponse)
 }

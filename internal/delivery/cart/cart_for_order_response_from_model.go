@@ -50,13 +50,13 @@ func cartForOrderResponseFromModel(cart model.CartForOrder) orderData {
 	}
 
 	address := "г. Москва, 2-я Бауманская ул., 5" // Заглушка
-
-	if cart.Address.City != "" && cart.Address.Street != "" && cart.Address.House != "" {
-		address = "г. " + cart.Address.City + ", " + cart.Address.Street + ", " + cart.Address.House
-		if cart.Address.Flat != "" {
-			address += ", кв. " + cart.Address.Flat
-		}
-	}
+	//
+	//if cart.Address.City != "" && cart.Address.Street != "" && cart.Address.House != "" {
+	//	address = "г. " + cart.Address.City + ", " + cart.Address.Street + ", " + cart.Address.House
+	//	if cart.Address.Flat != "" {
+	//		address += ", кв. " + cart.Address.Flat
+	//	}
+	//}
 
 	return orderData{
 		TotalItems:     cart.TotalItems,

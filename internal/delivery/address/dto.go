@@ -4,34 +4,32 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
-type AddressResponse struct {
-	City   string `json:"city"`
-	Street string `json:"street"`
-	House  string `json:"house"`
-	Flat   string `json:"flat"`
+type GetAddressResponse struct {
+	Address string `json:"address"`
 }
 
 type UpdateAddressRequest struct {
-	City   string `json:"city"`
-	Street string `json:"street"`
-	House  string `json:"house"`
-	Flat   string `json:"flat"`
+	Address string `json:"address"`
 }
 
-func (a *UpdateAddressRequest) ToModel() model.Address {
-	return model.Address{
-		City:   a.City,
-		Street: a.Street,
-		House:  a.House,
-		Flat:   a.Flat,
+type AddressesSuggestions struct {
+	Addresses []GetAddressResponse `json:"addresses"`
+}
+
+func (a *UpdateAddressRequest) ToModel() model.Addresses {
+	return model.Addresses{
+		Address: a.Address,
 	}
 }
 
-func FromModel(address model.Address) AddressResponse {
-	return AddressResponse{
-		City:   address.City,
-		Street: address.Street,
-		House:  address.House,
-		Flat:   address.Flat,
+func addressFromModel(a model.Addresses) GetAddressResponse {
+	return GetAddressResponse{
+		Address: a.Address,
+	}
+}
+
+func addressesSuggestionsFromSlice(addresses []GetAddressResponse) AddressesSuggestions {
+	return AddressesSuggestions{
+		Addresses: addresses,
 	}
 }

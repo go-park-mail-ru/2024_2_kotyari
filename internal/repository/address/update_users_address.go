@@ -2,14 +2,13 @@ package address
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
-func (ar *AddressStore) UpdateUsersAddress(ctx context.Context, addressID uint32, addressModel model.Address) error {
+func (ar *AddressStore) UpdateUsersAddress(ctx context.Context, userID uint32, addressModel model.Addresses) error {
 	requestID, err := utils.GetContextRequestID(ctx)
 	if err != nil {
 		return err
@@ -18,33 +17,20 @@ func (ar *AddressStore) UpdateUsersAddress(ctx context.Context, addressID uint32
 	ar.Log.Info("[AddressStore.UpdateUsersAddress] Started executing", slog.Any("request-id", requestID))
 
 	const query = `
-		WITH upsert_address AS (
-			INSERT INTO addresses (user_id, city, street, house, flat)
-			VALUES ($1, $2, $3, $4, $5)
-			ON CONFLICT (user_id)
-			DO UPDATE SET 
-				city = EXCLUDED.city,
-				street = EXCLUDED.street,
-				house = EXCLUDED.house,
-				flat = EXCLUDED.flat
-			RETURNING user_id, city
-		)
-			UPDATE users
-			SET city = upsert_address.city
-			FROM upsert_address
-			WHERE users.id = upsert_address.user_id;
+		INSERT INTO addresses (user_id, address)
+		VALUES ($1, $2)
+		ON CONFLICT (user_id)
+		DO UPDATE SET 
+			address = EXCLUDED.address;
 	`
 
 	_, err = ar.Db.Exec(ctx, query,
-		addressID,
-		addressModel.City,
-		addressModel.Street,
-		addressModel.House,
-		addressModel.Flat)
+		userID,
+		addressModel.Address)
 
 	if err != nil {
-		fmt.Println(addressModel, addressID)
 		ar.Log.Error("[ AddressStore.UpdateUsersAddress ]Ошибка при обновлении адреса", slog.String("error", err.Error()))
+
 		return err
 	}
 
