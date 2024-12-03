@@ -84,19 +84,6 @@ ENTITIES := $(shell find $(PROTO_DIR) -mindepth 1 -maxdepth 1 -type d -exec base
 # Общая цель для генерации всех сущностей
 proto-build: $(ENTITIES)
 
-# Правило генерации для каждой сущности
-$(ENTITIES):
-	  @echo "Генерация кода для сущности $@..."
-	  @mkdir -p $(PROTO_DIR)/$@/$(GEN_DIR)
-	  @$(PROTOC) \
-		--proto_path=$(PROTO_DIR)/$@/proto \
-		--go_out=$(PROTO_DIR)/$@/$(GEN_DIR) \
-		--go_opt=paths=source_relative \
-		--go-grpc_out=$(PROTO_DIR)/$@/$(GEN_DIR) \
-		--go-grpc_opt=paths=source_relative \
-    	$(PROTO_DIR)/$@/proto/*.proto
-	  @echo "Генерация для $@ завершена."
-
 fmt:
 	go fmt ./...
 
@@ -107,16 +94,16 @@ all-run:
 	docker compose up -d
 
 main-refresh:
-	docker stop main_go && docker rm main_go && docker rmi main-go-image && docker compose up -d
+	docker compose build main_go && docker compose up -d --force-recreate
 
 rating-updater-refresh:
-	docker stop rating_updater_go && docker rm rating_updater_go && docker rmi rating-updater-go-image && docker compose up -d
+	docker compose build rating_updater_go && docker compose up -d --force-recreate --build
 
 user-refresh:
-	docker stop user_go && docker rm user_go && docker rmi user-go-image && docker compose up -d
+	docker compose build user_go && docker compose up -d --force-recreate
 
 profile-refresh:
-	docker stop profile_go && docker rm profile_go && docker rmi profile-go-image && docker compose up -d
+	docker compose build profile_go && docker compose up -d --force-recreate
 
 prometheus-refresh:
 	docker stop prometheus && docker rm prometheus && docker compose up -d
@@ -152,27 +139,7 @@ revert-migrations:
 	@echo 'Reverting migrations...'
 	@migrate -path $(MIGRATIONS_DIR) -database "$(DB_URL)" down
 
-
 back-refresh:
-	docker stop main_go && docker rm main_go && docker rmi main-go-image && \
-	docker stop rating_updater_go && docker rm rating_updater_go && docker rmi rating-updater-go-image && \
-	docker stop user_go && docker rm user_go && docker rmi user-go-image && \
-	docker stop profile_go && docker rm profile_go && docker rmi profile-go-image && \
-	docker compose up -d
-
-# Правило генерации для каждой сущности
-$(ENTITIES):
-	  @echo "Генерация кода для сущности $@..."
-	  @mkdir -p $(PROTO_DIR)/$@/$(GEN_DIR)
-	  @$(PROTOC) \
-		--proto_path=$(PROTO_DIR)/$@/proto \
-		--go_out=$(PROTO_DIR)/$@/$(GEN_DIR) \
-		--go_opt=paths=source_relative \
-		--go-grpc_out=$(PROTO_DIR)/$@/$(GEN_DIR) \
-		--go-grpc_opt=paths=source_relative \
-		$(PROTO_DIR)/$@/proto/*.proto
-	  @echo "Генерация для $@ завершена."
-
-
+	docker compose build && docker compose up -d --force-recreate
 
 .PHONY: clean build
