@@ -36,7 +36,13 @@ func (us *UsersService) CreateUser(ctx context.Context, user model.User) (model.
 		return model.User{}, err
 	}
 
-	us.log.Debug("[ UsersService.CreateUser ]", slog.String("DbUser", dbUser.Username))
+	err = us.producer.AddPromoCode(ctx, dbUser.ID, utils.AvailPromoTenID)
+	if err != nil {
+		us.log.Error("[UserService.CreateUser] Failed to give user a promo",
+			slog.String("error", err.Error()))
+	}
+
+	//us.log.Debug("[ UsersService.CreateUser ]", slog.String("DbUser", dbUser.Username))
 
 	return dbUser, nil
 }
