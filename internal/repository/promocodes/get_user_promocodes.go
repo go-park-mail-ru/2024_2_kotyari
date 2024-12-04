@@ -20,9 +20,10 @@ func (p *PromoCodesStore) GetUserPromoCodes(ctx context.Context, userID uint32) 
 	p.log.Info("[PromoCodesStore.GetUserPromoCodes] Started executing", slog.Any("request-id", requestID))
 
 	const query = `
-		select id, user_id, name, updated_at, created_at
-		from promo_codes
-		where user_id = $1;
+		select p.id, up.user_id, p.bonus, p.updated_at, p.created_at
+		from promocodes p
+		join user_promocodes up on p.id = up.promo_id
+		where up.user_id = $1
 	`
 
 	rows, err := p.db.Query(ctx, query, userID)

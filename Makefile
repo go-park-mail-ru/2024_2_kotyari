@@ -105,6 +105,9 @@ user-refresh:
 profile-refresh:
 	docker compose build profile_go && docker compose up profile_go -d --force-recreate
 
+promocodes-refresh:
+	docker compose build promocodes_go && docker compose up promocodes_go -d --force-recreate
+
 prometheus-refresh:
 	docker stop prometheus && docker rm prometheus && docker compose up -d
 
@@ -128,8 +131,6 @@ recreate-redis:
 
 all-delete:
 	docker compose down -v
-
-all-refresh: main-refresh pg-refresh redis-refresh
 
 apply-migrations:
 	@echo 'Applying migrations...'

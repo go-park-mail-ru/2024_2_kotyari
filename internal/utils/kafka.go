@@ -3,8 +3,10 @@ package utils
 type MessageType string
 
 const (
-	AddPromo    MessageType = "add_promo"
-	DeletePromo MessageType = "remove_promo"
+	AddPromo            MessageType = "add_promo"
+	DeletePromo         MessageType = "remove_promo"
+	AvailPromoTenID                 = 1
+	AvailPromoTwoFiveID             = 2
 )
 
 type PromoMessage struct {
