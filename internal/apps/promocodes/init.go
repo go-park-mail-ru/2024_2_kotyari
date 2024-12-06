@@ -1,6 +1,7 @@
 package promocodes
 
 import (
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs"
 	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/logger"
@@ -18,7 +19,7 @@ type PromoCodesApp struct {
 	log    *slog.Logger
 }
 
-func NewPromoCodesApp() (*PromoCodesApp, error) {
+func NewPromoCodesApp(kafkaConf map[string]any, _ map[string]any) (*PromoCodesApp, error) {
 	pool, err := postgres.LoadPgxPool()
 	if err != nil {
 		slog.Error("[NewPromoCodesApp] Failed to load pgxpool",
@@ -27,7 +28,8 @@ func NewPromoCodesApp() (*PromoCodesApp, error) {
 
 	log := logger.InitLogger()
 	promoCodesRepo := promocodesRepositoryLib.NewPromoCodesStore(pool, log)
-	promoCodesConsumer := promocodesDeliveryLib.NewPromoCodesConsumer(promoCodesRepo, log)
+	promoCodesConsumer := promocodesDeliveryLib.NewPromoCodesConsumer(configs.ParseKafkaViperConfig(kafkaConf),
+		promoCodesRepo, log)
 
 	return &PromoCodesApp{
 		reader: promoCodesConsumer,

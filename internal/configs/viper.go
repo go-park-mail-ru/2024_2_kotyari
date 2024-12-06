@@ -19,6 +19,11 @@ type ServiceViperConfig struct {
 	Port    string
 }
 
+type KafkaConfig struct {
+	Domain string
+	Port   string
+}
+
 func SetupViper() (*viper.Viper, error) {
 	viper.AddConfigPath(ConfigPath)
 	viper.SetConfigName(ServicesConfigs)
@@ -35,5 +40,12 @@ func ParseServiceViperConfig(config map[string]any) ServiceViperConfig {
 		Domain:  config[KeyDomain].(string),
 		Address: config[KeyAddress].(string),
 		Port:    config[KeyPort].(string),
+	}
+}
+
+func ParseKafkaViperConfig(config map[string]any) KafkaConfig {
+	return KafkaConfig{
+		Domain: config[KeyDomain].(string),
+		Port:   config[KeyPort].(string),
 	}
 }

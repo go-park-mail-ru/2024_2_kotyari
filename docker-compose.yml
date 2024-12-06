@@ -77,7 +77,7 @@ services:
     ports:
       - "8005:8005"
 #      - "8083:8083"
-    image: profile-go-image
+    image: promocodes-go-image
     container_name: promocodes_go
     restart: unless-stopped
     networks:
