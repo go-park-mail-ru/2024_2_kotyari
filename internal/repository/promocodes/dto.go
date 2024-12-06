@@ -9,7 +9,7 @@ type PromoCodesDTO struct {
 	ID        uint32    `db:"id"`
 	UserID    uint32    `db:"user_id"`
 	Name      string    `db:"name"`
-	Bonus     uint32    `db:"promo"`
+	Bonus     uint32    `db:"bonus"`
 	UpdatedAt time.Time `db:"updated_at"`
 	CreatedAt time.Time `db:"created_at"`
 }

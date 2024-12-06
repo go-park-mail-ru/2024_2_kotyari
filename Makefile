@@ -80,7 +80,7 @@ profile-refresh:
 	docker stop profile_go && docker rm profile_go && docker rmi profile-go-image && docker compose up -d
 
 promocodes-refresh:
-	docker compose build promocodes_go && docker compose up promocodes_go -d --force-recreate
+	docker compose build promocodes_go --no-cache && docker compose up promocodes_go -d --force-recreate
 
 prometheus-refresh:
 	docker stop prometheus && docker rm prometheus && docker compose up -d
@@ -115,6 +115,6 @@ revert-migrations:
 	@migrate -path $(MIGRATIONS_DIR) -database "$(DB_URL)" down
 
 back-refresh:
-	docker compose build && docker compose up -d --force-recreate
+	docker compose build --no-cache && docker compose up -d --force-recreate
 
 .PHONY: clean build

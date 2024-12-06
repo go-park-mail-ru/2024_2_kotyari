@@ -1,0 +1,11 @@
+syntax="proto3";
+
+package promocodes;
+
+option go_package = "https://github.com/go-park-mail-ru/2024_2_kotyari/api/protos/promocodes";
+
+import "get_promocodes.proto";
+
+service PromoCodes {
+  rpc GetUserPromoCodes(GetUserPromoCodesRequest) returns (GetUserPromoCodesResponse);
+}
