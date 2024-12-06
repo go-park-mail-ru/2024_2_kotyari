@@ -21,7 +21,7 @@ func (us *UsersService) CreateUser(ctx context.Context, user model.User) (model.
 	user.Email = us.inputValidator.SanitizeString(user.Email)
 	user.Password = us.inputValidator.SanitizeString(user.Password)
 
-	us.log.Debug("creating new user", slog.Any("user", user))
+	//us.log.Debug("creating new user", slog.Any("user", user))
 
 	salt, err := utils.GenerateSalt()
 	if err != nil {

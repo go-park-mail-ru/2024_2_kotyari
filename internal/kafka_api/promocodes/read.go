@@ -70,6 +70,11 @@ func (p *PromoCodesConsumer) processMessage(promoMessage kafka.Message) error {
 		return err
 	}
 
+	p.log.Info("[PromoCodesConsumer.processMessage] Started processing message",
+		slog.Any("request-id", message.RequestID))
+
+	ctx = context.WithValue(ctx, utils.RequestIDName, message.RequestID)
+
 	switch utils.MessageType(promoMessage.Key) {
 	case utils.AddPromo:
 		err = p.repository.AddPromoCode(ctx, message.UserID, message.PromoID)

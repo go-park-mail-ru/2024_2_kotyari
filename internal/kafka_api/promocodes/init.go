@@ -2,6 +2,9 @@ package promocodes
 
 import (
 	"context"
+	"fmt"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
@@ -20,13 +23,10 @@ type PromoCodesConsumer struct {
 	log        *slog.Logger
 }
 
-func NewPromoCodesConsumer(repository promoCodesRepository, logger *slog.Logger) *PromoCodesConsumer {
-	//TODO: REFACTOR INIT
-	topic := "promo_codes"
+func NewPromoCodesConsumer(kafkaConfig configs.KafkaConfig, repository promoCodesRepository, logger *slog.Logger) *PromoCodesConsumer {
 	reader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:  []string{"kafka:9092"},
-		Topic:    topic,
-		MaxBytes: 10e6,
+		Brokers: []string{fmt.Sprintf("%s:%s", kafkaConfig.Domain, kafkaConfig.Port)},
+		Topic:   utils.PromoTopic,
 	})
 
 	return &PromoCodesConsumer{
