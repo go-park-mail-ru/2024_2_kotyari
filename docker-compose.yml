@@ -83,7 +83,10 @@ services:
     volumes:
       - ./assets/init.sql:/docker-entrypoint-initdb.d/init.sql
       - pg_data:/var/lib/postgresql/data/
+      - ./db/homework_2/postgresql.conf:/var/lib/postgres/data/postgresql.conf
+      - ./log:/log
     container_name: pg_db
+    command: postgres -c 'config_file=/var/lib/postgres/data/postgresql.conf'
     restart: unless-stopped
     networks:
       - app-network
