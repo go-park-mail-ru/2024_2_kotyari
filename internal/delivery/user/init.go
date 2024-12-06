@@ -2,6 +2,8 @@ package user
 
 import (
 	"context"
+	"fmt"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs"
 	"github.com/segmentio/kafka-go"
 	"log/slog"
 
@@ -37,12 +39,10 @@ type MessageProducer struct {
 	log    *slog.Logger
 }
 
-func NewMessageProducer(logger *slog.Logger) *MessageProducer {
-	///TODO: Remove magic constants
-	topic := "promo-topic"
+func NewMessageProducer(kafkaConfig configs.KafkaConfig, logger *slog.Logger) *MessageProducer {
 	w := &kafka.Writer{
-		Addr:     kafka.TCP("kafka:9092"),
-		Topic:    topic,
+		Addr:     kafka.TCP(fmt.Sprintf("%s:%s", kafkaConfig.Domain, kafkaConfig.Port)),
+		Topic:    utils.PromoTopic,
 		Balancer: &kafka.Hash{},
 	}
 	return &MessageProducer{

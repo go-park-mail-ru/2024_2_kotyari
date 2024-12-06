@@ -59,6 +59,7 @@ var (
 	NoTitlesToSuggest             = errors.New("отсутствуют продукты для саджестов")
 	FailedToChangeProductRating   = errors.New("не удалось изменить рейтинг продукта")
 	NoPromoCodesForUser           = errors.New("у данного пользователя нет промокодов")
+	FailedToParseConfig           = errors.New("ошибка парсинга конфигурации")
 )
 
 type ErrorStore struct {
@@ -122,6 +123,7 @@ func NewErrorStore() *ErrorStore {
 			NoTitlesToSuggest:             http.StatusNotFound,
 			FailedToChangeProductRating:   http.StatusInternalServerError,
 			NoPromoCodesForUser:           http.StatusNotFound,
+			FailedToParseConfig:           http.StatusInternalServerError,
 		},
 	}
 }
