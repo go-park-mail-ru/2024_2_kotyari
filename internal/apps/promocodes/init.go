@@ -24,12 +24,21 @@ func NewPromoCodesApp(kafkaConf map[string]any, _ map[string]any) (*PromoCodesAp
 	if err != nil {
 		slog.Error("[NewPromoCodesApp] Failed to load pgxpool",
 			slog.String("error", err.Error()))
+
+		return nil, err
+	}
+
+	kafkaConfig, err := configs.ParseKafkaViperConfig(kafkaConf)
+	if err != nil {
+		slog.Error("[NewPromoCodesApp] Failed to kafka cfg",
+			slog.String("error", err.Error()))
+
+		return nil, err
 	}
 
 	log := logger.InitLogger()
 	promoCodesRepo := promocodesRepositoryLib.NewPromoCodesStore(pool, log)
-	promoCodesConsumer := promocodesDeliveryLib.NewPromoCodesConsumer(configs.ParseKafkaViperConfig(kafkaConf),
-		promoCodesRepo, log)
+	promoCodesConsumer := promocodesDeliveryLib.NewPromoCodesConsumer(kafkaConfig, promoCodesRepo, log)
 
 	return &PromoCodesApp{
 		reader: promoCodesConsumer,

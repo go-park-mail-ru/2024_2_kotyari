@@ -22,6 +22,7 @@ import (
 const (
 	userService = "user_go"
 	configFile  = ".env"
+	kafka       = "kafka"
 )
 
 // todo вынос в app
@@ -36,7 +37,8 @@ func main() {
 		log.Fatalf("Error setting up viper %v", err)
 	}
 
-	conf := viper.GetStringMap(userService)
+	serviceConf := viper.GetStringMap(userService)
+	kafkaConf := viper.GetStringMap(kafka)
 
 	slogLog := logger.InitLogger()
 
@@ -50,7 +52,7 @@ func main() {
 	interceptor := metrics2.NewGrpcMiddleware(*metrics, errorResolver)
 	server := grpc.NewServer(grpc.ChainUnaryInterceptor(interceptor.ServerMetricsInterceptor))
 
-	app, err := user.NewUsersApp(slogLog, server, conf)
+	app, err := user.NewUsersApp(slogLog, server, serviceConf, kafkaConf)
 
 	router := mux.NewRouter()
 	router.PathPrefix("/metrics").Handler(promhttp.Handler())

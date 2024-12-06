@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	proto "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/user/gen"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs"
@@ -30,10 +29,20 @@ type UsersApp struct {
 	config     configs.ServiceViperConfig
 }
 
-func NewUsersApp(log *slog.Logger, grpcServer *grpc.Server, conf map[string]any) (*UsersApp, error) {
-	c := configs.ParseServiceViperConfig(conf)
-	if c.Address == "" || c.Port == "" {
-		return nil, errors.New("config is empty")
+func NewUsersApp(log *slog.Logger, grpcServer *grpc.Server,
+	serviceConf map[string]any, kafkaConf map[string]any) (*UsersApp, error) {
+	c, err := configs.ParseServiceViperConfig(serviceConf)
+	if err != nil {
+		slog.Error("UsersApp [NewUsersApp] Failed to parse service cfg")
+
+		return nil, err
+	}
+
+	kafkaCfg, err := configs.ParseKafkaViperConfig(kafkaConf)
+	if err != nil {
+		slog.Error("UsersApp [NewUsersApp] Failed to parse kafka cfg")
+
+		return nil, err
 	}
 
 	dbPool, err := postgres.LoadPgxPool()
@@ -45,7 +54,7 @@ func NewUsersApp(log *slog.Logger, grpcServer *grpc.Server, conf map[string]any)
 	inputValidator := utils.NewInputValidator()
 
 	userRepo := userRepoLib.NewUsersStore(dbPool, log)
-	userProducer := userProducerLib.NewMessageProducer(log)
+	userProducer := userProducerLib.NewMessageProducer(kafkaCfg, log)
 	userService := userServiceLib.NewUserService(userRepo, userProducer, inputValidator, log)
 
 	delivery := user2.NewUsersGrpc(userService, userRepo, log)

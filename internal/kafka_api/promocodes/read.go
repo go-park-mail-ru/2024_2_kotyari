@@ -33,6 +33,14 @@ func (p *PromoCodesConsumer) Read() error {
 	for {
 		///TODO: Разобраться с EOF
 		message, _ := p.reader.ReadMessage(ctx)
+		if len(message.Value) != 0 {
+			err := p.processMessage(message)
+			if err != nil {
+				p.log.Error("[PromoCodesConsumer.Read] Error processing message", slog.String("error", err.Error()))
+
+				return err
+			}
+		}
 		//if err != nil {
 		//	p.log.Error("[PromoCodesConsumer.Read] Error reading message", slog.String("error", err.Error()))
 		//
@@ -45,13 +53,6 @@ func (p *PromoCodesConsumer) Read() error {
 		//
 		//	return err
 		//}
-
-		err := p.processMessage(message)
-		if err != nil {
-			p.log.Error("[PromoCodesConsumer.Read] Error processing message", slog.String("error", err.Error()))
-
-			return err
-		}
 	}
 
 }
