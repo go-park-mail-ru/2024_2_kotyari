@@ -94,19 +94,19 @@ all-run:
 	docker compose up -d
 
 main-refresh:
-	docker compose build main_go && docker compose up main_go -d --force-recreate
+	docker compose build main_go --no-cache && docker compose up main_go -d --force-recreate
 
 rating-updater-refresh:
-	docker compose build rating_updater_go && docker compose up rating_updater_go -d --force-recreate
+	docker compose build rating_updater_go --no-cache && docker compose up rating_updater_go -d --force-recreate
 
 user-refresh:
-	docker compose build user_go && docker compose up user_go -d --force-recreate
+	docker compose build user_go --no-cache && docker compose up user_go -d --force-recreate
 
 profile-refresh:
-	docker compose build profile_go && docker compose up profile_go -d --force-recreate
+	docker compose build profile_go --no-cache && docker compose up profile_go -d --force-recreate
 
 promocodes-refresh:
-	docker compose build promocodes_go && docker compose up promocodes_go -d --force-recreate
+	docker compose build promocodes_go --no-cache && docker compose up promocodes_go -d --force-recreate
 
 prometheus-refresh:
 	docker stop prometheus && docker rm prometheus && docker compose up -d
@@ -141,6 +141,6 @@ revert-migrations:
 	@migrate -path $(MIGRATIONS_DIR) -database "$(DB_URL)" down
 
 back-refresh:
-	docker compose build && docker compose up -d --force-recreate
+	docker compose build --no-cache && docker compose up -d --force-recreate
 
 .PHONY: clean build
