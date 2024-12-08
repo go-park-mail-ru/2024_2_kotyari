@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	PromoCodes_GetUserPromoCodes_FullMethodName = "/promocodes.PromoCodes/GetUserPromoCodes"
+	PromoCodes_GetPromoCode_FullMethodName      = "/promocodes.PromoCodes/GetPromoCode"
 )
 
 // PromoCodesClient is the client API for PromoCodes service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PromoCodesClient interface {
 	GetUserPromoCodes(ctx context.Context, in *GetUserPromoCodesRequest, opts ...grpc.CallOption) (*GetUserPromoCodesResponse, error)
+	GetPromoCode(ctx context.Context, in *GetPromoCodeRequest, opts ...grpc.CallOption) (*GetPromoCodeResponse, error)
 }
 
 type promoCodesClient struct {
@@ -47,11 +49,22 @@ func (c *promoCodesClient) GetUserPromoCodes(ctx context.Context, in *GetUserPro
 	return out, nil
 }
 
+func (c *promoCodesClient) GetPromoCode(ctx context.Context, in *GetPromoCodeRequest, opts ...grpc.CallOption) (*GetPromoCodeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetPromoCodeResponse)
+	err := c.cc.Invoke(ctx, PromoCodes_GetPromoCode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PromoCodesServer is the server API for PromoCodes service.
 // All implementations must embed UnimplementedPromoCodesServer
 // for forward compatibility.
 type PromoCodesServer interface {
 	GetUserPromoCodes(context.Context, *GetUserPromoCodesRequest) (*GetUserPromoCodesResponse, error)
+	GetPromoCode(context.Context, *GetPromoCodeRequest) (*GetPromoCodeResponse, error)
 	mustEmbedUnimplementedPromoCodesServer()
 }
 
@@ -64,6 +77,9 @@ type UnimplementedPromoCodesServer struct{}
 
 func (UnimplementedPromoCodesServer) GetUserPromoCodes(context.Context, *GetUserPromoCodesRequest) (*GetUserPromoCodesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserPromoCodes not implemented")
+}
+func (UnimplementedPromoCodesServer) GetPromoCode(context.Context, *GetPromoCodeRequest) (*GetPromoCodeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPromoCode not implemented")
 }
 func (UnimplementedPromoCodesServer) mustEmbedUnimplementedPromoCodesServer() {}
 func (UnimplementedPromoCodesServer) testEmbeddedByValue()                    {}
@@ -104,6 +120,24 @@ func _PromoCodes_GetUserPromoCodes_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PromoCodes_GetPromoCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPromoCodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PromoCodesServer).GetPromoCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PromoCodes_GetPromoCode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PromoCodesServer).GetPromoCode(ctx, req.(*GetPromoCodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PromoCodes_ServiceDesc is the grpc.ServiceDesc for PromoCodes service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -114,6 +148,10 @@ var PromoCodes_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserPromoCodes",
 			Handler:    _PromoCodes_GetUserPromoCodes_Handler,
+		},
+		{
+			MethodName: "GetPromoCode",
+			Handler:    _PromoCodes_GetPromoCode_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

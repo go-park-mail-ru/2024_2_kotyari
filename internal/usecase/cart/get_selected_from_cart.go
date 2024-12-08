@@ -48,6 +48,7 @@ func (cm *CartManager) GetSelectedFromCart(ctx context.Context, userID uint32) (
 		cart.DeliveryDates = append(cart.DeliveryDates, *dateInfo)
 	}
 
+	// TODO: Change total price with promocodes
 	cart.UserName = products.UserName
 	cart.PreferredPaymentMethod = products.PreferredPaymentMethod
 	cart.Address = products.Address
