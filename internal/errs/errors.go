@@ -61,6 +61,7 @@ var (
 	NoPromoCodesForUser           = errors.New("у данного пользователя нет промокодов")
 	FailedToParseConfig           = errors.New("ошибка парсинга конфигурации")
 	NoPromoCode                   = errors.New("этого промокода нет")
+	FailedToRetrievePromoCode     = errors.New("не удалось получить промокод")
 )
 
 type ErrorStore struct {

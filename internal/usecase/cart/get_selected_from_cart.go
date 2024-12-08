@@ -2,14 +2,16 @@ package cart
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"time"
 
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
-func (cm *CartManager) GetSelectedFromCart(ctx context.Context, userID uint32) (model.CartForOrder, error) {
+func (cm *CartManager) GetSelectedFromCart(ctx context.Context, userID uint32, promoName string) (model.CartForOrder, error) {
 	requestID, err := utils.GetContextRequestID(ctx)
 	if err != nil {
 		return model.CartForOrder{}, err
@@ -48,10 +50,28 @@ func (cm *CartManager) GetSelectedFromCart(ctx context.Context, userID uint32) (
 		cart.DeliveryDates = append(cart.DeliveryDates, *dateInfo)
 	}
 
-	// TODO: Change total price with promocodes
 	cart.UserName = products.UserName
 	cart.PreferredPaymentMethod = products.PreferredPaymentMethod
 	cart.Address = products.Address
+
+	if promoName != "" {
+		promoCode, err := cm.promoCodeGetter.GetPromoCode(ctx, userID, promoName)
+		if err != nil {
+			if errors.Is(err, errs.NoPromoCode) {
+				cm.log.Error("[CartManager.GetSelectedFromCart] no promo code")
+
+				return cart, err
+			}
+
+			cm.log.Error("[CartManager.GetSelectedFromCart] Unexpected error",
+				slog.String("error", err.Error()))
+
+			return cart, nil
+		}
+
+		discountAmount := (cart.FinalPrice * promoCode.Bonus) / 100
+		cart.FinalPrice -= discountAmount
+	}
 
 	return cart, nil
 }

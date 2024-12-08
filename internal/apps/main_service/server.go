@@ -57,6 +57,7 @@ const (
 	ratingUpdaterService = "rating_updater"
 	profileService       = "profile_go"
 	userService          = "user_go"
+	promocodesService    = "promocodes_go"
 )
 
 type categoryApp interface {
@@ -202,8 +203,13 @@ func NewServer() (*Server, error) {
 	prodRepo := productRepoLib.NewProductsStore(dbPool, log)
 	ca := NewCategoryApp(router, categoryDelivery)
 
+	cartGRPC, err := cartDeliveryLib.NewPromoCodesGetterGRPC(v.GetStringMap(promocodesService), log)
+	if err != nil {
+		return nil, err
+	}
+
 	cartRepo := cartRepoLib.NewCartsStore(dbPool, log)
-	cartService := cartServiceLib.NewCartManager(cartRepo, prodRepo, log)
+	cartService := cartServiceLib.NewCartManager(cartRepo, cartGRPC, prodRepo, log)
 	cartHandler := cartDeliveryLib.NewCartHandler(cartService, cartRepo, errResolver, log)
 	cartApp := NewCartApp(router, cartHandler)
 
