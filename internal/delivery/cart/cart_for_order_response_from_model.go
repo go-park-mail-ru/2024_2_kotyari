@@ -18,7 +18,7 @@ func getPaymentIcon(method string) string {
 	}
 }
 
-func cartForOrderResponseFromModel(cart model.CartForOrder) orderData {
+func cartForOrderResponseFromModel(cart model.CartForOrder, promoStatus string) orderData {
 	deliveryDates := make([]deliveryDateInfo, 0, len(cart.DeliveryDates))
 
 	for _, deliveryDate := range cart.DeliveryDates {
@@ -64,5 +64,6 @@ func cartForOrderResponseFromModel(cart model.CartForOrder) orderData {
 			RecipientName: cart.UserName,
 		},
 		DeliveryDates: deliveryDates,
+		PromoStatus:   promoStatus,
 	}
 }

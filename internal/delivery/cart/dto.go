@@ -6,6 +6,14 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
+type AddPromoCodeRequest struct {
+	PromoCode string `json:"promocode"`
+}
+
+func (a AddPromoCodeRequest) ToModel() string {
+	return a.PromoCode
+}
+
 type ChangeCartProductCountRequest struct {
 	Count int32 `json:"count"`
 }
@@ -72,6 +80,7 @@ type orderData struct {
 	PaymentMethods []paymentMethod    `json:"payment_methods"`
 	Recipient      recipientInfo      `json:"recipient"`
 	DeliveryDates  []deliveryDateInfo `json:"delivery_dates"`
+	PromoStatus    string             `json:"promo_status"`
 }
 
 type paymentMethod struct {
