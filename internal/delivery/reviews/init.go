@@ -44,8 +44,13 @@ type RatingUpdaterGRPC struct {
 }
 
 func NewRatingUpdaterGRPC(config map[string]any, logger *slog.Logger) (*RatingUpdaterGRPC, error) {
-	cfg := configs.ParseServiceViperConfig(config)
-	fmt.Println(cfg.Address)
+	cfg, err := configs.ParseServiceViperConfig(config)
+	if err != nil {
+		slog.Error("[NewReviewsService] Failed to parse cfg",
+			slog.String("error", err.Error()))
+
+		return nil, err
+	}
 
 	ratingUpdaterConnection, err := grpc.NewClient(fmt.Sprintf("%s:%s", cfg.Domain, cfg.Port),
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
