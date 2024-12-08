@@ -25,7 +25,7 @@ func (ps *ProductsStore) GetProductByID(ctx context.Context, productID uint32) (
 		return model.ProductCard{}, err
 	}
 
-	categories, err := ps.getProductCategories(ctx, productID)
+	categories, err := ps.GetProductCategories(ctx, productID)
 	if err != nil {
 		ps.log.Info("[ ProductsStore.GetProductByID ] error getting product categories:", err)
 	}

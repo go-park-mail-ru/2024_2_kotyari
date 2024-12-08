@@ -11,15 +11,21 @@ type productsDelivery interface {
 	GetProductById(w http.ResponseWriter, r *http.Request)
 }
 
-type ProductsApp struct {
-	delivery productsDelivery
-	router   *mux.Router
+type recDelivery interface {
+	GetRecommendations(w http.ResponseWriter, r *http.Request)
 }
 
-func NewProductsApp(r *mux.Router, delivery productsDelivery) *ProductsApp {
+type ProductsApp struct {
+	delivery    productsDelivery
+	router      *mux.Router
+	recDelivery recDelivery
+}
+
+func NewProductsApp(r *mux.Router, delivery productsDelivery, recDelivery recDelivery) *ProductsApp {
 	return &ProductsApp{
-		router:   r,
-		delivery: delivery,
+		router:      r,
+		delivery:    delivery,
+		recDelivery: recDelivery,
 	}
 }
 
@@ -28,6 +34,7 @@ func (p *ProductsApp) InitProductsRoutes() *mux.Router {
 
 	sub.HandleFunc("/api/v1/catalog", p.delivery.GetAllProducts).Methods(http.MethodGet)
 	sub.HandleFunc("/api/v1/product/{id}", p.delivery.GetProductById).Methods(http.MethodGet)
+	sub.HandleFunc("/api/v1/product/{id}/recommendations", p.recDelivery.GetRecommendations).Methods(http.MethodGet)
 
 	return sub
 }
