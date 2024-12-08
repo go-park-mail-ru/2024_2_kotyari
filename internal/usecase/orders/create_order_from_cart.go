@@ -38,6 +38,7 @@ func (m *OrdersManager) CreateOrderFromCart(ctx context.Context, address string,
 	var totalPrice uint32
 	productOrders := make([]order.ProductOrder, 0, len(cartItems))
 
+	// TODO: Promocode here
 	for _, item := range cartItems {
 		totalPrice += item.Cost * item.Count
 		productOrders = append(productOrders, item)

@@ -10,6 +10,7 @@ import (
 
 type promoCodesGetter interface {
 	GetUserPromoCodes(ctx context.Context, userID uint32) ([]model.PromoCode, error)
+	GetPromoCode(ctx context.Context, userID uint32, promoCodeName string) (model.PromoCode, error)
 }
 
 type PromoCodesGRPC struct {

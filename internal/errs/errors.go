@@ -60,6 +60,7 @@ var (
 	FailedToChangeProductRating   = errors.New("не удалось изменить рейтинг продукта")
 	NoPromoCodesForUser           = errors.New("у данного пользователя нет промокодов")
 	FailedToParseConfig           = errors.New("ошибка парсинга конфигурации")
+	NoPromoCode                   = errors.New("этого промокода нет")
 )
 
 type ErrorStore struct {
@@ -124,6 +125,7 @@ func NewErrorStore() *ErrorStore {
 			FailedToChangeProductRating:   http.StatusInternalServerError,
 			NoPromoCodesForUser:           http.StatusNotFound,
 			FailedToParseConfig:           http.StatusInternalServerError,
+			NoPromoCode:                   http.StatusNotFound,
 		},
 	}
 }
