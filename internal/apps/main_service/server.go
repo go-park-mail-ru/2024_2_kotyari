@@ -218,8 +218,13 @@ func NewServer() (*Server, error) {
 
 	fileDelivery := fileDeliveryLib.NewFilesDelivery(fileRepo)
 
+	ordersGRPC, err := orders.NewPromoCodesGRPC(v.GetStringMap(promocodesService), log)
+	if err != nil {
+		return nil, err
+	}
+
 	ordersRepo := rorders.NewOrdersRepo(dbPool, log)
-	ordersManager := ordersServiceLib.NewOrdersManager(ordersRepo, log, cartRepo)
+	ordersManager := ordersServiceLib.NewOrdersManager(ordersRepo, ordersGRPC, log, cartRepo)
 	ordersHandler := orders.NewOrdersHandler(ordersManager, log, errResolver)
 	orderApp := NewOrderApp(router, ordersHandler)
 

@@ -14,7 +14,6 @@ import (
 type promoCodesRepository interface {
 	AddPromoCode(ctx context.Context, userID uint32, promoID uint32) error
 	GetUserPromoCodes(ctx context.Context, userID uint32) ([]model.PromoCode, error)
-	DeletePromoCode(ctx context.Context, userID uint32, promoID uint32) error
 }
 
 type PromoCodesConsumer struct {

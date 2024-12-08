@@ -88,17 +88,6 @@ func (p *PromoCodesConsumer) processMessage(promoMessage kafka.Message) error {
 
 		return nil
 
-	case utils.DeletePromo:
-		err = p.repository.DeletePromoCode(ctx, message.UserID, message.PromoID)
-		if err != nil {
-			p.log.Error("[PromoCodesConsumer.processMessage] Error adding promo",
-				slog.String("error", err.Error()))
-
-			return err
-		}
-
-		return nil
-
 	default:
 		p.log.Error("[PromoCodesConsumer.processMessage] Invalid message type")
 

@@ -8,7 +8,8 @@ import (
 )
 
 type CreateOrderRequest struct {
-	Address string `json:"address"`
+	Address   string `json:"address"`
+	PromoCode string `json:"promocode"`
 }
 
 type OrdersResponse struct {

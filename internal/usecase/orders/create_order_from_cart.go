@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (m *OrdersManager) CreateOrderFromCart(ctx context.Context, address string, userID uint32) (*order.Order, error) {
+func (m *OrdersManager) CreateOrderFromCart(ctx context.Context, address string, userID uint32, promoName string) (*order.Order, error) {
 	requestID, err := utils.GetContextRequestID(ctx)
 	if err != nil {
 		return nil, err
@@ -38,10 +38,28 @@ func (m *OrdersManager) CreateOrderFromCart(ctx context.Context, address string,
 	var totalPrice uint32
 	productOrders := make([]order.ProductOrder, 0, len(cartItems))
 
-	// TODO: Promocode here
 	for _, item := range cartItems {
 		totalPrice += item.Cost * item.Count
 		productOrders = append(productOrders, item)
+	}
+
+	if promoName != "" {
+		promoCode, err := m.promoCodesManager.GetPromoCode(ctx, userID, promoName)
+		if err != nil {
+			m.logger.Error("[OrdersManager.CreateOrderFromCart] Error getting promo code ", slog.Uint64("user_id", uint64(userID)))
+
+			return nil, err
+		}
+
+		discountAmount := (totalPrice * promoCode.Bonus) / 100
+		totalPrice -= discountAmount
+		err = m.promoCodesManager.DeletePromoCode(ctx, userID, promoCode.ID)
+		if err != nil {
+			m.logger.Error("[OrdersManager.CreateOrderFromCart] Error deleting promo",
+				slog.String("error", err.Error()))
+
+			return nil, err
+		}
 	}
 
 	orderData := &order.OrderFromCart{
