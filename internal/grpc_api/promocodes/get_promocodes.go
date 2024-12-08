@@ -12,7 +12,7 @@ import (
 )
 
 func (r *PromoCodesGRPC) GetUserPromoCodes(ctx context.Context, request *promocodes.GetUserPromoCodesRequest) (*promocodes.GetUserPromoCodesResponse, error) {
-	promoCodes, err := r.promoCodesGetter.GetUserPromoCodes(ctx, request.GetUserId())
+	promoCodes, err := r.promoCodesRepo.GetUserPromoCodes(ctx, request.GetUserId())
 	if err != nil {
 		if errors.Is(err, errs.NoPromoCodesForUser) {
 			r.log.Error("[PromoCodesGRPC.GetPromoCodes] No promo codes for user",

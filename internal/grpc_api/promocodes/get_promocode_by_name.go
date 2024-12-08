@@ -11,7 +11,7 @@ import (
 )
 
 func (r *PromoCodesGRPC) GetPromoCode(ctx context.Context, request *promocodes.GetPromoCodeRequest) (*promocodes.GetPromoCodeResponse, error) {
-	promoCode, err := r.promoCodesGetter.GetPromoCode(ctx, request.GetUserId(), request.GetName())
+	promoCode, err := r.promoCodesRepo.GetPromoCode(ctx, request.GetUserId(), request.GetName())
 	if err != nil {
 		if errors.Is(err, errs.NoPromoCode) {
 			r.log.Error("[PromoCodesGRPC.GetPromoCode] No promo code", slog.String("error", err.Error()))

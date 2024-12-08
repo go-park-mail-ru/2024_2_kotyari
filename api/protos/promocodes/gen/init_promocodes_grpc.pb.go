@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -21,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	PromoCodes_GetUserPromoCodes_FullMethodName = "/promocodes.PromoCodes/GetUserPromoCodes"
 	PromoCodes_GetPromoCode_FullMethodName      = "/promocodes.PromoCodes/GetPromoCode"
+	PromoCodes_DeletePromoCode_FullMethodName   = "/promocodes.PromoCodes/DeletePromoCode"
 )
 
 // PromoCodesClient is the client API for PromoCodes service.
@@ -29,6 +31,7 @@ const (
 type PromoCodesClient interface {
 	GetUserPromoCodes(ctx context.Context, in *GetUserPromoCodesRequest, opts ...grpc.CallOption) (*GetUserPromoCodesResponse, error)
 	GetPromoCode(ctx context.Context, in *GetPromoCodeRequest, opts ...grpc.CallOption) (*GetPromoCodeResponse, error)
+	DeletePromoCode(ctx context.Context, in *DeletePromoCodesRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type promoCodesClient struct {
@@ -59,12 +62,23 @@ func (c *promoCodesClient) GetPromoCode(ctx context.Context, in *GetPromoCodeReq
 	return out, nil
 }
 
+func (c *promoCodesClient) DeletePromoCode(ctx context.Context, in *DeletePromoCodesRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, PromoCodes_DeletePromoCode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PromoCodesServer is the server API for PromoCodes service.
 // All implementations must embed UnimplementedPromoCodesServer
 // for forward compatibility.
 type PromoCodesServer interface {
 	GetUserPromoCodes(context.Context, *GetUserPromoCodesRequest) (*GetUserPromoCodesResponse, error)
 	GetPromoCode(context.Context, *GetPromoCodeRequest) (*GetPromoCodeResponse, error)
+	DeletePromoCode(context.Context, *DeletePromoCodesRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedPromoCodesServer()
 }
 
@@ -80,6 +94,9 @@ func (UnimplementedPromoCodesServer) GetUserPromoCodes(context.Context, *GetUser
 }
 func (UnimplementedPromoCodesServer) GetPromoCode(context.Context, *GetPromoCodeRequest) (*GetPromoCodeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPromoCode not implemented")
+}
+func (UnimplementedPromoCodesServer) DeletePromoCode(context.Context, *DeletePromoCodesRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeletePromoCode not implemented")
 }
 func (UnimplementedPromoCodesServer) mustEmbedUnimplementedPromoCodesServer() {}
 func (UnimplementedPromoCodesServer) testEmbeddedByValue()                    {}
@@ -138,6 +155,24 @@ func _PromoCodes_GetPromoCode_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PromoCodes_DeletePromoCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeletePromoCodesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PromoCodesServer).DeletePromoCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PromoCodes_DeletePromoCode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PromoCodesServer).DeletePromoCode(ctx, req.(*DeletePromoCodesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PromoCodes_ServiceDesc is the grpc.ServiceDesc for PromoCodes service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -152,6 +187,10 @@ var PromoCodes_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetPromoCode",
 			Handler:    _PromoCodes_GetPromoCode_Handler,
+		},
+		{
+			MethodName: "DeletePromoCode",
+			Handler:    _PromoCodes_DeletePromoCode_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

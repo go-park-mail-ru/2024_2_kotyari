@@ -8,20 +8,21 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
-type promoCodesGetter interface {
+type promoCodesRepo interface {
 	GetUserPromoCodes(ctx context.Context, userID uint32) ([]model.PromoCode, error)
 	GetPromoCode(ctx context.Context, userID uint32, promoCodeName string) (model.PromoCode, error)
+	DeletePromoCode(ctx context.Context, userID uint32, promoID uint32) error
 }
 
 type PromoCodesGRPC struct {
 	promocodes.UnimplementedPromoCodesServer
-	promoCodesGetter promoCodesGetter
-	log              *slog.Logger
+	promoCodesRepo promoCodesRepo
+	log            *slog.Logger
 }
 
-func NewPromoCodesGRPC(promoCodesGetter promoCodesGetter, logger *slog.Logger) *PromoCodesGRPC {
+func NewPromoCodesGRPC(promoCodesRepo promoCodesRepo, logger *slog.Logger) *PromoCodesGRPC {
 	return &PromoCodesGRPC{
-		promoCodesGetter: promoCodesGetter,
-		log:              logger,
+		promoCodesRepo: promoCodesRepo,
+		log:            logger,
 	}
 }

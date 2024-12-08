@@ -6,8 +6,11 @@ option go_package = "https://github.com/go-park-mail-ru/2024_2_kotyari/api/proto
 
 import "get_promocodes.proto";
 import "get_promocode_by_name.proto";
+import "delete_promocode.proto";
+import "google/protobuf/empty.proto";
 
 service PromoCodes {
   rpc GetUserPromoCodes(GetUserPromoCodesRequest) returns (GetUserPromoCodesResponse);
   rpc GetPromoCode(GetPromoCodeRequest) returns (GetPromoCodeResponse);
+  rpc DeletePromoCode(DeletePromoCodesRequest) returns (google.protobuf.Empty);
 }
