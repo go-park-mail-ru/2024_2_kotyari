@@ -20,6 +20,7 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/orders"
 	productDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/product"
 	profileDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/profile"
+	recDeliverylib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/recommendations"
 	reviewsDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/reviews"
 	searchDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/search"
 	sessionsDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/sessions"
@@ -35,6 +36,7 @@ import (
 	fileRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/file"
 	rorders "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/orders"
 	productRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/product"
+	recRepolib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/recommendations"
 	reviewsRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/reviews"
 	searchRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/search"
 	sessionsRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/sessions"
@@ -172,9 +174,6 @@ func NewServer() (*Server, error) {
 
 	userHandler := userDeliveryLib.NewUsersDelivery(userClient, inputValidator, sessionService, errResolver, log)
 
-	categoryRepo := categoryRepoLib.NewCategoriesStore(dbPool, log)
-	categoryDelivery := categoryDeliveryLib.NewCategoriesDelivery(categoryRepo, log, errResolver)
-
 	addressRepo := addressRepoLib.NewAddressRepo(dbPool, log)
 	addressService := addressServiceLib.NewAddressService(addressRepo, log)
 	addressHandler := addressDeliveryLib.NewAddressHandler(addressService, errResolver, log)
@@ -192,7 +191,14 @@ func NewServer() (*Server, error) {
 
 	profileHandler := profileDeliveryLib.NewProfilesHandler(profileClient, log, addressRepo, imageService, errResolver)
 	prodRepo := productRepoLib.NewProductsStore(dbPool, log)
+
+	categoryRepo := categoryRepoLib.NewCategoriesStore(dbPool, log, prodRepo)
+	categoryDelivery := categoryDeliveryLib.NewCategoriesDelivery(categoryRepo, log, errResolver)
+
 	ca := NewCategoryApp(router, categoryDelivery)
+
+	recRepo := recRepolib.NewRecRepo(dbPool, log, prodRepo, categoryRepo)
+	recHandler := recDeliverylib.NewRecHandler(log, errResolver, recRepo)
 
 	cartRepo := cartRepoLib.NewCartsStore(dbPool, log)
 	cartService := cartServiceLib.NewCartManager(cartRepo, prodRepo, log)
@@ -200,7 +206,7 @@ func NewServer() (*Server, error) {
 	cartApp := NewCartApp(router, cartHandler)
 
 	prodHandler := productDeliveryLib.NewProductHandler(errResolver, prodRepo, log, cartRepo)
-	pa := NewProductsApp(router, prodHandler)
+	pa := NewProductsApp(router, prodHandler, recHandler)
 
 	fileDelivery := fileDeliveryLib.NewFilesDelivery(fileRepo)
 
