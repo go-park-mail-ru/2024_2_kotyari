@@ -1,0 +1,15 @@
+syntax="proto3";
+
+package promocodes;
+
+option go_package = "https://github.com/go-park-mail-ru/2024_2_kotyari/api/protos/promocodes";
+
+import "promocode.proto";
+
+message GetUserPromoCodesRequest {
+  uint32 user_id = 1;
+}
+
+message GetUserPromoCodesResponse {
+  repeated PromoCode promocodes = 1;
+}

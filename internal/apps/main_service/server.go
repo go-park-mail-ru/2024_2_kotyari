@@ -57,6 +57,7 @@ const (
 	ratingUpdaterService = "rating_updater"
 	profileService       = "profile_go"
 	userService          = "user_go"
+	promocodesService    = "promocodes_go"
 )
 
 type categoryApp interface {
@@ -160,7 +161,11 @@ func NewServer() (*Server, error) {
 	sessionsDelivery := sessionsDeliveryLib.NewSessionDelivery(sessionsRepo, errResolver)
 
 	userGRPCCfg := v.GetStringMap(userService)
-	userCfg := configs.ParseServiceViperConfig(userGRPCCfg)
+	userCfg, err := configs.ParseServiceViperConfig(userGRPCCfg)
+	if err != nil {
+		return nil, err
+	}
+
 	userConn, err := grpc.NewClient(fmt.Sprintf("%s:%s", userCfg.Domain, userCfg.Port),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
@@ -180,7 +185,11 @@ func NewServer() (*Server, error) {
 	addressHandler := addressDeliveryLib.NewAddressHandler(addressService, errResolver, log)
 
 	profileGRPCCfg := v.GetStringMap(profileService)
-	profileCfg := configs.ParseServiceViperConfig(profileGRPCCfg)
+	profileCfg, err := configs.ParseServiceViperConfig(profileGRPCCfg)
+	if err != nil {
+		return nil, err
+	}
+
 	profileConn, err := grpc.NewClient(fmt.Sprintf("%s:%s", profileCfg.Domain, profileCfg.Port),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
@@ -194,8 +203,13 @@ func NewServer() (*Server, error) {
 	prodRepo := productRepoLib.NewProductsStore(dbPool, log)
 	ca := NewCategoryApp(router, categoryDelivery)
 
+	cartGRPC, err := cartDeliveryLib.NewPromoCodesGetterGRPC(v.GetStringMap(promocodesService), log)
+	if err != nil {
+		return nil, err
+	}
+
 	cartRepo := cartRepoLib.NewCartsStore(dbPool, log)
-	cartService := cartServiceLib.NewCartManager(cartRepo, prodRepo, log)
+	cartService := cartServiceLib.NewCartManager(cartRepo, cartGRPC, prodRepo, log)
 	cartHandler := cartDeliveryLib.NewCartHandler(cartService, cartRepo, errResolver, log)
 	cartApp := NewCartApp(router, cartHandler)
 
@@ -204,8 +218,13 @@ func NewServer() (*Server, error) {
 
 	fileDelivery := fileDeliveryLib.NewFilesDelivery(fileRepo)
 
+	ordersGRPC, err := orders.NewPromoCodesGRPC(v.GetStringMap(promocodesService), log)
+	if err != nil {
+		return nil, err
+	}
+
 	ordersRepo := rorders.NewOrdersRepo(dbPool, log)
-	ordersManager := ordersServiceLib.NewOrdersManager(ordersRepo, log, cartRepo)
+	ordersManager := ordersServiceLib.NewOrdersManager(ordersRepo, ordersGRPC, log, cartRepo)
 	ordersHandler := orders.NewOrdersHandler(ordersManager, log, errResolver)
 	orderApp := NewOrderApp(router, ordersHandler)
 
@@ -232,6 +251,10 @@ func NewServer() (*Server, error) {
 	searchApp := NewSearchApp(router, searchHandler)
 
 	cfg := v.GetStringMap(mainService)
+	mainCfg, err := configs.ParseServiceViperConfig(cfg)
+	if err != nil {
+		return nil, err
+	}
 
 	return &Server{
 		r:        router,
@@ -240,7 +263,7 @@ func NewServer() (*Server, error) {
 		profile:  profileHandler,
 		address:  addressHandler,
 		category: ca,
-		cfg:      configs.ParseServiceViperConfig(cfg),
+		cfg:      mainCfg,
 		log:      log,
 		sessions: sessionsDelivery,
 		files:    fileDelivery,

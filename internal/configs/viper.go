@@ -1,7 +1,9 @@
 package configs
 
 import (
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/spf13/viper"
+	"log/slog"
 )
 
 const (
@@ -19,6 +21,11 @@ type ServiceViperConfig struct {
 	Port    string
 }
 
+type KafkaConfig struct {
+	Domain string
+	Port   string
+}
+
 func SetupViper() (*viper.Viper, error) {
 	viper.AddConfigPath(ConfigPath)
 	viper.SetConfigName(ServicesConfigs)
@@ -30,10 +37,52 @@ func SetupViper() (*viper.Viper, error) {
 	return viper.GetViper(), nil
 }
 
-func ParseServiceViperConfig(config map[string]any) ServiceViperConfig {
-	return ServiceViperConfig{
-		Domain:  config[KeyDomain].(string),
-		Address: config[KeyAddress].(string),
-		Port:    config[KeyPort].(string),
+func ParseServiceViperConfig(config map[string]any) (ServiceViperConfig, error) {
+	domain, ok := config[KeyDomain].(string)
+	if !ok {
+		slog.Error("[ParseServiceViperConfig] Failed to parse domain")
+
+		return ServiceViperConfig{}, errs.FailedToParseConfig
 	}
+
+	address, ok := config[KeyAddress].(string)
+	if !ok {
+		slog.Error("[ParseServiceViperConfig] Failed to parse address")
+
+		return ServiceViperConfig{}, errs.FailedToParseConfig
+	}
+
+	port, ok := config[KeyPort].(string)
+	if !ok {
+		slog.Error("[ParseServiceViperConfig] Failed to parse port")
+
+		return ServiceViperConfig{}, errs.FailedToParseConfig
+	}
+
+	return ServiceViperConfig{
+		Domain:  domain,
+		Address: address,
+		Port:    port,
+	}, nil
+}
+
+func ParseKafkaViperConfig(config map[string]any) (KafkaConfig, error) {
+	domain, ok := config[KeyDomain].(string)
+	if !ok {
+		slog.Error("[ParseServiceViperConfig] Failed to parse domain")
+
+		return KafkaConfig{}, errs.FailedToParseConfig
+	}
+
+	port, ok := config[KeyPort].(string)
+	if !ok {
+		slog.Error("[ParseServiceViperConfig] Failed to parse port")
+
+		return KafkaConfig{}, errs.FailedToParseConfig
+	}
+
+	return KafkaConfig{
+		Domain: domain,
+		Port:   port,
+	}, nil
 }
