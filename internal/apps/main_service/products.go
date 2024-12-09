@@ -26,8 +26,8 @@ func NewProductsApp(r *mux.Router, delivery productsDelivery) *ProductsApp {
 func (p *ProductsApp) InitProductsRoutes() *mux.Router {
 	sub := p.router.Methods(http.MethodGet).Subrouter()
 
-	sub.HandleFunc("/catalog", p.delivery.GetAllProducts).Methods(http.MethodGet)
-	sub.HandleFunc("/product/{id}", p.delivery.GetProductById).Methods(http.MethodGet)
+	sub.HandleFunc("/api/v1/catalog", p.delivery.GetAllProducts).Methods(http.MethodGet)
+	sub.HandleFunc("/api/v1/product/{id}", p.delivery.GetProductById).Methods(http.MethodGet)
 
 	return sub
 }

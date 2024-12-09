@@ -273,26 +273,26 @@ func (s *Server) setupRoutes() {
 	subOrder.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 	subOrder.Use(csrfMiddleware)
 
-	s.r.HandleFunc("/login", s.auth.LoginUser).Methods(http.MethodPost)
-	s.r.HandleFunc("/logout", s.sessions.Delete).Methods(http.MethodPost)
-	s.r.HandleFunc("/signup", s.auth.CreateUser).Methods(http.MethodPost)
+	s.r.HandleFunc("/api/v1/login", s.auth.LoginUser).Methods(http.MethodPost)
+	s.r.HandleFunc("/api/v1/logout", s.sessions.Delete).Methods(http.MethodPost)
+	s.r.HandleFunc("/api/v1/signup", s.auth.CreateUser).Methods(http.MethodPost)
 
 	authSub := s.r.Methods(http.MethodGet, http.MethodPost, http.MethodPut).Subrouter()
-	authSub.HandleFunc("/csrf", s.csrf.GetCsrf).Methods(http.MethodGet)
-	authSub.HandleFunc("/", s.auth.GetUserById).Methods(http.MethodGet)
+	authSub.HandleFunc("/api/v1/csrf", s.csrf.GetCsrf).Methods(http.MethodGet)
+	authSub.HandleFunc("/api/v1/", s.auth.GetUserById).Methods(http.MethodGet)
 	authSub.Use(middlewares.RequestIDMiddleware)
 	authSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 
-	s.r.HandleFunc("/files/{name}", s.files.GetImage).Methods(http.MethodGet)
+	s.r.HandleFunc("/api/v1/files/{name}", s.files.GetImage).Methods(http.MethodGet)
 
 	csrfProtected := authSub.Methods(http.MethodGet, http.MethodPost, http.MethodPut).Subrouter()
 
-	csrfProtected.HandleFunc("/account", s.profile.GetProfile).Methods(http.MethodGet)
-	csrfProtected.HandleFunc("/account", s.profile.UpdateProfileData).Methods(http.MethodPut)
-	csrfProtected.HandleFunc("/change_password", s.profile.ChangePassword).Methods(http.MethodPut)
-	csrfProtected.HandleFunc("/account/avatar", s.profile.UpdateProfileAvatar).Methods(http.MethodPut)
-	csrfProtected.HandleFunc("/address", s.address.GetAddress).Methods(http.MethodGet)
-	csrfProtected.HandleFunc("/address", s.address.UpdateAddressData).Methods(http.MethodPut)
+	csrfProtected.HandleFunc("/api/v1/account", s.profile.GetProfile).Methods(http.MethodGet)
+	csrfProtected.HandleFunc("/api/v1/account", s.profile.UpdateProfileData).Methods(http.MethodPut)
+	csrfProtected.HandleFunc("/api/v1/change_password", s.profile.ChangePassword).Methods(http.MethodPut)
+	csrfProtected.HandleFunc("/api/v1/account/avatar", s.profile.UpdateProfileAvatar).Methods(http.MethodPut)
+	csrfProtected.HandleFunc("/api/v1/address", s.address.GetAddress).Methods(http.MethodGet)
+	csrfProtected.HandleFunc("/api/v1/address", s.address.UpdateAddressData).Methods(http.MethodPut)
 	csrfProtected.Use(csrfMiddleware)
 	csrfProtected.Use(middlewares.RequestIDMiddleware)
 
