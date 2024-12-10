@@ -62,6 +62,7 @@ var (
 	FailedToParseConfig           = errors.New("ошибка парсинга конфигурации")
 	NoPromoCode                   = errors.New("этого промокода нет")
 	FailedToRetrievePromoCode     = errors.New("не удалось получить промокод")
+	FailedToRetrievePromoCodes    = errors.New("не удалось получить промокоды")
 )
 
 type ErrorStore struct {
@@ -127,6 +128,8 @@ func NewErrorStore() *ErrorStore {
 			NoPromoCodesForUser:           http.StatusNotFound,
 			FailedToParseConfig:           http.StatusInternalServerError,
 			NoPromoCode:                   http.StatusNotFound,
+			FailedToRetrievePromoCodes:    http.StatusServiceUnavailable,
+			FailedToRetrievePromoCode:     http.StatusServiceUnavailable,
 		},
 	}
 }

@@ -1,13 +1,14 @@
-package orders
+package promocodes
 
 import (
 	"context"
+	"log/slog"
+
 	promocodes "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/promocodes/gen"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"log/slog"
 )
 
 func (p *PromoCodesGRPC) DeletePromoCode(ctx context.Context, userID uint32, promoID uint32) error {

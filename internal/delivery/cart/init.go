@@ -2,11 +2,6 @@ package cart
 
 import (
 	"context"
-	"fmt"
-	promocodes "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/promocodes/gen"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"log/slog"
 	"time"
 
@@ -43,35 +38,4 @@ func NewCartHandler(manager cartManager, manip cartManip, errorHandler errs.GetE
 		errResolver: errorHandler,
 		log:         logger,
 	}
-}
-
-type PromoCodesGetterGRPC struct {
-	client promocodes.PromoCodesClient
-	log    *slog.Logger
-}
-
-func NewPromoCodesGetterGRPC(config map[string]any, log *slog.Logger) (*PromoCodesGetterGRPC, error) {
-	cfg, err := configs.ParseServiceViperConfig(config)
-	if err != nil {
-		slog.Error("[NewPromoCodesGetterGRPC] Failed to parse cfg",
-			slog.String("error", err.Error()))
-
-		return nil, err
-	}
-
-	promoCodesConnection, err := grpc.NewClient(fmt.Sprintf("%s:%s", cfg.Domain, cfg.Port),
-		grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		slog.Error("[NewPromoCodesGetterGRPC] Failed to establish gRPC connection",
-			slog.String("error", err.Error()))
-
-		return nil, err
-	}
-
-	client := promocodes.NewPromoCodesClient(promoCodesConnection)
-
-	return &PromoCodesGetterGRPC{
-		client: client,
-		log:    log,
-	}, nil
 }
