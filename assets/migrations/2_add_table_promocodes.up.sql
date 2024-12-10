@@ -20,3 +20,5 @@ create table if not exists user_promocodes(
 
 create index if not exists idx_promocodes_user_id on user_promocodes(user_id);
 create index if not exists idx_promocodes_promo_id on user_promocodes(promo_id);
+
+insert into promocodes(name, bonus) values ('bonus10', 10);
