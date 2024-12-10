@@ -1,4 +1,4 @@
-package cart
+package promocodes
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (p *PromoCodesGetterGRPC) GetPromoCode(ctx context.Context, userID uint32, promoCodeName string) (model.PromoCode, error) {
+func (p *PromoCodesGRPC) GetPromoCode(ctx context.Context, userID uint32, promoCodeName string) (model.PromoCode, error) {
 	newCtx, err := utils.AddMetadataRequestID(ctx)
 	if err != nil {
 		p.log.Error("[PromoCodesGetterGRPC.GetPromoCode] Failed to imbue ctx with request id",
