@@ -29,10 +29,7 @@ func fromGrpcResponse(p *profilegrpc.GetProfileResponse, addr model.Address) Pro
 		Gender:    p.Gender,
 		AvatarUrl: p.AvatarUrl,
 		Address: address.AddressResponse{
-			City:   addr.City,
-			Street: addr.Street,
-			House:  addr.House,
-			Flat:   addr.Flat,
+			Address: addr.Text,
 		},
 	}
 }

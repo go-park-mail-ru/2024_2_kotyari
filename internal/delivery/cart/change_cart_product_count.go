@@ -34,7 +34,10 @@ func (ch *CartHandler) ChangeCartProductQuantity(w http.ResponseWriter, r *http.
 		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)
 	}
 
-	var req ChangeCartProductCountRequest
+	var (
+		req  ChangeCartProductCountRequest
+		resp ChangeCartProductCountResponse
+	)
 
 	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
@@ -43,7 +46,7 @@ func (ch *CartHandler) ChangeCartProductQuantity(w http.ResponseWriter, r *http.
 		return
 	}
 
-	err = ch.cartManager.ChangeCartProductCount(r.Context(), productID, req.ToModel(), userID)
+	cartProductCount, err := ch.cartManager.ChangeCartProductCount(r.Context(), productID, req.ToModel(), userID)
 	if err != nil {
 		err, code := ch.errResolver.Get(err)
 		utils.WriteErrorJSON(w, code, err)
@@ -51,5 +54,7 @@ func (ch *CartHandler) ChangeCartProductQuantity(w http.ResponseWriter, r *http.
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusNoContent, nil)
+	resp.Count = cartProductCount
+
+	utils.WriteJSON(w, http.StatusOK, resp)
 }

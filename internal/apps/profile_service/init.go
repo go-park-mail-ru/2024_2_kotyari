@@ -43,9 +43,14 @@ type ProfilesApp struct {
 func NewProfilesApp(
 	conf map[string]any,
 ) (*ProfilesApp, error) {
-	cfg := configs.ParseServiceViperConfig(conf)
-
 	slogLog := logger.InitLogger()
+
+	cfg, err := configs.ParseServiceViperConfig(conf)
+	if err != nil {
+		slogLog.Error("[NewProfilesApp] Failed to parse cfg")
+
+		return nil, err
+	}
 
 	if cfg.Address == "" || cfg.Port == "" {
 		return nil, errors.New("[ ERROR ] пустая конфигурация сервиса Profile")

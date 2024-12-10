@@ -2,6 +2,9 @@ package user
 
 import (
 	"context"
+	"fmt"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs"
+	"github.com/segmentio/kafka-go"
 	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/api/protos/user/gen"
@@ -28,5 +31,22 @@ func NewUsersDelivery(userManager grpc_gen.UserServiceClient, inputValidator *ut
 		sessionService: sessionService,
 		errResolver:    errResolver,
 		log:            log,
+	}
+}
+
+type MessageProducer struct {
+	writer *kafka.Writer
+	log    *slog.Logger
+}
+
+func NewMessageProducer(kafkaConfig configs.KafkaConfig, logger *slog.Logger) *MessageProducer {
+	w := &kafka.Writer{
+		Addr:     kafka.TCP(fmt.Sprintf("%s:%s", kafkaConfig.Domain, kafkaConfig.Port)),
+		Topic:    utils.PromoTopic,
+		Balancer: &kafka.Hash{},
+	}
+	return &MessageProducer{
+		writer: w,
+		log:    logger,
 	}
 }

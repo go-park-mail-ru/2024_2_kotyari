@@ -58,6 +58,10 @@ var (
 	ReviewAlreadyExists           = errors.New("отзыв уже существует")
 	NoTitlesToSuggest             = errors.New("отсутствуют продукты для саджестов")
 	FailedToChangeProductRating   = errors.New("не удалось изменить рейтинг продукта")
+	NoPromoCodesForUser           = errors.New("у данного пользователя нет промокодов")
+	FailedToParseConfig           = errors.New("ошибка парсинга конфигурации")
+	NoPromoCode                   = errors.New("этого промокода нет")
+	FailedToRetrievePromoCode     = errors.New("не удалось получить промокод")
 )
 
 type ErrorStore struct {
@@ -120,6 +124,9 @@ func NewErrorStore() *ErrorStore {
 			ReviewAlreadyExists:           http.StatusConflict,
 			NoTitlesToSuggest:             http.StatusNotFound,
 			FailedToChangeProductRating:   http.StatusInternalServerError,
+			NoPromoCodesForUser:           http.StatusNotFound,
+			FailedToParseConfig:           http.StatusInternalServerError,
+			NoPromoCode:                   http.StatusNotFound,
 		},
 	}
 }

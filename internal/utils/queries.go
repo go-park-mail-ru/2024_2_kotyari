@@ -4,6 +4,7 @@ import "net/http"
 
 const (
 	searchQueryParamKey = "q"
+	PromoQueryParamKey  = "promocode"
 )
 
 func GetSearchQuery(r *http.Request) string {

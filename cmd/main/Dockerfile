@@ -5,6 +5,13 @@ WORKDIR /var/backend
 COPY cmd/main/main.go main.go
 COPY . .
 
+#RUN apk add git
+#RUN --mount=type=cache,target=/go/pkg/mod/ \
+#    --mount=type=bind,source=go.sum,target=go.sum \
+#    --mount=type=bind,source=go.mod,target=go.mod \
+#    go mod download -x
+
+
 RUN go mod tidy
 RUN go build -o main main.go
 
