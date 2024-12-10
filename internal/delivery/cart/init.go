@@ -15,7 +15,7 @@ import (
 )
 
 type cartManager interface {
-	ChangeCartProductCount(ctx context.Context, productID uint32, count int32, userID uint32) error
+	ChangeCartProductCount(ctx context.Context, productID uint32, count int32, userID uint32) (uint32, error)
 	AddProduct(ctx context.Context, productID uint32, userID uint32) error
 	RemoveProduct(ctx context.Context, productID uint32, userID uint32) error
 	ChangeCartProductSelectedState(ctx context.Context, productID uint32, userID uint32, isSelected bool) error

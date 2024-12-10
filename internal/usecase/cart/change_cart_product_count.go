@@ -8,10 +8,10 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
-func (cm *CartManager) ChangeCartProductCount(ctx context.Context, productID uint32, count int32, userID uint32) error {
+func (cm *CartManager) ChangeCartProductCount(ctx context.Context, productID uint32, count int32, userID uint32) (uint32, error) {
 	requestID, err := utils.GetContextRequestID(ctx)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	cm.log.Info("[CartManager.ChangeCartProductCount] Started executing", slog.Any("request-id", requestID))
@@ -20,28 +20,36 @@ func (cm *CartManager) ChangeCartProductCount(ctx context.Context, productID uin
 	if err != nil {
 		cm.log.Error("[CartManager.ChangeCartProductCount] Error getting product count", slog.String("error", err.Error()))
 
-		return err
+		return 0, err
 	}
 
 	if product.IsDeleted {
-		return errs.ProductNotInCart
+		return 0, errs.ProductNotInCart
 	}
 
 	productCount, err := cm.productCountGetter.GetProductCount(ctx, productID)
 	if err != nil {
 		cm.log.Error("[CartManager.ChangeCartProductCount] Error getting productCount count", slog.String("error", err.Error()))
 
-		return err
+		return 0, err
 	}
 
 	err = cm.validateCartProductCount(ctx, count, productCount, product.Count, productID, userID)
 	if err != nil {
 		cm.log.Error("[CartManager.ChangeCartProductCount] Error changing product count", slog.String("error", err.Error()))
 
-		return err
+		return 0, err
 	}
 
-	return nil
+	cartProductCount, err := cm.cartRepository.GetCartProductCount(ctx, userID, productID)
+	if err != nil {
+		cm.log.Error("[CartManager.ChangeCartProductCount] Error getting cart product count",
+			slog.String("error", err.Error()))
+
+		return 0, err
+	}
+
+	return cartProductCount, nil
 }
 
 func (cm *CartManager) validateCartProductCount(ctx context.Context, count int32, productCount uint32, cartProductCount uint32, productID uint32, userID uint32) error {
