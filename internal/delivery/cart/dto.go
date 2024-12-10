@@ -6,6 +6,10 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
+type ChangeCartProductCountResponse struct {
+	Count uint32 `json:"count"`
+}
+
 type ChangeCartProductCountRequest struct {
 	Count int32 `json:"count"`
 }
