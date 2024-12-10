@@ -19,20 +19,14 @@ func (ar *AddressStore) GetAddressByProfileID(ctx context.Context, profileID uin
 	ar.Log.Info("[AddressStore.GetAddressByProfileID] Started executing", slog.Any("request-id", requestID))
 
 	const query = `
-		SELECT city, 
-		       street, 
-		       house, 
-		       flat 
+		SELECT address
 		FROM addresses 
 		WHERE addresses.user_id = $1;
 	`
 
 	var address AddressDTO
 	err = ar.Db.QueryRow(ctx, query, profileID).Scan(
-		&address.City,
-		&address.Street,
-		&address.House,
-		&address.Flat)
+		&address.Address)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
