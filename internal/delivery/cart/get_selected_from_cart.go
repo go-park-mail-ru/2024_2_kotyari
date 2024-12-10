@@ -1,7 +1,6 @@
 package cart
 
 import (
-	"encoding/json"
 	"errors"
 	"log/slog"
 	"net/http"
@@ -26,11 +25,9 @@ func (ch *CartHandler) GetSelectedFromCart(w http.ResponseWriter, r *http.Reques
 		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)
 	}
 
-	var promoCodeName AddPromoCodeRequest
+	promocode := r.URL.Query().Get(utils.PromoQueryParamKey)
 
-	_ = json.NewDecoder(r.Body).Decode(&promoCodeName)
-
-	cart, err := ch.cartManager.GetSelectedFromCart(r.Context(), userID, promoCodeName.ToModel())
+	cart, err := ch.cartManager.GetSelectedFromCart(r.Context(), userID, promocode)
 	if err != nil {
 		if errors.Is(err, errs.NoPromoCode) {
 			ch.log.Info("[CartHandler.GetSelectedFromCart] No promo codes", slog.Any("error", err.Error()))
