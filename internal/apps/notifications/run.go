@@ -1,6 +1,7 @@
 package notifications
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 )
@@ -10,5 +11,5 @@ func (n *NotificationsApp) Run() {
 
 	slog.Info("Listening at", n.config.Port)
 
-	http.ListenAndServe("0.0.0.0:8006", n.router)
+	http.ListenAndServe(fmt.Sprintf("%s:%s", n.config.Address, n.config.Port), n.router)
 }
