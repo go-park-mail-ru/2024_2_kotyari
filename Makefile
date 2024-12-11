@@ -88,6 +88,9 @@ user-refresh:
 profile-refresh:
 	docker stop profile_go && docker rm profile_go && docker rmi profile-go-image && docker compose up -d
 
+notifications-refresh:
+	docker stop notifications_go && docker rm notifications_go && docker rmi notifications-go-image && docker compose up -d
+
 prometheus-refresh:
 	docker stop prometheus && docker rm prometheus && docker compose up -d
 
