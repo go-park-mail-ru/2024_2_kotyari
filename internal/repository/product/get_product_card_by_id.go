@@ -57,7 +57,7 @@ func (ps *ProductsStore) getProductInfo(ctx context.Context, productID uint32) (
     SELECT 
         p.id, p.title, p.count, 
         p.price, p.original_price, p.discount,
-        p.rating,  p.description, p.characteristics::jsonb, 
+        p.rating,  p.description, p.characteristics::jsonb, p.type, p.tags,
         s.id, s.name, s.logo
     FROM products p
         JOIN sellers s ON p.seller_id = s.id
@@ -75,7 +75,7 @@ func (ps *ProductsStore) getProductInfo(ctx context.Context, productID uint32) (
 		&card.ID, &card.Title, &card.Count,
 		&card.Price, &card.OriginalPrice, &card.Discount,
 		&card.Rating, &card.Description,
-		&characteristicsJSON,
+		&characteristicsJSON, &card.Type, &card.Tags,
 		&seller.ID, &seller.Name, &seller.Logo,
 	)
 	if err != nil {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	"log/slog"
+	"sort"
 	"strings"
 )
 
@@ -25,26 +26,59 @@ func (rs *RecStore) GetRecommendations(ctx context.Context, productId uint64) ([
 		return nil, err
 	}
 
-	productWords := strings.Fields(strings.ToLower(product.Title))
+	productTags := make(map[string]bool, len(product.Tags))
+	for _, tag := range product.Tags {
+		productTags[strings.ToLower(tag)] = true
+	}
+	rs.log.Info("[ RecStore.GetRecommendations ] теги продукта ", slog.Any("producttags", productTags))
 
-	var filteredProducts []model.ProductCatalog
+	type scoredProduct struct {
+		product model.ProductCatalog
+		score   int
+	}
+
+	var scoredProducts []scoredProduct
 
 	for _, p := range allProducts {
 		if p.ID == product.ID {
 			continue
 		}
-		productTitleLower := strings.ToLower(p.Title)
+		rs.log.Info("[ RecStore.GetRecommendations ] type prod", slog.Any("p.type", p.Type))
+		score := 0
+		if strings.ToLower(p.Type) != strings.ToLower(product.Type) {
+			continue
+		} else {
+			score += 1
+		}
 
-		for _, word := range productWords {
-			if strings.Contains(productTitleLower, word) {
-				filteredProducts = append(filteredProducts, p)
-				break
+		for _, relatedTag := range p.Tags {
+			rs.log.Info("[ RecStore.GetRecommendations ] проверка", slog.Any("проверка", productTags[strings.ToLower(relatedTag)]))
+			rs.log.Info("[ RecStore.GetRecommendations ] тег релейтед", slog.Any("тег рел", relatedTag))
+
+			if productTags[strings.ToLower(relatedTag)] {
+				score++
 			}
+		}
+		rs.log.Info("[ RecStore.GetRecommendations ] подсчет score", slog.Any("scores", scoredProducts))
+		if score > 0 {
+			scoredProducts = append(scoredProducts, scoredProduct{product: p, score: score})
 		}
 	}
 
-	if len(filteredProducts) == 0 {
+	if len(scoredProducts) == 0 {
+		rs.log.Warn("[ RecStore.GetRecommendations ] No similar products found",
+			slog.Uint64("productId", productId),
+		)
 		return nil, fmt.Errorf("no similar products found for productId: %d", productId)
+	}
+
+	sort.Slice(scoredProducts, func(i, j int) bool {
+		return scoredProducts[i].score > scoredProducts[j].score
+	})
+
+	filteredProducts := make([]model.ProductCatalog, len(scoredProducts))
+	for i, sp := range scoredProducts {
+		filteredProducts[i] = sp.product
 	}
 
 	return filteredProducts, nil
