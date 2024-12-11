@@ -70,6 +70,22 @@ services:
       - redis_service
       - main_go
 
+  notifications_go:
+    build:
+      context: .
+      dockerfile: ./cmd/notifications/Dockerfile
+    ports:
+      - "8006:8006"
+    image: notifications-go-image
+    container_name: notifications_go
+    restart: unless-stopped
+    networks:
+      - app-network
+    depends_on:
+      - pg_db
+      - redis_service
+      - main_go
+
   promocodes_go:
     build:
       context: .

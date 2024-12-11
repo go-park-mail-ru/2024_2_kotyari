@@ -52,9 +52,6 @@ GEN_DIR := gen
 # Команда protoc
 PROTOC := protoc
 
-# Список всех сущностей (названия подпапок в ./api/protos)
-ENTITIES := $(shell find $(PROTO_DIR) -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
-
 # Общая цель для генерации всех сущностей
 proto-build: $(ENTITIES)
 
@@ -78,6 +75,9 @@ user-refresh:
 
 profile-refresh:
 	docker stop profile_go && docker rm profile_go && docker rmi profile-go-image && docker compose up -d
+
+notifications-refresh:
+	docker stop notifications_go && docker rm notifications_go && docker rmi notifications-go-image && docker compose up -d
 
 promocodes-refresh:
 	docker compose build promocodes_go --no-cache && docker compose up promocodes_go -d --force-recreate
