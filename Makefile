@@ -28,32 +28,6 @@ help:
 	@echo 'For this tools to work you need to have migrate tool to be installed'
 	@echo 'You can install it by running this command: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest'
 
-PROTO_DIR := ./api/protos
-
-GEN_DIR := gen
-
-PROTOC := protoc
-
-ENTITIES := $(shell find $(PROTO_DIR) -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
-
-proto-build: $(ENTITIES)
-
-
-# export PATH=$PATH:$(go env GOPATH)/bin
-
-$(ENTITIES):
-	@echo "Генерация кода для сущности $@..."
-	@mkdir -p $(PROTO_DIR)/$@/$(GEN_DIR)
-	@$(PROTOC) \
-		--proto_path=$(PROTO_DIR)/$@/proto \
-		--go_out=$(PROTO_DIR)/$@/$(GEN_DIR) \
-		--go_opt=paths=source_relative \
-		--go-grpc_out=$(PROTO_DIR)/$@/$(GEN_DIR) \
-		--go-grpc_opt=paths=source_relative \
-		$(PROTO_DIR)/$@/proto/*.proto
-	@echo "Генерация для $@ завершена."
-
-
 run:
 	go run ./cmd/main.go
 
@@ -78,24 +52,20 @@ GEN_DIR := gen
 # Команда protoc
 PROTOC := protoc
 
-# Список всех сущностей (названия подпапок в ./api/protos)
-ENTITIES := $(shell find $(PROTO_DIR) -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
-
 # Общая цель для генерации всех сущностей
 proto-build: $(ENTITIES)
 
-# Правило генерации для каждой сущности
 $(ENTITIES):
-	  @echo "Генерация кода для сущности $@..."
-	  @mkdir -p $(PROTO_DIR)/$@/$(GEN_DIR)
-	  @$(PROTOC) \
+	@echo "Генерация кода для сущности $@..."
+	@mkdir -p $(PROTO_DIR)/$@/$(GEN_DIR)
+	@$(PROTOC) \
 		--proto_path=$(PROTO_DIR)/$@/proto \
 		--go_out=$(PROTO_DIR)/$@/$(GEN_DIR) \
 		--go_opt=paths=source_relative \
 		--go-grpc_out=$(PROTO_DIR)/$@/$(GEN_DIR) \
 		--go-grpc_opt=paths=source_relative \
-    	$(PROTO_DIR)/$@/proto/*.proto
-	  @echo "Генерация для $@ завершена."
+		$(PROTO_DIR)/$@/proto/*.proto
+	@echo "Генерация для $@ завершена."
 
 fmt:
 	go fmt ./...
@@ -159,20 +129,5 @@ back-refresh:
 	docker stop user_go && docker rm user_go && docker rmi user-go-image && \
 	docker stop profile_go && docker rm profile_go && docker rmi profile-go-image && \
 	docker compose up -d
-
-# Правило генерации для каждой сущности
-$(ENTITIES):
-	  @echo "Генерация кода для сущности $@..."
-	  @mkdir -p $(PROTO_DIR)/$@/$(GEN_DIR)
-	  @$(PROTOC) \
-		--proto_path=$(PROTO_DIR)/$@/proto \
-		--go_out=$(PROTO_DIR)/$@/$(GEN_DIR) \
-		--go_opt=paths=source_relative \
-		--go-grpc_out=$(PROTO_DIR)/$@/$(GEN_DIR) \
-		--go-grpc_opt=paths=source_relative \
-		$(PROTO_DIR)/$@/proto/*.proto
-	  @echo "Генерация для $@ завершена."
-
-
 
 .PHONY: clean build
