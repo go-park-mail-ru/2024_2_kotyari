@@ -318,7 +318,7 @@ func (s *Server) setupRoutes() {
 	csrfProtected.HandleFunc("/api/v1/account/avatar", s.profile.UpdateProfileAvatar).Methods(http.MethodPut)
 	csrfProtected.HandleFunc("/api/v1/address", s.address.GetAddress).Methods(http.MethodGet)
 	csrfProtected.HandleFunc("/api/v1/address", s.address.UpdateAddressData).Methods(http.MethodPut)
-	csrfProtected.HandleFunc("/promocodes", s.promoCodes.GetUserPromoCodes).Methods(http.MethodGet)
+	csrfProtected.HandleFunc("/api/v1/promocodes", s.promoCodes.GetUserPromoCodes).Methods(http.MethodGet)
 	csrfProtected.Use(csrfMiddleware)
 	csrfProtected.Use(middlewares.RequestIDMiddleware)
 
@@ -328,7 +328,6 @@ func (s *Server) setupRoutes() {
 	reviewsSub := s.reviews.InitRoutes()
 	reviewsSub.Use(middlewares.RequestIDMiddleware)
 	reviewsSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
-
 }
 
 func (s *Server) Run() error {
