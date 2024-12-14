@@ -45,6 +45,7 @@ import (
 	fileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/file"
 	imageServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/image"
 	ordersServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders"
+	productServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/product"
 	reviewsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/reviews"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
@@ -124,6 +125,7 @@ type csrfDelivery interface {
 }
 
 func NewServer() (*Server, error) {
+
 	log := logger.InitLogger()
 	router := mux.NewRouter()
 	v, err := configs.SetupViper()
@@ -219,7 +221,8 @@ func NewServer() (*Server, error) {
 	cartHandler := cartDeliveryLib.NewCartHandler(cartService, cartRepo, errResolver, log)
 	cartApp := NewCartApp(router, cartHandler)
 
-	prodHandler := productDeliveryLib.NewProductHandler(errResolver, prodRepo, log, cartRepo)
+	productService := productServiceLib.NewProductService(cartRepo, prodRepo, log)
+	prodHandler := productDeliveryLib.NewProductHandler(errResolver, prodRepo, productService, log, cartRepo)
 	pa := NewProductsApp(router, prodHandler)
 
 	fileDelivery := fileDeliveryLib.NewFilesDelivery(fileRepo)

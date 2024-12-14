@@ -16,7 +16,7 @@ const queryGetProductCategories = `
     WHERE pc.product_id = $1 AND pc.active = true;
 	`
 
-func (ps *ProductsStore) getProductCategories(ctx context.Context, productID uint64) ([]model.Category, error) {
+func (ps *ProductsStore) getProductCategories(ctx context.Context, productID uint32) ([]model.Category, error) {
 	requestID, err := utils.GetContextRequestID(ctx)
 	if err != nil {
 		return nil, err

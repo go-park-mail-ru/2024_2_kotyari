@@ -19,7 +19,7 @@ func (pd *ProductsDelivery) GetAllProducts(w http.ResponseWriter, r *http.Reques
 
 	pd.log.Info("[ProductsDelivery.GetAllProducts] Started executing", slog.Any("request-id", requestID))
 
-	products, err := pd.repo.GetAllProducts(r.Context())
+	products, err := pd.allProductsGetter.GetAllProducts(r.Context())
 	if err != nil {
 		pd.log.Error("[ ProductsDelivery.GetAllProducts ] no products ]",
 			slog.String("method", r.Method),
