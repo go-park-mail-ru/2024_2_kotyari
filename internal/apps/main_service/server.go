@@ -339,6 +339,8 @@ func (s *Server) setupRoutes() {
 	authSub := s.r.Methods(http.MethodGet, http.MethodPost, http.MethodPut).Subrouter()
 	authSub.HandleFunc("/api/v1/csrf", s.csrf.GetCsrf).Methods(http.MethodGet)
 	authSub.HandleFunc("/api/v1/", s.auth.GetUserById).Methods(http.MethodGet)
+	authSub.HandleFunc("/api/v1/orders/updates", s.notifications.GetOrdersUpdates).Methods(http.MethodGet)
+
 	authSub.Use(middlewares.RequestIDMiddleware)
 	authSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 
@@ -352,7 +354,6 @@ func (s *Server) setupRoutes() {
 	csrfProtected.HandleFunc("/api/v1/account/avatar", s.profile.UpdateProfileAvatar).Methods(http.MethodPut)
 	csrfProtected.HandleFunc("/api/v1/address", s.address.GetAddress).Methods(http.MethodGet)
 	csrfProtected.HandleFunc("/api/v1/address", s.address.UpdateAddressData).Methods(http.MethodPut)
-	csrfProtected.HandleFunc("/api/v1/orders/updates", s.notifications.GetOrdersUpdates).Methods(http.MethodGet)
 	csrfProtected.HandleFunc("/api/v1/promocodes", s.promoCodes.GetUserPromoCodes).Methods(http.MethodGet)
 	csrfProtected.Use(csrfMiddleware)
 	csrfProtected.Use(middlewares.RequestIDMiddleware)
