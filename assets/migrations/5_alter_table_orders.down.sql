@@ -1,0 +1,1 @@
+alter table orders drop column if exists new_status;

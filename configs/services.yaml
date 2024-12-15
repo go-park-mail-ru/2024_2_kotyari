@@ -20,6 +20,11 @@ user_go:
   address: "0.0.0.0"
   port: "8001"
 
+notifications_go:
+  domain: "notifications_go"
+  address: "0.0.0.0"
+  port: "8006"
+
 promocodes_go:
   domain: "promocodes_go"
   address: "0.0.0.0"
