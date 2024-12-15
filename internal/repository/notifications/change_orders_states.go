@@ -12,7 +12,7 @@ func (n *NotificationsStore) ChangeOrdersStates() error {
 
 	const changeToPaidQuery = `
 		update orders
-		set status = $1
+		set status = $1, updated_at = now()
 		where status = $2
 		and created_at <= now() - $3::interval;
 	`
@@ -30,7 +30,7 @@ func (n *NotificationsStore) ChangeOrdersStates() error {
 
 	const changeToDeliveredQuery = `
 		update orders
-		set status = $1
+		set status = $1, updated_at = now()
 		where status = $2
 		and created_at <= now() - $3::interval;
 	`

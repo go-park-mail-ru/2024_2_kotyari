@@ -7,21 +7,20 @@ import (
 
 	notifications "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/notifications/gen"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 func (n *NotificationsGRPC) GetOrdersUpdates(ctx context.Context, request *notifications.GetOrdersUpdatesRequest) (*notifications.GetOrdersUpdatesResponse, error) {
-	requestID, err := utils.GetContextRequestID(ctx)
-	if err != nil {
-		n.log.Error("[NotificationsStore.GetUserOrdersStates] Failed to get request-id",
-			slog.String("error", err.Error()))
-
-		return nil, err
-	}
-
-	n.log.Error("[NotificationsStore.GetUserOrdersStates] Started executing", slog.Any("request-id", requestID))
+	//requestID, err := utils.GetContextRequestID(ctx)
+	//if err != nil {
+	//	n.log.Error("[NotificationsStore.GetUserOrdersStates] Failed to get request-id",
+	//		slog.String("error", err.Error()))
+	//
+	//	return nil, err
+	//}
+	//
+	//n.log.Error("[NotificationsStore.GetUserOrdersStates] Started executing", slog.Any("request-id", requestID))
 
 	states, err := n.userOrdersStatesGetter.GetUserOrdersStates(ctx, request.GetUserId())
 	if err != nil {
