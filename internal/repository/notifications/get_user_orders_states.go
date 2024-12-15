@@ -22,14 +22,14 @@ func (n *NotificationsStore) GetUserOrdersStates(ctx context.Context, userID uin
 	//
 	//n.log.Error("[NotificationsStore.GetUserOrdersStates] Started executing", slog.Any("request-id", requestID))
 
-	const query = `
-		select id, status
+	const selectStatusesQuery = `
+		select id, new_status
 		from orders
 		where user_id = $1
-		and updated_at >= now() - $2::interval;
+		and status != new_status;
 	`
 
-	rows, err := n.db.Query(ctx, query, userID, DefaultDeliveredInterval)
+	rows, err := n.db.Query(ctx, selectStatusesQuery, userID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			n.log.Error("[NotificationsStore.GetUserOrdersStates] No rows",
@@ -56,6 +56,14 @@ func (n *NotificationsStore) GetUserOrdersStates(ctx context.Context, userID uin
 		return nil, errs.NoOrdersUpdates
 	}
 
+	err = n.updateStatuses(ctx, userID)
+	if err != nil {
+		n.log.Error("[NotificationsStore.updateStatuses] Failed to update statuses",
+			slog.String("error", err.Error()))
+
+		return nil, err
+	}
+
 	orderStates := make([]model.OrderState, 0, len(orderStatuses))
 
 	for _, orderStatus := range orderStatuses {
@@ -63,4 +71,30 @@ func (n *NotificationsStore) GetUserOrdersStates(ctx context.Context, userID uin
 	}
 
 	return orderStates, nil
+}
+
+func (n *NotificationsStore) updateStatuses(ctx context.Context, userID uint32) error {
+	const updateStatuses = `
+		update orders
+		set status = new_status
+		where user_id = $1;
+	`
+
+	commandTag, err := n.db.Exec(ctx, updateStatuses, userID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			n.log.Info("[NotificationsStore.updateStatuses] No rows to update")
+
+			return nil
+		}
+
+		n.log.Error("[NotificationsStore.updateStatuses] Failed to update statuses",
+			slog.String("error", err.Error()))
+
+		return err
+	}
+
+	n.log.Info("[NotificationsStore.updateStatuses] Statuses affected: ", commandTag.RowsAffected())
+
+	return nil
 }

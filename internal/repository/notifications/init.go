@@ -9,11 +9,10 @@ import (
 type OrderState string
 
 const (
-	AwaitingPayment          OrderState = "awaiting_payment"
-	Paid                     OrderState = "paid"
-	Delivered                OrderState = "delivered"
-	DefaultPaidInterval                 = "30 minutes"
-	DefaultDeliveredInterval            = "60 minutes"
+	AwaitingPayment            OrderState = "awaiting_payment"
+	Paid                       OrderState = "paid"
+	Delivered                  OrderState = "delivered"
+	DefaultStateSwitchInterval            = "15 minutes"
 )
 
 type NotificationsStore struct {

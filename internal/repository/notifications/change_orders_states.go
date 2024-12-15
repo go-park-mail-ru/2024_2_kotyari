@@ -12,12 +12,12 @@ func (n *NotificationsStore) ChangeOrdersStates() error {
 
 	const changeToPaidQuery = `
 		update orders
-		set status = $1, updated_at = now()
+		set new_status = $1, updated_at = now()
 		where status = $2
 		and created_at <= now() - $3::interval;
 	`
 
-	commandTag, err := n.db.Exec(ctx, changeToPaidQuery, Paid, AwaitingPayment, DefaultPaidInterval)
+	commandTag, err := n.db.Exec(ctx, changeToPaidQuery, Paid, AwaitingPayment, DefaultStateSwitchInterval)
 	if err != nil {
 		n.log.Error("[NotificationsStore.ChangeOrdersStates] Failed to change orders statuses",
 			slog.String("error", err.Error()))
@@ -30,12 +30,12 @@ func (n *NotificationsStore) ChangeOrdersStates() error {
 
 	const changeToDeliveredQuery = `
 		update orders
-		set status = $1, updated_at = now()
+		set new_status = $1
 		where status = $2
-		and created_at <= now() - $3::interval;
+		and updated_at <= now() - $3::interval;
 	`
 
-	commandTag, err = n.db.Exec(ctx, changeToDeliveredQuery, Delivered, Paid, DefaultDeliveredInterval)
+	commandTag, err = n.db.Exec(ctx, changeToDeliveredQuery, Delivered, Paid, DefaultStateSwitchInterval)
 	if err != nil {
 		n.log.Error("[NotificationsStore.ChangeOrdersStates] Failed to change orders statuses",
 			slog.String("error", err.Error()))

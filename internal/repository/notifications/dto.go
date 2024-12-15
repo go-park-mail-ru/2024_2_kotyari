@@ -7,7 +7,7 @@ import (
 
 type OrderStateDTO struct {
 	ID    uuid.UUID `db:"id"`
-	State string    `db:"status"`
+	State string    `db:"new_status"`
 }
 
 func (o OrderStateDTO) ToModel() model.OrderState {
