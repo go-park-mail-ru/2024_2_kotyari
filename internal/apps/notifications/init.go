@@ -33,7 +33,10 @@ type NotificationsApp struct {
 }
 
 func NewNotificationsApp(config map[string]any) *NotificationsApp {
-	cfg := configs.ParseServiceViperConfig(config)
+	cfg, err := configs.ParseServiceViperConfig(config)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	slogLogger := logger.InitLogger()
 	db, err := postgres.LoadPgxPool()

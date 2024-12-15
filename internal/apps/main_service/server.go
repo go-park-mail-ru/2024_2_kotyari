@@ -125,7 +125,7 @@ type Server struct {
 	reviews       ReviewsApp
 	search        SearchApp
 	notifications notificationsDelivery
-	promoCodes promoCodesDelivery
+	promoCodes    promoCodesDelivery
 }
 
 type csrfDelivery interface {
@@ -262,7 +262,11 @@ func NewServer() (*Server, error) {
 	searchApp := NewSearchApp(router, searchHandler)
 
 	notificationsGRPCCfg := v.GetStringMap(notificationsService)
-	notificationsCfg := configs.ParseServiceViperConfig(notificationsGRPCCfg)
+	notificationsCfg, err := configs.ParseServiceViperConfig(notificationsGRPCCfg)
+	if err != nil {
+		return nil, err
+	}
+
 	notificationsConn, err := grpc.NewClient(fmt.Sprintf("%s:%s", notificationsCfg.Domain, notificationsCfg.Port),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
@@ -297,7 +301,7 @@ func NewServer() (*Server, error) {
 		reviews:       reviewsApp,
 		search:        searchApp,
 		notifications: notifications,
-		promoCodes: promoCodesGRPC,
+		promoCodes:    promoCodesGRPC,
 	}, nil
 }
 
