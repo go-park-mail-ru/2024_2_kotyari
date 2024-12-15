@@ -70,6 +70,23 @@ services:
       - redis_service
       - main_go
 
+  wishlists_go:
+    build:
+      context: .
+      dockerfile: ./cmd/wish_list/Dockerfile
+    ports:
+      - "8006:8006"
+      - "8086:8086"
+    image: wishlists-go-image
+    container_name: wishlists_go
+    restart: unless-stopped
+    networks:
+      - app-network
+    depends_on:
+      - pg_db
+      - mongo_db
+      - main_go
+
   notifications_go:
     build:
       context: .
@@ -194,6 +211,20 @@ services:
     networks:
       - app-network
 
+  mongo_db:
+    image: mongo
+    container_name: mongo_db
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+    ports:
+      - '27017:27017'
+    networks:
+      - app-network
+
 volumes:
   pg_data:
   redis_data:
@@ -202,7 +233,7 @@ volumes:
   grafana:
   prometheus_data:
   grafana_data:
-
+  mongo_data:
 
 
 networks:

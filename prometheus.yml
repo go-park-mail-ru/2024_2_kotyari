@@ -27,3 +27,8 @@ scrape_configs:
     metrics_path: /metrics
     static_configs:
       - targets: [ 'profile_go:8083' ]
+
+  - job_name: 'wishlists_go'
+    metrics_path: /metrics
+    static_configs:
+      - targets: [ 'wishlists_go:8086' ]

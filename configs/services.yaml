@@ -20,6 +20,17 @@ user_go:
   address: "0.0.0.0"
   port: "8001"
 
+wishlists_go:
+  domain: "wishlists_go"
+  address: "0.0.0.0"
+  port: "8006"
+
+mongo_db:
+  domain: "mongo_db"
+  port: "27017"
+  address: "0.0.0.0"
+
+
 notifications_go:
   domain: "notifications_go"
   address: "0.0.0.0"

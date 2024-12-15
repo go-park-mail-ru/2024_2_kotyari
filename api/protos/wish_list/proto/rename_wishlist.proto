@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package wishlist;
+option go_package = "https://github.com/go-park-mail-ru/2024_2_kotyari/wishlist/grpc_gen";
+
+
+message RenameWishlistRequest {
+  uint32 user_id = 1;
+  string new_name = 2;
+  string link = 3;
+}

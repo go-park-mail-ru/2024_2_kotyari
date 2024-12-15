@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package wishlist;
+option go_package = "https://github.com/go-park-mail-ru/2024_2_kotyari/wishlist/grpc_gen";
+
+
+message CopyWishlistRequest {
+  string source_link = 1;
+  uint32 target_user_id = 2;
+}
+
+message CopyWishlistResponse {
+  string new_link = 1;
+}
