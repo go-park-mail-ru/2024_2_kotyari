@@ -2,26 +2,25 @@ package notifications
 
 import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs"
-	"github.com/gorilla/mux"
-	"net/http"
+	"log/slog"
 )
 
-type notificationsDelivery interface {
-	Listen(w http.ResponseWriter, r *http.Request)
+type orderStatusesChanger interface {
+	Run()
 }
 
 type NotificationsApp struct {
-	notificationsDelivery notificationsDelivery
-	router                *mux.Router
-	config                configs.ServiceViperConfig
+	orderStatusesChanger orderStatusesChanger
+	log                  *slog.Logger
+	config               configs.ServiceViperConfig
 }
 
-func NewNotificationsApp(config map[string]any, notificationsDelivery notificationsDelivery, router *mux.Router) *NotificationsApp {
+func NewNotificationsApp(config map[string]any, orderStatusesChanger orderStatusesChanger, logger *slog.Logger) *NotificationsApp {
 	cfg := configs.ParseServiceViperConfig(config)
 
 	return &NotificationsApp{
-		notificationsDelivery: notificationsDelivery,
-		router:                router,
-		config:                cfg,
+		orderStatusesChanger: orderStatusesChanger,
+		log:                  logger,
+		config:               cfg,
 	}
 }
