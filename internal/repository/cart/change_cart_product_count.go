@@ -67,11 +67,7 @@ func (cs *CartsStore) updateProductCount(ctx context.Context, productID uint32, 
 
 	cs.log.Info("[CartsStore.updateProductCount] Started executing", slog.Any("request-id", requestID))
 
-	const updateProductCount = `
-		update products 
-		set count = count - $2
-		where id = $1;	
-	`
+	const updateProductCount = `update products set count=count-$2 where id=$1;`
 
 	commandTag, err := cs.db.Exec(ctx, updateProductCount, productID, count)
 	if err != nil {
@@ -97,11 +93,7 @@ func (cs *CartsStore) updateCartProductCount(ctx context.Context, productID uint
 
 	cs.log.Info("[CartsStore.updateCartProductCount] Started executing", slog.Any("request-id", requestID))
 
-	const updateCartProductCount = `
-        update carts
-        set count = count + $2
-        where product_id = $1 and user_id = $3;
-    `
+	const updateCartProductCount = `update carts set count=count+$2 where product_id=$1 and user_id=$3;`
 
 	commandTag, err := cs.db.Exec(ctx, updateCartProductCount, productID, count, userID)
 	if err != nil {

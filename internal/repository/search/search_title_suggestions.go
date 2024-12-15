@@ -18,7 +18,7 @@ func (s *SearchStore) GetSearchTitleSuggestions(ctx context.Context, queryParam 
 		return model.SearchTitleSuggestions{}, err
 	}
 
-	s.log.Info("[SearchStore.GetSearchTitleSuggestions], request-id: ", requestID)
+	s.log.Info("[SearchStore.GetSearchTitleSuggestions], request-id: ", slog.Any("req", requestID))
 
 	const query = `
 		select title from products

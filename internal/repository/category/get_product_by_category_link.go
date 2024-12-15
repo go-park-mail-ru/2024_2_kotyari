@@ -35,7 +35,7 @@ func (cs *CategoriesStore) GetProductsByCategoryLink(ctx context.Context, catego
 					FROM products p
 						JOIN product_categories pc ON p.id = pc.product_id
 						JOIN categories c ON pc.category_id = c.id
-					WHERE p.active = true AND p.count > 0 AND c.link_to = $1  -- Parameter for category name
+					WHERE p.active = true AND p.count > 0 AND c.link_to = $1
 					ORDER BY %s %s;
 					`, field, sortOrder)
 

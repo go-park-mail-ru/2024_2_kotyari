@@ -1,18 +1,18 @@
 package search
 
 import (
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/pool"
 	"log/slog"
 )
 
 type SearchStore struct {
-	db  *pgxpool.Pool
+	db  pool.DBPool
 	log *slog.Logger
 }
 
-func NewSearchStore(pool *pgxpool.Pool, logger *slog.Logger) *SearchStore {
+func NewSearchStore(db pool.DBPool, logger *slog.Logger) *SearchStore {
 	return &SearchStore{
-		db:  pool,
+		db:  db,
 		log: logger,
 	}
 }
