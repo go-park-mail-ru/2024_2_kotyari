@@ -2,17 +2,18 @@ package recommendations
 
 import (
 	"context"
+	"log/slog"
+
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"log/slog"
 )
 
 type productGetter interface {
-	GetProductByID(ctx context.Context, productID uint64) (model.ProductCard, error)
+	GetProductByID(ctx context.Context, productID uint32) (model.ProductCard, error)
 }
 
 type productsOfCategoryGetter interface {
-	GetRelatedProductsByProductID(ctx context.Context, productID uint64, sortField string, sortOrder string) ([]model.ProductCatalog, error)
+	GetRelatedProductsByProductID(ctx context.Context, productID uint32, sortField string, sortOrder string) ([]model.ProductCatalog, error)
 }
 
 type RecStore struct {

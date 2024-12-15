@@ -3,13 +3,14 @@ package recommendations
 import (
 	"context"
 	"fmt"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	"log/slog"
 	"sort"
 	"strings"
+
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
-func (rs *RecStore) GetRecommendations(ctx context.Context, productId uint64) ([]model.ProductCatalog, error) {
+func (rs *RecStore) GetRecommendations(ctx context.Context, productId uint32) ([]model.ProductCatalog, error) {
 	product, err := rs.productGetter.GetProductByID(ctx, productId)
 	if err != nil {
 		rs.log.Error("[ RecStore.GetRecommendations ] Ошибка при получении товара, на который требуются рекомендации",
@@ -67,7 +68,7 @@ func (rs *RecStore) GetRecommendations(ctx context.Context, productId uint64) ([
 
 	if len(scoredProducts) == 0 {
 		rs.log.Warn("[ RecStore.GetRecommendations ] No similar products found",
-			slog.Uint64("productId", productId),
+			slog.Any("productId", productId),
 		)
 		return nil, fmt.Errorf("no similar products found for productId: %d", productId)
 	}

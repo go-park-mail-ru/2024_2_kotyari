@@ -1,13 +1,13 @@
 package recommendations
 
 import (
+	"log/slog"
+	"net/http"
+
 	productDTO "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/product"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"github.com/gorilla/mux"
-	"log/slog"
-	"net/http"
-	"strconv"
 )
 
 func (h *RecDelivery) GetRecommendations(w http.ResponseWriter, r *http.Request) {
@@ -22,7 +22,7 @@ func (h *RecDelivery) GetRecommendations(w http.ResponseWriter, r *http.Request)
 	h.log.Info("", slog.Any("request-id", requestID))
 
 	vars := mux.Vars(r)
-	productId, err := strconv.ParseUint(vars["id"], 10, 32)
+	productId, err := utils.StrToUint32(vars["id"])
 	if err != nil {
 		utils.WriteErrorJSON(w, http.StatusInternalServerError, errs.InternalServerError)
 

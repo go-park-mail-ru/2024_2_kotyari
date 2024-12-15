@@ -2,11 +2,12 @@ package category
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	"log/slog"
+
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
-func (cs *CategoriesStore) GetRelatedProductsByProductID(ctx context.Context, productID uint64, sortField string, sortOrder string) ([]model.ProductCatalog, error) {
+func (cs *CategoriesStore) GetRelatedProductsByProductID(ctx context.Context, productID uint32, sortField string, sortOrder string) ([]model.ProductCatalog, error) {
 	categories, err := cs.categoriesGetter.GetProductCategories(ctx, productID)
 	if err != nil {
 	}
