@@ -7,20 +7,20 @@ import (
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
-	//"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"github.com/jackc/pgx/v5"
 )
 
 func (n *NotificationsStore) GetUserOrdersStates(ctx context.Context, userID uint32) ([]model.OrderState, error) {
-	//requestID, err := utils.GetContextRequestID(ctx)
-	//if err != nil {
-	//	n.log.Error("[NotificationsStore.GetUserOrdersStates] Failed to get request-id",
-	//		slog.String("error", err.Error()))
-	//
-	//	return nil, err
-	//}
-	//
-	//n.log.Error("[NotificationsStore.GetUserOrdersStates] Started executing", slog.Any("request-id", requestID))
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		n.log.Error("[NotificationsStore.GetUserOrdersStates] Failed to get request-id",
+			slog.String("error", err.Error()))
+
+		return nil, err
+	}
+
+	n.log.Error("[NotificationsStore.GetUserOrdersStates] Started executing", slog.Any("request-id", requestID))
 
 	const selectStatusesQuery = `
 		select id, new_status
