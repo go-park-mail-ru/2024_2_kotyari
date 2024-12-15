@@ -52,20 +52,11 @@ GEN_DIR := gen
 # Команда protoc
 PROTOC := protoc
 
+# Список всех сущностей (названия подпапок в ./api/protos)
+ENTITIES := $(shell find $(PROTO_DIR) -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
+
 # Общая цель для генерации всех сущностей
 proto-build: $(ENTITIES)
-
-$(ENTITIES):
-	@echo "Генерация кода для сущности $@..."
-	@mkdir -p $(PROTO_DIR)/$@/$(GEN_DIR)
-	@$(PROTOC) \
-		--proto_path=$(PROTO_DIR)/$@/proto \
-		--go_out=$(PROTO_DIR)/$@/$(GEN_DIR) \
-		--go_opt=paths=source_relative \
-		--go-grpc_out=$(PROTO_DIR)/$@/$(GEN_DIR) \
-		--go-grpc_opt=paths=source_relative \
-		$(PROTO_DIR)/$@/proto/*.proto
-	@echo "Генерация для $@ завершена."
 
 fmt:
 	go fmt ./...
@@ -87,6 +78,9 @@ user-refresh:
 
 profile-refresh:
 	docker stop profile_go && docker rm profile_go && docker rmi profile-go-image && docker compose up -d
+
+promocodes-refresh:
+	docker compose build promocodes_go --no-cache && docker compose up promocodes_go -d --force-recreate
 
 prometheus-refresh:
 	docker stop prometheus && docker rm prometheus && docker compose up -d
@@ -112,8 +106,6 @@ recreate-redis:
 all-delete:
 	docker compose down -v
 
-all-refresh: main-refresh pg-refresh redis-refresh
-
 apply-migrations:
 	@echo 'Applying migrations...'
 	@migrate -path $(MIGRATIONS_DIR) -database $(DB_URL) up
@@ -122,12 +114,7 @@ revert-migrations:
 	@echo 'Reverting migrations...'
 	@migrate -path $(MIGRATIONS_DIR) -database "$(DB_URL)" down
 
-
 back-refresh:
-	docker stop main_go && docker rm main_go && docker rmi main-go-image && \
-	docker stop rating_updater_go && docker rm rating_updater_go && docker rmi rating-updater-go-image && \
-	docker stop user_go && docker rm user_go && docker rmi user-go-image && \
-	docker stop profile_go && docker rm profile_go && docker rmi profile-go-image && \
-	docker compose up -d
+	docker compose build --no-cache && docker compose up -d --force-recreate
 
 .PHONY: clean build

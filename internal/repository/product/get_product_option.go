@@ -17,7 +17,7 @@ const queryGetOptions = `
     WHERE po.product_id = $1;
 `
 
-func (ps *ProductsStore) getProductOptions(ctx context.Context, productID uint64) (model.Options, error) {
+func (ps *ProductsStore) getProductOptions(ctx context.Context, productID uint32) (model.Options, error) {
 	requestID, err := utils.GetContextRequestID(ctx)
 	if err != nil {
 		return model.Options{}, err

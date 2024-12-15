@@ -20,6 +20,7 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/orders"
 	productDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/product"
 	profileDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/profile"
+	promocodesDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/promocodes"
 	reviewsDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/reviews"
 	searchDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/search"
 	sessionsDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/sessions"
@@ -44,6 +45,7 @@ import (
 	fileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/file"
 	imageServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/image"
 	ordersServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders"
+	productServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/product"
 	reviewsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/reviews"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
@@ -57,6 +59,7 @@ const (
 	ratingUpdaterService = "rating_updater"
 	profileService       = "profile_go"
 	userService          = "user_go"
+	promocodesService    = "promocodes_go"
 )
 
 type categoryApp interface {
@@ -80,6 +83,10 @@ type profilesDelivery interface {
 	ChangePassword(writer http.ResponseWriter, request *http.Request)
 }
 
+type promoCodesDelivery interface {
+	GetUserPromoCodes(w http.ResponseWriter, r *http.Request)
+}
+
 type addressesDelivery interface {
 	UpdateAddressData(writer http.ResponseWriter, request *http.Request)
 	GetAddress(writer http.ResponseWriter, request *http.Request)
@@ -95,21 +102,22 @@ type productsApp interface {
 }
 
 type Server struct {
-	r        *mux.Router
-	sessions SessionDelivery
-	auth     usersDelivery
-	product  productsApp
-	category categoryApp
-	profile  profilesDelivery
-	address  addressesDelivery
-	cfg      configs.ServiceViperConfig
-	log      *slog.Logger
-	files    filesDelivery
-	cart     CartApp
-	order    OrderApp
-	csrf     csrfDelivery
-	reviews  ReviewsApp
-	search   SearchApp
+	r          *mux.Router
+	sessions   SessionDelivery
+	auth       usersDelivery
+	product    productsApp
+	category   categoryApp
+	profile    profilesDelivery
+	address    addressesDelivery
+	cfg        configs.ServiceViperConfig
+	log        *slog.Logger
+	files      filesDelivery
+	cart       CartApp
+	order      OrderApp
+	csrf       csrfDelivery
+	reviews    ReviewsApp
+	search     SearchApp
+	promoCodes promoCodesDelivery
 }
 
 type csrfDelivery interface {
@@ -117,6 +125,7 @@ type csrfDelivery interface {
 }
 
 func NewServer() (*Server, error) {
+
 	log := logger.InitLogger()
 	router := mux.NewRouter()
 	v, err := configs.SetupViper()
@@ -160,7 +169,11 @@ func NewServer() (*Server, error) {
 	sessionsDelivery := sessionsDeliveryLib.NewSessionDelivery(sessionsRepo, errResolver)
 
 	userGRPCCfg := v.GetStringMap(userService)
-	userCfg := configs.ParseServiceViperConfig(userGRPCCfg)
+	userCfg, err := configs.ParseServiceViperConfig(userGRPCCfg)
+	if err != nil {
+		return nil, err
+	}
+
 	userConn, err := grpc.NewClient(fmt.Sprintf("%s:%s", userCfg.Domain, userCfg.Port),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
@@ -180,7 +193,11 @@ func NewServer() (*Server, error) {
 	addressHandler := addressDeliveryLib.NewAddressHandler(addressService, errResolver, log)
 
 	profileGRPCCfg := v.GetStringMap(profileService)
-	profileCfg := configs.ParseServiceViperConfig(profileGRPCCfg)
+	profileCfg, err := configs.ParseServiceViperConfig(profileGRPCCfg)
+	if err != nil {
+		return nil, err
+	}
+
 	profileConn, err := grpc.NewClient(fmt.Sprintf("%s:%s", profileCfg.Domain, profileCfg.Port),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
@@ -194,18 +211,24 @@ func NewServer() (*Server, error) {
 	prodRepo := productRepoLib.NewProductsStore(dbPool, log)
 	ca := NewCategoryApp(router, categoryDelivery)
 
+	promoCodesGRPC, err := promocodesDeliveryLib.NewPromoCodesGRPC(v.GetStringMap(promocodesService), errResolver, log)
+	if err != nil {
+		return nil, err
+	}
+
 	cartRepo := cartRepoLib.NewCartsStore(dbPool, log)
-	cartService := cartServiceLib.NewCartManager(cartRepo, prodRepo, log)
+	cartService := cartServiceLib.NewCartManager(cartRepo, promoCodesGRPC, prodRepo, log)
 	cartHandler := cartDeliveryLib.NewCartHandler(cartService, cartRepo, errResolver, log)
 	cartApp := NewCartApp(router, cartHandler)
 
-	prodHandler := productDeliveryLib.NewProductHandler(errResolver, prodRepo, log, cartRepo)
+	productService := productServiceLib.NewProductService(cartRepo, prodRepo, log)
+	prodHandler := productDeliveryLib.NewProductHandler(errResolver, prodRepo, productService, log, cartRepo)
 	pa := NewProductsApp(router, prodHandler)
 
 	fileDelivery := fileDeliveryLib.NewFilesDelivery(fileRepo)
 
 	ordersRepo := rorders.NewOrdersRepo(dbPool, log)
-	ordersManager := ordersServiceLib.NewOrdersManager(ordersRepo, log, cartRepo)
+	ordersManager := ordersServiceLib.NewOrdersManager(ordersRepo, promoCodesGRPC, log, cartRepo)
 	ordersHandler := orders.NewOrdersHandler(ordersManager, log, errResolver)
 	orderApp := NewOrderApp(router, ordersHandler)
 
@@ -232,23 +255,28 @@ func NewServer() (*Server, error) {
 	searchApp := NewSearchApp(router, searchHandler)
 
 	cfg := v.GetStringMap(mainService)
+	mainCfg, err := configs.ParseServiceViperConfig(cfg)
+	if err != nil {
+		return nil, err
+	}
 
 	return &Server{
-		r:        router,
-		auth:     userHandler,
-		product:  pa,
-		profile:  profileHandler,
-		address:  addressHandler,
-		category: ca,
-		cfg:      configs.ParseServiceViperConfig(cfg),
-		log:      log,
-		sessions: sessionsDelivery,
-		files:    fileDelivery,
-		cart:     cartApp,
-		order:    orderApp,
-		csrf:     csrfHandler,
-		reviews:  reviewsApp,
-		search:   searchApp,
+		r:          router,
+		auth:       userHandler,
+		product:    pa,
+		profile:    profileHandler,
+		address:    addressHandler,
+		category:   ca,
+		cfg:        mainCfg,
+		log:        log,
+		sessions:   sessionsDelivery,
+		files:      fileDelivery,
+		cart:       cartApp,
+		order:      orderApp,
+		csrf:       csrfHandler,
+		reviews:    reviewsApp,
+		search:     searchApp,
+		promoCodes: promoCodesGRPC,
 	}, nil
 }
 
@@ -293,6 +321,7 @@ func (s *Server) setupRoutes() {
 	csrfProtected.HandleFunc("/api/v1/account/avatar", s.profile.UpdateProfileAvatar).Methods(http.MethodPut)
 	csrfProtected.HandleFunc("/api/v1/address", s.address.GetAddress).Methods(http.MethodGet)
 	csrfProtected.HandleFunc("/api/v1/address", s.address.UpdateAddressData).Methods(http.MethodPut)
+	csrfProtected.HandleFunc("/api/v1/promocodes", s.promoCodes.GetUserPromoCodes).Methods(http.MethodGet)
 	csrfProtected.Use(csrfMiddleware)
 	csrfProtected.Use(middlewares.RequestIDMiddleware)
 
@@ -302,7 +331,6 @@ func (s *Server) setupRoutes() {
 	reviewsSub := s.reviews.InitRoutes()
 	reviewsSub.Use(middlewares.RequestIDMiddleware)
 	reviewsSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
-
 }
 
 func (s *Server) Run() error {

@@ -109,6 +109,6 @@ func newDTOProductCardFromModel(pc model.ProductCard) dtoProductCard {
 			Name: pc.Seller.Name,
 			Logo: pc.Seller.Logo,
 		},
-		InCart: false,
+		InCart: pc.IsInCart,
 	}
 }

@@ -52,7 +52,7 @@ func (cs *CartsStore) GetSelectedFromCart(ctx context.Context, userID uint32) (*
 		SELECT p.id, p.title, p.price, p.image_url, p.weight, c.count, c.delivery_date, u.username, u.preferred_payment_method,
            a.address
 		FROM users u
-			LEFT JOIN carts c ON u.id = c.user_id AND c.is_deleted = false
+			LEFT JOIN carts c ON u.id = c.user_id AND c.is_deleted = false and c.is_selected = true
 			LEFT JOIN products p ON p.id = c.product_id
 			LEFT JOIN addresses a ON u.id = a.user_id
 		WHERE u.id=$1;

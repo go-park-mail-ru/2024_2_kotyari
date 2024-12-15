@@ -2,6 +2,7 @@ package orders
 
 import (
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -32,8 +33,15 @@ func (h *OrdersHandler) CreateOrderFromCart(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	order, err := h.ordersManager.CreateOrderFromCart(r.Context(), request.Address, userID)
+	order, err := h.ordersManager.CreateOrderFromCart(r.Context(), request.Address, userID, request.PromoCode)
 	if err != nil {
+		if errors.Is(err, errs.NoPromoCode) {
+			h.logger.Error("[delivery.CreateOrderFromCart] No promo code", slog.String("error", err.Error()))
+			utils.WriteErrorJSONByError(w, errs.NoPromoCode, h.errResolver)
+
+			return
+		}
+
 		h.logger.Error("[delivery.CreateOrderFromCart] Failed to create order from cart", slog.String("error", err.Error()))
 		utils.WriteErrorJSONByError(w, errs.InternalServerError, h.errResolver)
 		return

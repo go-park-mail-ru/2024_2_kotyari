@@ -7,6 +7,7 @@ type ProductCard struct {
 	Options         Options
 	Characteristics map[string]string
 	Seller          Seller
+	IsInCart        bool
 }
 
 type Image struct {

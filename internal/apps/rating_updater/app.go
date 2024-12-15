@@ -70,7 +70,12 @@ func NewApp(config map[string]any) (*RatingUpdaterApp, error) {
 	ratingUpdaterDelivery := reviewsUpdaterDeliveryLib.NewRatingUpdaterGRPC(ratingUpdaterManager, log)
 	ratingUpdaterDelivery.Register(grpcServer)
 
-	cfg := configs.ParseServiceViperConfig(config)
+	cfg, err := configs.ParseServiceViperConfig(config)
+	if err != nil {
+		log.Error("RatingUpdaterApp [NewApp] Failed to parse viper config")
+
+		return nil, err
+	}
 
 	return &RatingUpdaterApp{
 		delivery: ratingUpdaterDelivery,

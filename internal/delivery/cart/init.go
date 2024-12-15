@@ -10,11 +10,11 @@ import (
 )
 
 type cartManager interface {
-	ChangeCartProductCount(ctx context.Context, productID uint32, count int32, userID uint32) error
+	ChangeCartProductCount(ctx context.Context, productID uint32, count int32, userID uint32) (uint32, error)
 	AddProduct(ctx context.Context, productID uint32, userID uint32) error
 	RemoveProduct(ctx context.Context, productID uint32, userID uint32) error
 	ChangeCartProductSelectedState(ctx context.Context, productID uint32, userID uint32, isSelected bool) error
-	GetSelectedFromCart(ctx context.Context, userID uint32) (model.CartForOrder, error)
+	GetSelectedFromCart(ctx context.Context, userID uint32, promoName string) (model.CartForOrder, error)
 	RemoveSelected(ctx context.Context, userID uint32) error
 }
 

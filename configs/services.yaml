@@ -19,3 +19,12 @@ user_go:
   domain: "user_go"
   address: "0.0.0.0"
   port: "8001"
+
+promocodes_go:
+  domain: "promocodes_go"
+  address: "0.0.0.0"
+  port: "8005"
+
+kafka:
+  domain: "kafka"
+  port: "9092"

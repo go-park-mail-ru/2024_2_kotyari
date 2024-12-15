@@ -4,15 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"github.com/jackc/pgx/v5"
 )
 
-func (ps *ProductsStore) GetProductByID(ctx context.Context, productID uint64) (model.ProductCard, error) {
+func (ps *ProductsStore) GetProductByID(ctx context.Context, productID uint32) (model.ProductCard, error) {
 	requestID, err := utils.GetContextRequestID(ctx)
 	if err != nil {
 		return model.ProductCard{}, err
@@ -52,7 +52,7 @@ func (ps *ProductsStore) GetProductByID(ctx context.Context, productID uint64) (
 	return card, nil
 }
 
-func (ps *ProductsStore) getProductInfo(ctx context.Context, productID uint64) (model.ProductCard, error) {
+func (ps *ProductsStore) getProductInfo(ctx context.Context, productID uint32) (model.ProductCard, error) {
 	const query = `
     SELECT 
         p.id, p.title, p.count, 
@@ -81,7 +81,7 @@ func (ps *ProductsStore) getProductInfo(ctx context.Context, productID uint64) (
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			ps.log.Error("[ ProductsStore.GetProductByID ] ProductBase not found",
-				slog.Uint64("productID", productID),
+				slog.Any("productID", productID),
 			)
 
 			return model.ProductCard{}, errs.ProductsDoesNotExists

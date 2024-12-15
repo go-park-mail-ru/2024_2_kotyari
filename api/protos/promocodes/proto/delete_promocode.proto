@@ -1,0 +1,12 @@
+syntax="proto3";
+
+package promocodes;
+
+option go_package = "https://github.com/go-park-mail-ru/2024_2_kotyari/api/protos/promocodes";
+
+import "promocode.proto";
+
+message DeletePromoCodesRequest {
+  uint32 user_id = 1;
+  uint32 promo_id = 2;
+}
