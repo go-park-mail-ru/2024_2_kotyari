@@ -24,7 +24,7 @@ func (n *NotificationsGRPC) GetOrdersUpdates(ctx context.Context, request *notif
 
 	states, err := n.userOrdersStatesGetter.GetUserOrdersStates(ctx, request.GetUserId())
 	if err != nil {
-		if errors.Is(err, errs.NoOrders) {
+		if errors.Is(err, errs.NoOrdersUpdates) {
 			n.log.Error("[NotificationsGRPC.GetOrdersUpdates] No orders for user")
 
 			return nil, status.Error(codes.NotFound, err.Error())

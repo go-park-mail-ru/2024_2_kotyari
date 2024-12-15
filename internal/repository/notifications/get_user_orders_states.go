@@ -35,7 +35,7 @@ func (n *NotificationsStore) GetUserOrdersStates(ctx context.Context, userID uin
 			n.log.Error("[NotificationsStore.GetUserOrdersStates] No rows",
 				slog.String("error", err.Error()))
 
-			return nil, errs.NoOrders
+			return nil, errs.NoOrdersUpdates
 		}
 
 		n.log.Error("[NotificationsStore.GetUserOrdersStates] Failed to get rows",
@@ -50,6 +50,10 @@ func (n *NotificationsStore) GetUserOrdersStates(ctx context.Context, userID uin
 			slog.String("error", err.Error()))
 
 		return nil, err
+	}
+
+	if len(orderStatuses) == 0 {
+		return nil, errs.NoOrdersUpdates
 	}
 
 	orderStates := make([]model.OrderState, 0, len(orderStatuses))

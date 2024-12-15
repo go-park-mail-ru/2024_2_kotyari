@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	notificationsGRPC "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/notifications/gen"
 	profilegrpc "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/profile/gen"
 	usergrpc "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/user/gen"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs"
@@ -17,6 +18,7 @@ import (
 	categoryDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/category"
 	csrfDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/csrf"
 	fileDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/file"
+	notificationsDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/notifications"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/orders"
 	productDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/product"
 	profileDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/profile"
@@ -59,6 +61,7 @@ const (
 	ratingUpdaterService = "rating_updater"
 	profileService       = "profile_go"
 	userService          = "user_go"
+	notificationsService = "notifications_go"
 	promocodesService    = "promocodes_go"
 )
 
@@ -101,22 +104,27 @@ type productsApp interface {
 	InitProductsRoutes() *mux.Router
 }
 
+type notificationsDelivery interface {
+	GetOrdersUpdates(w http.ResponseWriter, r *http.Request)
+}
+
 type Server struct {
-	r          *mux.Router
-	sessions   SessionDelivery
-	auth       usersDelivery
-	product    productsApp
-	category   categoryApp
-	profile    profilesDelivery
-	address    addressesDelivery
-	cfg        configs.ServiceViperConfig
-	log        *slog.Logger
-	files      filesDelivery
-	cart       CartApp
-	order      OrderApp
-	csrf       csrfDelivery
-	reviews    ReviewsApp
-	search     SearchApp
+	r             *mux.Router
+	sessions      SessionDelivery
+	auth          usersDelivery
+	product       productsApp
+	category      categoryApp
+	profile       profilesDelivery
+	address       addressesDelivery
+	cfg           configs.ServiceViperConfig
+	log           *slog.Logger
+	files         filesDelivery
+	cart          CartApp
+	order         OrderApp
+	csrf          csrfDelivery
+	reviews       ReviewsApp
+	search        SearchApp
+	notifications notificationsDelivery
 	promoCodes promoCodesDelivery
 }
 
@@ -125,7 +133,6 @@ type csrfDelivery interface {
 }
 
 func NewServer() (*Server, error) {
-
 	log := logger.InitLogger()
 	router := mux.NewRouter()
 	v, err := configs.SetupViper()
@@ -254,6 +261,19 @@ func NewServer() (*Server, error) {
 	searchHandler := searchDeliveryLib.NewSearchDelivery(searchRepo, errResolver, log)
 	searchApp := NewSearchApp(router, searchHandler)
 
+	notificationsGRPCCfg := v.GetStringMap(notificationsService)
+	notificationsCfg := configs.ParseServiceViperConfig(notificationsGRPCCfg)
+	notificationsConn, err := grpc.NewClient(fmt.Sprintf("%s:%s", notificationsCfg.Domain, notificationsCfg.Port),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	notificationsClient := notificationsGRPC.NewNotificationsClient(notificationsConn)
+
+	notifications := notificationsDeliveryLib.NewNotificationsDelivery(notificationsClient, errResolver, log)
+
 	cfg := v.GetStringMap(mainService)
 	mainCfg, err := configs.ParseServiceViperConfig(cfg)
 	if err != nil {
@@ -261,21 +281,22 @@ func NewServer() (*Server, error) {
 	}
 
 	return &Server{
-		r:          router,
-		auth:       userHandler,
-		product:    pa,
-		profile:    profileHandler,
-		address:    addressHandler,
-		category:   ca,
-		cfg:        mainCfg,
-		log:        log,
-		sessions:   sessionsDelivery,
-		files:      fileDelivery,
-		cart:       cartApp,
-		order:      orderApp,
-		csrf:       csrfHandler,
-		reviews:    reviewsApp,
-		search:     searchApp,
+		r:             router,
+		auth:          userHandler,
+		product:       pa,
+		profile:       profileHandler,
+		address:       addressHandler,
+		category:      ca,
+		cfg:           mainCfg,
+		log:           log,
+		sessions:      sessionsDelivery,
+		files:         fileDelivery,
+		cart:          cartApp,
+		order:         orderApp,
+		csrf:          csrfHandler,
+		reviews:       reviewsApp,
+		search:        searchApp,
+		notifications: notifications,
 		promoCodes: promoCodesGRPC,
 	}, nil
 }
@@ -321,6 +342,7 @@ func (s *Server) setupRoutes() {
 	csrfProtected.HandleFunc("/api/v1/account/avatar", s.profile.UpdateProfileAvatar).Methods(http.MethodPut)
 	csrfProtected.HandleFunc("/api/v1/address", s.address.GetAddress).Methods(http.MethodGet)
 	csrfProtected.HandleFunc("/api/v1/address", s.address.UpdateAddressData).Methods(http.MethodPut)
+	csrfProtected.HandleFunc("/api/v1/orders/updates", s.notifications.GetOrdersUpdates).Methods(http.MethodGet)
 	csrfProtected.HandleFunc("/api/v1/promocodes", s.promoCodes.GetUserPromoCodes).Methods(http.MethodGet)
 	csrfProtected.Use(csrfMiddleware)
 	csrfProtected.Use(middlewares.RequestIDMiddleware)
