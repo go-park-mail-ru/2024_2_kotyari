@@ -63,6 +63,7 @@ var (
 	NoPromoCode                   = errors.New("этого промокода нет")
 	FailedToRetrievePromoCode     = errors.New("не удалось получить промокод")
 	FailedToRetrievePromoCodes    = errors.New("не удалось получить промокоды")
+	NoOrders                      = errors.New("у этого пользователя нет заказов")
 )
 
 type ErrorStore struct {
@@ -125,6 +126,7 @@ func NewErrorStore() *ErrorStore {
 			ReviewAlreadyExists:           http.StatusConflict,
 			NoTitlesToSuggest:             http.StatusNotFound,
 			FailedToChangeProductRating:   http.StatusInternalServerError,
+			NoOrders:                      http.StatusNotFound,
 			NoPromoCodesForUser:           http.StatusNotFound,
 			FailedToParseConfig:           http.StatusInternalServerError,
 			NoPromoCode:                   http.StatusNotFound,

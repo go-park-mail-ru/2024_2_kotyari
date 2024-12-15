@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package notifications;
+
+option go_package = "https://github.com/go-park-mail-ru/2024_2_kotyari/api/protos/notifications";
+
+message GetOrdersUpdatesRequest {
+  uint32 user_id = 1;
+}
+
+message OrderUpdateMessage {
+  string order_id = 1;
+  string new_status = 2;
+}
+
+message GetOrdersUpdatesResponse {
+  repeated OrderUpdateMessage orders_updates = 2;
+}
