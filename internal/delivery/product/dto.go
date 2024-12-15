@@ -2,7 +2,7 @@ package product
 
 import "github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 
-type dtoProductCatalog struct {
+type DtoProductCatalog struct {
 	dtoProduct
 	ImageURL string `json:"image_url"`
 }
@@ -18,8 +18,8 @@ type dtoProduct struct {
 	Rating        float32 `json:"rating"`
 }
 
-func newDTOProductCatalogFromModel(pc model.ProductCatalog) dtoProductCatalog {
-	return dtoProductCatalog{
+func NewDTOProductCatalogFromModel(pc model.ProductCatalog) DtoProductCatalog {
+	return DtoProductCatalog{
 		dtoProduct: dtoProduct{
 			ID:            pc.ID,
 			Description:   pc.Description,

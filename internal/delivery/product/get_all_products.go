@@ -32,9 +32,9 @@ func (pd *ProductsDelivery) GetAllProducts(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	dtoProducts := make([]dtoProductCatalog, len(products))
+	dtoProducts := make([]DtoProductCatalog, len(products))
 	for i, product := range products {
-		dtoProducts[i] = newDTOProductCatalogFromModel(product)
+		dtoProducts[i] = NewDTOProductCatalogFromModel(product)
 	}
 
 	utils.WriteJSON(w, http.StatusOK, dtoProducts)
