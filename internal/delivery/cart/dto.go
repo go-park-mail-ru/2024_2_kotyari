@@ -28,6 +28,7 @@ func (r ChangeCartProductSelectedStateRequest) ToModel() bool {
 
 type GetCartResponse struct {
 	ID           uint32               `json:"id"`
+	TotalWeight  float32              `json:"total_weight"`
 	DeliveryDate time.Time            `json:"delivery_date"`
 	Products     []GetProductResponse `json:"products"`
 }
@@ -50,6 +51,7 @@ func cartResponseFromModel(cart model.Cart, products []GetProductResponse) GetCa
 		ID:           cart.ID,
 		DeliveryDate: cart.DeliveryDate,
 		Products:     products,
+		TotalWeight:  cart.TotalWeight,
 	}
 }
 

@@ -20,7 +20,7 @@ func (n *NotificationsStore) GetUserOrdersStates(ctx context.Context, userID uin
 		return nil, err
 	}
 
-	n.log.Error("[NotificationsStore.GetUserOrdersStates] Started executing", slog.Any("request-id", requestID))
+	n.log.Info("[NotificationsStore.GetUserOrdersStates] Started executing", slog.Any("request-id", requestID))
 
 	const selectStatusesQuery = `
 		select id, new_status

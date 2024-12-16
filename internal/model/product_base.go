@@ -9,4 +9,5 @@ type BaseProduct struct {
 	OriginalPrice uint32
 	Discount      uint32
 	Rating        float32
+	Weight        float32
 }

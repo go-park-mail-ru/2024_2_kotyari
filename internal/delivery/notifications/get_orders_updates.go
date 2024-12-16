@@ -20,7 +20,7 @@ func (n *NotificationsHandler) GetOrdersUpdates(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	n.log.Info("[NotificationsHandler.GetOrdersUpdates] AddReview handler",
+	n.log.Info("[NotificationsHandler.GetOrdersUpdates] GetOrdersUpdates handler",
 		slog.Any("request-id", requestID))
 
 	userID, ok := utils.GetContextSessionUserID(r.Context())
