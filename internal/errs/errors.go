@@ -64,6 +64,7 @@ var (
 	NoPromoCode                   = errors.New("Этого промокода нет")
 	FailedToRetrievePromoCode     = errors.New("Не удалось получить промокод")
 	FailedToRetrievePromoCodes    = errors.New("Не удалось получить промокоды")
+	ErrNotPermitted               = errors.New("Нет прав для изменения")
 )
 
 type ErrorStore struct {
