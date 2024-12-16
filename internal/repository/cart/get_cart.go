@@ -21,7 +21,7 @@ func (cs *CartsStore) GetCart(ctx context.Context, userID uint32, deliveryDate t
 	cs.log.Info("[CartsStore.GetCart] Started executing", slog.Any("request-id", requestID))
 
 	const query = `
-		select c.id, p.id, title, price, description, image_url, original_price, discount, c.count, c.is_selected from products p
+		select c.id, p.id, title, price, p.weight, description, image_url, original_price, discount, c.count, c.is_selected from products p
 		join carts c on p.id = c.product_id where user_id=$1 and c.is_deleted = false and c.count>0;
 	`
 
@@ -47,6 +47,7 @@ func (cs *CartsStore) GetCart(ctx context.Context, userID uint32, deliveryDate t
 			&product.ID,
 			&product.Title,
 			&product.Price,
+			&product.Weight,
 			&product.Description,
 			&product.ImageURL,
 			&product.OriginalPrice,
@@ -64,6 +65,10 @@ func (cs *CartsStore) GetCart(ctx context.Context, userID uint32, deliveryDate t
 
 	if len(cart.Products) == 0 {
 		return model.Cart{}, errs.EmptyCart
+	}
+
+	for _, product := range cart.Products {
+		cart.TotalWeight += product.Weight
 	}
 
 	cart.UserID = userID

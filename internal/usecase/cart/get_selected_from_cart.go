@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"math"
 	"time"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
@@ -41,7 +42,7 @@ func (cm *CartManager) GetSelectedFromCart(ctx context.Context, userID uint32, p
 				Items:  []model.CartProductForOrder{},
 			}
 		}
-		deliveryDatesMap[product.DeliveryDate].Weight += totalProductWeight
+		deliveryDatesMap[product.DeliveryDate].Weight += float32(math.Round(float64(totalProductWeight)*100) / 100)
 		deliveryDatesMap[product.DeliveryDate].Items = append(deliveryDatesMap[product.DeliveryDate].Items, product)
 	}
 
