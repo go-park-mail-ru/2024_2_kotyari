@@ -8,7 +8,7 @@ import (
 )
 
 func (wllr *WishListLinksRepo) GetUserIDFromLink(ctx context.Context, link string) (uint32, error) {
-	const query = "SELECT user_id FROM wishlist_links WHERE link = $1"
+	const query = "SELECT user_id FROM wish_list_links WHERE link = $1"
 
 	var userID uint32
 

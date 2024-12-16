@@ -7,5 +7,10 @@ import (
 )
 
 func (wlg *WishlistGrpc) RemoveFromWishlists(ctx context.Context, in *wishlistgrpc.RemoveFromWishlistsRequest) (*empty.Empty, error) {
+	err := wlg.manager.RemoveFromWishlists(ctx, in.GetUserId(), in.GetLinks(), in.GetProductId())
+	if err != nil {
+		return nil, err
+	}
+
 	return &empty.Empty{}, nil
 }

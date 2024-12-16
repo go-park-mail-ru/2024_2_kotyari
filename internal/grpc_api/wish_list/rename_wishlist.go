@@ -7,6 +7,10 @@ import (
 )
 
 func (wlg *WishlistGrpc) RenameWishlist(ctx context.Context, in *wishlistgrpc.RenameWishlistRequest) (*empty.Empty, error) {
+	err := wlg.manager.RenameWishList(ctx, in.GetUserId(), in.GetNewName(), in.GetLink())
+	if err != nil {
+		return nil, err
+	}
 
 	return &empty.Empty{}, nil
 }

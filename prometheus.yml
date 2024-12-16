@@ -31,4 +31,4 @@ scrape_configs:
   - job_name: 'wishlists_go'
     metrics_path: /metrics
     static_configs:
-      - targets: [ 'wishlists_go:8086' ]
+      - targets: [ 'wishlists_go:8087' ]

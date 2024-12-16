@@ -101,6 +101,10 @@ promocodes-refresh:
 prometheus-refresh:
 	docker stop prometheus && docker rm prometheus && docker compose up -d
 
+wishlists-refresh:
+	docker compose build wishlists_go --no-cache && docker compose up wishlists_go -d --force-recreate
+	#docker stop wishlists_go && docker rm wishlists_go && docker rmi wishlists-go-image && docker compose up -d
+
 grafana-refresh:
 	docker stop grafana && docker rm grafana && docker compose up -d
 

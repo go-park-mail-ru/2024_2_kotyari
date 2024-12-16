@@ -1,7 +1,8 @@
-package wish_list
+package main
 
 import (
 	"fmt"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/apps/wish_list_service"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs/logger"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
@@ -33,7 +34,9 @@ func main() {
 		log.Fatalf("Error setting up viper %v", err)
 	}
 
-	_ = viper.GetStringMap(wishlistService)
+	conf := viper.GetStringMap(wishlistService)
+	log.Println("service: ", wishlistService)
+	log.Printf("config: %+v", conf)
 
 	slogLog := logger.InitLogger()
 
@@ -46,13 +49,16 @@ func main() {
 	}
 
 	interceptor := metrics2.NewGrpcMiddleware(*metrics, errorResolver)
-	_ = grpc.NewServer(grpc.ChainUnaryInterceptor(interceptor.ServerMetricsInterceptor))
+	server := grpc.NewServer(grpc.ChainUnaryInterceptor(interceptor.ServerMetricsInterceptor))
 
-	//app, err := user.NewUsersApp(slogLog, server, conf)
+	app, err := wish_list_service.NewWishlistApp(conf, server)
+	if err != nil {
+		log.Fatalf("ошибка при инициализации %v", err)
+	}
 
 	router := mux.NewRouter()
 	router.PathPrefix("/metrics").Handler(promhttp.Handler())
-	serverProm := http.Server{Handler: router, Addr: fmt.Sprintf(":%d", 8086), ReadHeaderTimeout: 10 * time.Second}
+	serverProm := http.Server{Handler: router, Addr: fmt.Sprintf(":%d", 8087), ReadHeaderTimeout: 10 * time.Second}
 
 	go func() {
 		if err = serverProm.ListenAndServe(); err != nil {
@@ -60,7 +66,7 @@ func main() {
 		}
 	}()
 
-	//err = app.Run()
+	err = app.Run()
 	if err != nil {
 		log.Fatalf("err %v", err)
 	}

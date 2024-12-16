@@ -29,7 +29,7 @@ func (pd *ProfilesDelivery) UpdateProfileData(w http.ResponseWriter, r *http.Req
 	}
 	var req UpdateProfile
 
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err = json.NewDecoder(r.Body).Decode(&req); err != nil {
 		pd.log.Error("[ ProfilesDelivery.UpdateProfileData ] Ошибка десериализации запроса",
 			slog.String("error", err.Error()),
 		)

@@ -1,4 +1,4 @@
-package user
+package wish_list_service
 
 import (
 	"fmt"
@@ -6,21 +6,21 @@ import (
 	"net"
 )
 
-func (app *UsersApp) Run() error {
+func (app *WishlistApp) Run() error {
 	lis, err := net.Listen("tcp",
 		fmt.Sprintf("%s:%s", app.config.Address, app.config.Port),
 	)
 	if err != nil {
-		app.log.Error("[  UsersApp.Run ] ",
+		app.log.Error("[  WishlistApp.Run ] ",
 			slog.String("error", err.Error()),
 		)
 
 		return err
 	}
 
-	app.delivery.Register(app.gRPCServer)
+	app.server.Register(app.gRPCServer)
 
-	app.log.Info("[ UsersApp.Run ]",
+	app.log.Info("[ WishlistApp.Run ]",
 		slog.String("address", app.config.Address+app.config.Port),
 	)
 	if err = app.gRPCServer.Serve(lis); err != nil {

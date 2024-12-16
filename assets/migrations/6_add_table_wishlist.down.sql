@@ -1,1 +1,1 @@
-drop table if exists wishlist;
+drop table if exists wish_list_links;

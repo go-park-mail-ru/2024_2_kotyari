@@ -75,8 +75,8 @@ services:
       context: .
       dockerfile: ./cmd/wish_list/Dockerfile
     ports:
-      - "8006:8006"
-      - "8086:8086"
+      - "8007:8007"
+      - "8087:8087"
     image: wishlists-go-image
     container_name: wishlists_go
     restart: unless-stopped
@@ -217,8 +217,8 @@ services:
     volumes:
       - mongo_data:/data/db
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+#      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+#      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
       - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
     ports:
       - '27017:27017'

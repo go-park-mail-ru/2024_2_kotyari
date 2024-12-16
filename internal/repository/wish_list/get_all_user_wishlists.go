@@ -11,9 +11,11 @@ import (
 )
 
 func (wlr *WishListRepo) GetALlUserWishlists(ctx context.Context, userID uint32) ([]model.Wishlist, error) {
+	wlr.log.Info("[ WishListRepo.GetALlUserWishlists ]", slog.Any("userId", userID))
+
 	filter := bson.M{"user_id": userID}
 
-	var result = dtoUserWishLists{}
+	var result dtoUserWishLists
 
 	err := wlr.collection.FindOne(ctx, filter).Decode(&result)
 	if err != nil {
@@ -23,9 +25,17 @@ func (wlr *WishListRepo) GetALlUserWishlists(ctx context.Context, userID uint32)
 
 		wlr.log.Error("[ WishListRepo.GetALlUserWishlists ] ",
 			"func", "FindOne",
-			slog.String("err", err.Error()))
+			slog.Any("err", err))
 
 		return nil, fmt.Errorf("внутренняя ошибка сервера %w", err)
+	}
+
+	wlr.log.Info("[ WishListRepo.GetALlUserWishlists ]",
+		slog.Any("userId", userID),
+		slog.Any("result", result))
+
+	if len(result.Wishlists) == 0 {
+		return []model.Wishlist{}, nil
 	}
 
 	res := make([]model.Wishlist, len(result.Wishlists))
@@ -43,7 +53,12 @@ func (wlr *WishListRepo) GetALlUserWishlists(ctx context.Context, userID uint32)
 				AddedAt:   it.AddedAt,
 			}
 		}
+		res[i].Items = items
 	}
+
+	wlr.log.Info("[ WishListRepo.GetALlUserWishlists ]",
+		slog.Any("userId", userID),
+		slog.Any("res", res))
 
 	return res, nil
 }
