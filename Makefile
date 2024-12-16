@@ -26,7 +26,8 @@ help:
 	@echo 'apply-migrations - Apply all migrations from assets/migrations folder'
 	@echo 'revert-migrations - Revert all migrations from assets/migrations folder'
 	@echo 'For this tools to work you need to have migrate tool to be installed'
-	@echo 'You can install it by running this command: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest'
+	@echo 'You can install it by running this command: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest and export PATH=$PATH:$GOPATH/bin'
+
 
 run:
 	go run ./cmd/main.go
@@ -43,16 +44,31 @@ test-coverage:
 	go tool cover -func=coverage.out
 	go tool cover -html=coverage.out
 
-# Путь к папке с прототипами
 PROTO_DIR := ./api/protos
 
-# Путь к папке сгенерированных файлов
 GEN_DIR := gen
 
-# Команда protoc
 PROTOC := protoc
 
-# Общая цель для генерации всех сущностей
+ENTITIES := $(shell find $(PROTO_DIR) -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
+
+# export PATH=$PATH:$(go env GOPATH)/bin
+
+$(ENTITIES):
+	@echo "Генерация кода для сущности $@..."
+	@mkdir -p $(PROTO_DIR)/$@/$(GEN_DIR)
+	@$(PROTOC) \
+		--proto_path=$(PROTO_DIR)/$@/proto \
+		--go_out=$(PROTO_DIR)/$@/$(GEN_DIR) \
+		--go_opt=paths=source_relative \
+		--go-grpc_out=$(PROTO_DIR)/$@/$(GEN_DIR) \
+		--go-grpc_opt=paths=source_relative \
+		$(PROTO_DIR)/$@/proto/*.proto
+	@echo "Генерация для $@ завершена."
+
+#proto-build:
+#	@echo "Entities: $(ENTITIES)"
+
 proto-build: $(ENTITIES)
 
 fmt:
@@ -85,6 +101,10 @@ promocodes-refresh:
 prometheus-refresh:
 	docker stop prometheus && docker rm prometheus && docker compose up -d
 
+wishlists-refresh:
+	docker compose build wishlists_go --no-cache && docker compose up wishlists_go -d --force-recreate
+	#docker stop wishlists_go && docker rm wishlists_go && docker rmi wishlists-go-image && docker compose up -d
+
 grafana-refresh:
 	docker stop grafana && docker rm grafana && docker compose up -d
 
@@ -107,7 +127,7 @@ all-delete:
 	docker compose down -v
 
 apply-migrations:
-	@echo 'Applying migrations...'
+	@echo 'Applying migrations... $(MIGRATIONS_DIR)'
 	@migrate -path $(MIGRATIONS_DIR) -database $(DB_URL) up
 
 revert-migrations:

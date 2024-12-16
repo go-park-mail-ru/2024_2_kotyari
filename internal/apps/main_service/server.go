@@ -3,6 +3,8 @@ package main_service
 import (
 	"context"
 	"fmt"
+	wishlistgrpc "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/wish_list/gen"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/wish_list"
 	"log/slog"
 	"net/http"
 
@@ -65,10 +67,15 @@ const (
 	userService          = "user_go"
 	notificationsService = "notifications_go"
 	promocodesService    = "promocodes_go"
+	wishlistsService     = "wishlists_go"
 )
 
 type categoryApp interface {
 	InitCategoriesRoutes()
+}
+
+type wishlistApp interface {
+	InitWishlistRoutes() *mux.Router
 }
 
 type filesDelivery interface {
@@ -128,6 +135,7 @@ type Server struct {
 	search        SearchApp
 	notifications notificationsDelivery
 	promoCodes    promoCodesDelivery
+	wishlist      wishlistApp
 }
 
 type csrfDelivery interface {
@@ -284,6 +292,27 @@ func NewServer() (*Server, error) {
 
 	notifications := notificationsDeliveryLib.NewNotificationsDelivery(notificationsClient, errResolver, log)
 
+	wishlistsCfgService := v.GetStringMap(wishlistsService)
+	clientWishlists, err := configs.ParseServiceViperConfig(wishlistsCfgService)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Info("wish", "addr", fmt.Sprintf("%s:%s", clientWishlists.Domain, clientWishlists.Port))
+	wishlistConn, err := grpc.NewClient(fmt.Sprintf("%s:%s", clientWishlists.Domain, clientWishlists.Port),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	wishlistClient := wishlistgrpc.NewWishlistServiceClient(wishlistConn)
+
+	wishlistDeli := wish_list.NewWishlistDelivery(wishlistClient, prodRepo, log, errResolver)
+
+	wishApp := NewWishlistApp(router, wishlistDeli)
+
 	cfg := v.GetStringMap(mainService)
 	mainCfg, err := configs.ParseServiceViperConfig(cfg)
 	if err != nil {
@@ -308,6 +337,7 @@ func NewServer() (*Server, error) {
 		search:        searchApp,
 		notifications: notifications,
 		promoCodes:    promoCodesGRPC,
+		wishlist:      wishApp,
 	}, nil
 }
 
@@ -331,6 +361,11 @@ func (s *Server) setupRoutes() {
 	subOrder.Use(middlewares.RequestIDMiddleware)
 	subOrder.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 	subOrder.Use(csrfMiddleware)
+
+	wishSub := s.wishlist.InitWishlistRoutes()
+	wishSub.Use(middlewares.RequestIDMiddleware)
+	wishSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
+	wishSub.Use(csrfMiddleware)
 
 	s.r.HandleFunc("/api/v1/login", s.auth.LoginUser).Methods(http.MethodPost)
 	s.r.HandleFunc("/api/v1/logout", s.sessions.Delete).Methods(http.MethodPost)

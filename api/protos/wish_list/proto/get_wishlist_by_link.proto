@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package wishlist;
+option go_package = "https://github.com/go-park-mail-ru/2024_2_kotyari/wishlist/grpc_gen";
+
+import "wishlist_model.proto";
+
+message GetWishlistByLinkRequest {
+  string link = 1;
+}
+
+message GetWishlistByLinkResponse {
+  Wishlist wishlist = 1;
+  uint32 creator_id = 2;
+}
