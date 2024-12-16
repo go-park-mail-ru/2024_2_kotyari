@@ -29,7 +29,7 @@ func (r *OrdersRepo) GetOrderById(ctx context.Context, id uuid.UUID, userID uint
 		var orderRow getOrderByIdRow
 
 		err := rows.Scan(
-			&orderRow.OrderID, &orderRow.Address, &orderRow.Status, &orderRow.OrderDate,
+			&orderRow.OrderID, &orderRow.Address, &orderRow.Status, &orderRow.TotalPrice, &orderRow.OrderDate,
 			&orderRow.Username, &orderRow.Date, &orderRow.ProductID, &orderRow.Cost,
 			&orderRow.Count, &orderRow.ImageURL, &orderRow.Weight, &orderRow.Title,
 		)
@@ -42,6 +42,7 @@ func (r *OrdersRepo) GetOrderById(ctx context.Context, id uuid.UUID, userID uint
 		if ord == nil {
 			ord = &order.Order{
 				ID:           orderRow.OrderID,
+				TotalPrice:   orderRow.TotalPrice,
 				Recipient:    orderRow.Username,
 				Address:      orderRow.Address,
 				Status:       orderRow.Status,
