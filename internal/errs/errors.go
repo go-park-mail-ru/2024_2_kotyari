@@ -65,6 +65,7 @@ var (
 	FailedToRetrievePromoCode     = errors.New("Не удалось получить промокод")
 	FailedToRetrievePromoCodes    = errors.New("Не удалось получить промокоды")
 	ErrNotPermitted               = errors.New("Нет прав для изменения")
+	WrongPassword                 = errors.New("Неправильный пароль")
 )
 
 type ErrorStore struct {
@@ -134,6 +135,7 @@ func NewErrorStore() *ErrorStore {
 			NoPromoCode:                   http.StatusNotFound,
 			FailedToRetrievePromoCodes:    http.StatusServiceUnavailable,
 			FailedToRetrievePromoCode:     http.StatusServiceUnavailable,
+			WrongPassword:                 http.StatusBadRequest,
 		},
 	}
 }

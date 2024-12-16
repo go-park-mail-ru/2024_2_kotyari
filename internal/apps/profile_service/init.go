@@ -13,6 +13,7 @@ import (
 	grpc2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/metrics/grpc"
 	metrics2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/middlewares/metrics"
 	profileRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/profile"
+	userRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/user"
 	profileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/profile"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/gorilla/mux"
@@ -69,8 +70,10 @@ func NewProfilesApp(
 
 	interceptor := metrics2.NewGrpcMiddleware(*metrics, errorResolver)
 
+	userRepo := userRepoLib.NewUsersStore(dbPool, slogLog)
+
 	profileRepo := profileRepoLib.NewProfileRepo(dbPool, slogLog)
-	profileService := profileServiceLib.NewProfileService(profileRepo, slogLog)
+	profileService := profileServiceLib.NewProfileService(profileRepo, userRepo, slogLog)
 
 	delivery := profile.NewProfilesGrpc(profileRepo, profileService, slogLog)
 
