@@ -5,13 +5,25 @@ import (
 	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 )
 
 func (cs *CategoriesStore) GetRelatedProductsByProductID(ctx context.Context, productID uint32, sortField string, sortOrder string) ([]model.ProductCatalog, error) {
+	requestID, err := utils.GetContextRequestID(ctx)
+	if err != nil {
+		cs.log.Error("[CategoriesStore.GetRelatedProductsByProductID] Failed to get request id",
+			slog.String("error", err.Error()))
+
+		return nil, err
+	}
+
+	cs.log.Info("[CategoriesStore.GetRelatedProductsByProductID] Started executing",
+		slog.Any("request-id", requestID))
+
 	categories, err := cs.categoriesGetter.GetProductCategories(ctx, productID)
 	if err != nil {
 	}
-	cs.log.Info("[CategoriesStore.GetRelatedProductsByProductID] Вывод полученных категорий", slog.Any("categories", categories))
+	//cs.log.Info("[CategoriesStore.GetRelatedProductsByProductID] Вывод полученных категорий", slog.Any("categories", categories))
 	if len(categories) == 0 {
 	}
 
@@ -21,7 +33,6 @@ func (cs *CategoriesStore) GetRelatedProductsByProductID(ctx context.Context, pr
 	for _, category := range categories {
 
 		products, err := cs.GetProductsByCategoryLink(ctx, category.LinkTo, sortField, sortOrder)
-		cs.log.Info("[CategoriesStore.GetRelatedProductsByProductID] Вывод полученных продуктов n-ой категории", slog.Any("products", products))
 		if err != nil {
 
 		}
@@ -32,10 +43,8 @@ func (cs *CategoriesStore) GetRelatedProductsByProductID(ctx context.Context, pr
 				seenProducts[product.ID] = true
 			}
 		}
-		cs.log.Info("[CategoriesStore.GetRelatedProductsByProductID] Вывод просмотренных товаров", slog.Any("seenProd", seenProducts))
 	}
 
-	cs.log.Info("[CategoriesStore.GetRelatedProductsByProductID] Вывод просмотренных товаров", slog.Any("allProducts", allProducts))
 	if len(allProducts) == 0 {
 
 	}

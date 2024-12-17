@@ -129,8 +129,6 @@ func (r *ReviewsStore) GetProductReviewsWithLogin(ctx context.Context, productID
 		}
 	}
 
-	fmt.Println("USER REVIEW", userReviewDTO)
-
 	reviews.UserReview = userReviewDTO.ToModel()
 
 	fieldSortOptions := map[string]string{
@@ -172,8 +170,6 @@ func (r *ReviewsStore) GetProductReviewsWithLogin(ctx context.Context, productID
 
 		return model.Reviews{}, err
 	}
-
-	fmt.Println("USER REVIEW", reviewsDTO)
 
 	if (len(reviewsDTO) == 0) && (userReviewDTO.Rating == 0) {
 		return model.Reviews{}, errs.NoReviewsForProduct
