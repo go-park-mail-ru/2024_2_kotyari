@@ -14,8 +14,8 @@ type GetProductReviewsResponseDTO struct {
 }
 
 type ReviewResponseDTO struct {
-	Username  string    `json:"username"`
-	AvatarURL string    `json:"avatar_url"`
+	Username  string    `json:"username,omitempty"`
+	AvatarURL string    `json:"avatar_url,omitempty"`
 	Text      string    `json:"text"`
 	Rating    uint8     `json:"rating"`
 	IsPrivate bool      `json:"is_private"`
