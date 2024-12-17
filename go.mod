@@ -3,12 +3,12 @@ module github.com/go-park-mail-ru/2024_2_kotyari
 go 1.23.1
 
 require (
-	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/bxcodec/faker/v3 v3.8.1
 	github.com/bxcodec/faker/v4 v4.0.0-beta.3
 	github.com/caarlos0/env v3.5.0+incompatible
 	github.com/disintegration/imaging v1.6.2
 	github.com/go-faker/faker/v4 v4.5.0
+	github.com/go-redis/redismock/v9 v9.2.0
 	github.com/golang/mock v1.6.0
 	github.com/golang/protobuf v1.5.4
 	github.com/google/uuid v1.6.0
