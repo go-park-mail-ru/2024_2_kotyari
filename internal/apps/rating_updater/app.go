@@ -39,18 +39,19 @@ type RatingUpdaterApp struct {
 
 func NewApp(config map[string]any) (*RatingUpdaterApp, error) {
 	dbPool, err := postgres.LoadPgxPool()
+	slogLogger := logger.InitLogger()
+
 	if err != nil {
-		slog.Error("[RatingUpdaterApp] Failed to load dbPool", err.Error())
+		slogLogger.Error("[RatingUpdaterApp] Failed to load dbPool", err.Error())
 
 		return nil, err
 	}
 
-	log := logger.InitLogger()
 	errorResolver := errs.NewErrorStore()
 
 	metrics, err := grpc2.NewGrpcMetrics("rating_updater")
 	if err != nil {
-		log.Error("Ошибка при регистрации метрики", slog.String("error", err.Error()))
+		slogLogger.Error("Ошибка при регистрации метрики", slog.String("error", err.Error()))
 	}
 
 	interceptor := metrics2.NewGrpcMiddleware(*metrics, errorResolver)
@@ -61,13 +62,13 @@ func NewApp(config map[string]any) (*RatingUpdaterApp, error) {
 
 	go func() {
 		if err := serverProm.ListenAndServe(); err != nil {
-			log.Error("fail auth.ListenAndServe")
+			slogLogger.Error("fail auth.ListenAndServe")
 		}
 	}()
-	productsRepo := productRepoLib.NewProductsStore(dbPool, log)
-	reviewsRepo := reviewsRepoLib.NewReviewsStore(dbPool, log)
-	ratingUpdaterManager := reviewsUpdaterServiceLib.NewRatingUpdateService(productsRepo, reviewsRepo, log)
-	ratingUpdaterDelivery := reviewsUpdaterDeliveryLib.NewRatingUpdaterGRPC(ratingUpdaterManager, log)
+	productsRepo := productRepoLib.NewProductsStore(dbPool, slogLogger)
+	reviewsRepo := reviewsRepoLib.NewReviewsStore(dbPool, slogLogger)
+	ratingUpdaterManager := reviewsUpdaterServiceLib.NewRatingUpdateService(productsRepo, reviewsRepo, slogLogger)
+	ratingUpdaterDelivery := reviewsUpdaterDeliveryLib.NewRatingUpdaterGRPC(ratingUpdaterManager, slogLogger)
 	ratingUpdaterDelivery.Register(grpcServer)
 
 	cfg, err := configs.ParseServiceViperConfig(config)
@@ -80,7 +81,7 @@ func NewApp(config map[string]any) (*RatingUpdaterApp, error) {
 	return &RatingUpdaterApp{
 		delivery: ratingUpdaterDelivery,
 		server:   grpcServer,
-		log:      log,
+		log:      slogLogger,
 		config:   cfg,
 	}, nil
 }
