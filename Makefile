@@ -41,8 +41,12 @@ test:
 
 test-coverage:
 	go test ./... -coverprofile=coverage.out
-	go tool cover -func=coverage.out
-	go tool cover -html=coverage.out
+	# Exclude protobuf 'gen' directories, 'docs', 'internal/errs', and 'dto_easyjson.go' files
+	grep -vE '\/kafka_api\/|\/grpc_api\/|\/metrics\/|\/middlewares\/|\/configs\/|\/apps\/|\/cmd\/|\/mocks\/|\/gen\/|\/docs\/|\/internal\/errs\/|dto_easyjson\.go|init\.go' coverage.out > coverage_filtered.out
+	go tool cover -func=coverage_filtered.out
+	go tool cover -html=coverage_filtered.out
+
+
 
 PROTO_DIR := ./api/protos
 

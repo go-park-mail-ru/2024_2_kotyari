@@ -5,7 +5,8 @@ import (
 	"github.com/google/uuid"
 )
 
-func (wlu *WishListUsecase) CopyWishList(ctx context.Context, sourceLink string, targetUserId uint32) (string, error) {
+func (wlu *WishListUsecase) CopyWishList(ctx context.Context,
+	sourceLink string, targetUserId uint32) (string, error) {
 	userId, err := wlu.wishListLinkRepo.GetUserIDFromLink(ctx, sourceLink)
 	if err != nil {
 		return "", err

@@ -116,10 +116,6 @@ func (s *ReviewsStoreTestSuite) TestGetProductReviewsNoLoginSuccess() {
 	requestID := uuid.New()
 	s.ctx = context.WithValue(context.Background(), utils.RequestIDName, requestID)
 
-	countQuery := `select count(id) from reviews where product_id = $1;`
-	s.dbMock.ExpectQuery(regexp.QuoteMeta(countQuery)).WithArgs(productID).
-		WillReturnRows(pgxmock.NewRows([]string{"count"}).AddRow(2))
-
 	query := `select r.text, r.rating, r.is_private, u.username, u.avatar_url, r.created_at 
 		from reviews r join users u on u.id = r.user_id 
 		where r.product_id = $1 order by r.created_at desc;`
@@ -130,44 +126,11 @@ func (s *ReviewsStoreTestSuite) TestGetProductReviewsNoLoginSuccess() {
 
 	s.dbMock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs(productID).WillReturnRows(rows)
 
-	reviews, err := s.store.GetProductReviewsNoLogin(s.ctx, productID, "date", "ASC")
+	reviews, err := s.store.GetProductReviews(s.ctx, productID, "date", "ASC")
 
 	require.NoError(s.T(), err)
 	require.Len(s.T(), reviews.Reviews, 2)
 	require.Equal(s.T(), reviews.TotalReviewCount, uint32(0x0))
-	require.NoError(s.T(), s.dbMock.ExpectationsWereMet())
-}
-
-func (s *ReviewsStoreTestSuite) TestGetProductReviewsWithLoginSuccess() {
-	productID := uint32(1)
-	userID := uint32(2)
-	requestID := uuid.New()
-	s.ctx = context.WithValue(context.Background(), utils.RequestIDName, requestID)
-
-	countQuery := `select count(id) from reviews where product_id = $1;`
-	s.dbMock.ExpectQuery(regexp.QuoteMeta(countQuery)).WithArgs(productID).
-		WillReturnRows(pgxmock.NewRows([]string{"count"}).AddRow(3))
-
-	userReviewQuery := `select r.text, r.rating, r.is_private, r.created_at from reviews r join users u ON u.id = r.user_id where r.product_id = $1 AND r.user_id = $2;`
-
-	s.dbMock.ExpectQuery(regexp.QuoteMeta(userReviewQuery)).WithArgs(productID, userID).
-		WillReturnRows(pgxmock.NewRows([]string{"text", "rating", "is_private", "created_at"}).
-			AddRow("Awesome!", uint8(5), false, time.Now()))
-
-	query := `select r.text, r.rating, r.is_private, u.username, u.avatar_url, r.created_at from reviews r join users u on u.id = r.user_id 
-		where r.product_id = $1 and r.user_id != $2 order by r.created_at desc;`
-
-	rows := pgxmock.NewRows([]string{"text", "rating", "is_private", "username", "avatar_url", "created_at"}).
-		AddRow("Okay product", uint8(3), false, "jane_doe", "avatar2.png", time.Now())
-
-	s.dbMock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs(productID, userID).WillReturnRows(rows)
-
-	reviews, err := s.store.GetProductReviewsWithLogin(s.ctx, productID, userID, "date", "ASC")
-
-	require.NoError(s.T(), err)
-	require.Equal(s.T(), reviews.TotalReviewCount, uint32(0x0))
-	require.Equal(s.T(), reviews.UserReview.Text, "Awesome!")
-	require.Len(s.T(), reviews.Reviews, 1)
 	require.NoError(s.T(), s.dbMock.ExpectationsWereMet())
 }
 

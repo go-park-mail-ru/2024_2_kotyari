@@ -56,14 +56,14 @@ func (u *UsersDelivery) CreateUser(w http.ResponseWriter, r *http.Request) {
 		if ok {
 			switch grpcErr.Code() {
 			case codes.InvalidArgument:
-				u.log.Error("[ UsersDelivery.CreateUser ] Пользователь уже существует", err.Error())
+				u.log.Error("[ UsersDelivery.CreateUser ] Пользователь уже существует", slog.Any("error", err.Error()))
 
 				utils.WriteErrorJSONByError(w, errs.UserAlreadyExists, u.errResolver)
 
 				return
 
 			default:
-				u.log.Error("[ UsersDelivery.CreateUser ] Неизвестная ошибка", err.Error())
+				u.log.Error("[ UsersDelivery.CreateUser ] Неизвестная ошибка", slog.String("error", err.Error()))
 
 				utils.WriteErrorJSONByError(w, errs.InternalServerError, u.errResolver)
 

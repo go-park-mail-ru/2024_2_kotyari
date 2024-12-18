@@ -61,21 +61,21 @@ func (pd *ProfilesDelivery) ChangePassword(w http.ResponseWriter, r *http.Reques
 		if ok {
 			switch grpcErr.Code() {
 			case codes.InvalidArgument:
-				pd.log.Error("[ ProfilesDelivery.ChangePassword ] Неправильный пароль", grpcErr.String())
+				pd.log.Error("[ ProfilesDelivery.ChangePassword ] Неправильный пароль", slog.String("error", grpcErr.String()))
 
 				utils.WriteErrorJSONByError(w, errs.WrongPassword, pd.errResolver)
 
 				return
 
 			case codes.Unauthenticated:
-				pd.log.Error("[ ProfilesDelivery.ChangePassword ] Пользователь уже существует", grpcErr.String())
+				pd.log.Error("[ ProfilesDelivery.ChangePassword ] Пользователь уже существует", slog.String("error", grpcErr.String()))
 
 				utils.WriteErrorJSONByError(w, errs.PasswordsDoNotMatch, pd.errResolver)
 
 				return
 
 			default:
-				pd.log.Error("[ ProfilesDelivery.ChangePassword ] Неизвестная ошибка", err.Error())
+				pd.log.Error("[ ProfilesDelivery.ChangePassword ] Неизвестная ошибка", slog.String("error", err.Error()))
 
 				utils.WriteErrorJSONByError(w, errs.InternalServerError, pd.errResolver)
 

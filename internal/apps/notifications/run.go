@@ -22,7 +22,7 @@ func (n *NotificationsApp) Run() error {
 		return err
 	}
 
-	n.log.Info("[NotificationsApp.Run] Server started listening at: ", n.config.Port)
+	n.log.Info("[NotificationsApp.Run] Server started listening at: ", slog.String("port", n.config.Port))
 
 	if err = n.server.Serve(listener); err != nil {
 		n.log.Info("[NotificationsApp.Run] Failed to start listening",

@@ -42,7 +42,7 @@ func NewApp(config map[string]any) (*RatingUpdaterApp, error) {
 	slogLogger := logger.InitLogger()
 
 	if err != nil {
-		slogLogger.Error("[RatingUpdaterApp] Failed to load dbPool", err.Error())
+		slogLogger.Error("[RatingUpdaterApp] Failed to load dbPool", slog.String("error", err.Error()))
 
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func NewApp(config map[string]any) (*RatingUpdaterApp, error) {
 
 	go func() {
 		if err := serverProm.ListenAndServe(); err != nil {
-			slogLogger.Error("fail auth.ListenAndServe")
+			slogLogger.Error("fail auth.ListenAndServe", slog.String("error", err.Error()))
 		}
 	}()
 	productsRepo := productRepoLib.NewProductsStore(dbPool, slogLogger)
@@ -73,7 +73,7 @@ func NewApp(config map[string]any) (*RatingUpdaterApp, error) {
 
 	cfg, err := configs.ParseServiceViperConfig(config)
 	if err != nil {
-		log.Error("RatingUpdaterApp [NewApp] Failed to parse viper config")
+		slogLogger.Error("RatingUpdaterApp [NewApp] Failed to parse viper config")
 
 		return nil, err
 	}
