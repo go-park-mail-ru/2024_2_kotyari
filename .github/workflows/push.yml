@@ -1,0 +1,56 @@
+name: kotyari_deploy
+
+on:
+  push:
+    branches: [ dev ]
+
+jobs:
+  build:
+    name: go-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go 1.23
+        uses: actions/setup-go@v5
+        with:
+          go-version: ^1.23
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v4
+
+      - name: Get dependencies
+        run: go mod tidy
+
+#      - name: Run make test
+#        run: make test
+
+  linter:
+    name: go-lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.62
+
+  deploy:
+    name: Deploy to VM
+    needs: [build, linter]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Execute commands over ssh
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            sudo bash
+            cd ./back_kotyari
+            git checkout dev
+            git pull
+            make back-refresh
