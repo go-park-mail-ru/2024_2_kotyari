@@ -38,7 +38,7 @@ jobs:
 
   deploy:
     name: Deploy to VM
-    needs: [build, linter]
+    needs: [build]
     runs-on: ubuntu-latest
 
     steps:
