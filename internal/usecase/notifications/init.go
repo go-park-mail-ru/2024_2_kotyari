@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-const defaultOrdersUpdateTime = 15 * time.Minute
+const defaultOrdersUpdateTime = 2 * time.Minute
 
 type notificationsRepo interface {
 	ChangeOrdersStates() error

@@ -12,7 +12,7 @@ const (
 	AwaitingPayment            OrderState = "awaiting_payment"
 	Paid                       OrderState = "paid"
 	Delivered                  OrderState = "delivered"
-	DefaultStateSwitchInterval            = "15 minutes"
+	DefaultStateSwitchInterval            = "2 minutes"
 )
 
 type NotificationsStore struct {
