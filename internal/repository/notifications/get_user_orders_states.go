@@ -94,7 +94,7 @@ func (n *NotificationsStore) updateStatuses(ctx context.Context, userID uint32) 
 		return err
 	}
 
-	n.log.Info("[NotificationsStore.updateStatuses] Statuses affected: ", commandTag.RowsAffected())
+	n.log.Info("[NotificationsStore.updateStatuses] Statuses affected: ", slog.Any("commandTag", commandTag.RowsAffected()))
 
 	return nil
 }

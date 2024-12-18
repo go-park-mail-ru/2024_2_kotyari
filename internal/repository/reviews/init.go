@@ -1,17 +1,16 @@
 package reviews
 
 import (
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/pool"
 	"log/slog"
-
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type ReviewsStore struct {
-	db  *pgxpool.Pool
+	db  pool.DBPool
 	log *slog.Logger
 }
 
-func NewReviewsStore(pool *pgxpool.Pool, logger *slog.Logger) *ReviewsStore {
+func NewReviewsStore(pool pool.DBPool, logger *slog.Logger) *ReviewsStore {
 	return &ReviewsStore{
 		db:  pool,
 		log: logger,

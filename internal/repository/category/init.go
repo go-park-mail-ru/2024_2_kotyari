@@ -5,7 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/pool"
 )
 
 type categoriesGetter interface {
@@ -13,12 +13,12 @@ type categoriesGetter interface {
 }
 
 type CategoriesStore struct {
-	db               *pgxpool.Pool
-	log              *slog.Logger
+	db  pool.DBPool
+	log *slog.Logger
 	categoriesGetter categoriesGetter
 }
 
-func NewCategoriesStore(db *pgxpool.Pool, log *slog.Logger, categoriesGetter categoriesGetter) *CategoriesStore {
+func NewCategoriesStore(db pool.DBPool, log *slog.Logger, categoriesGetter categoriesGetter) *CategoriesStore {
 	return &CategoriesStore{
 		db:               db,
 		log:              log,

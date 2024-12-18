@@ -1,16 +1,16 @@
 package user
 
 import (
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/pool"
 	"log/slog"
 )
 
 type UsersStore struct {
-	db  *pgxpool.Pool
+	db  pool.DBPool
 	log *slog.Logger
 }
 
-func NewUsersStore(db *pgxpool.Pool, log *slog.Logger) *UsersStore {
+func NewUsersStore(db pool.DBPool, log *slog.Logger) *UsersStore {
 	return &UsersStore{db: db,
 		log: log}
 }

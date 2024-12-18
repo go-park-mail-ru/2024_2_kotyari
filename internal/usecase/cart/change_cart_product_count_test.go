@@ -15,7 +15,10 @@ import (
 func TestCartManager_ChangeCartProductCount(t *testing.T) {
 	t.Parallel()
 
-	type want error
+	type want struct {
+		count uint32
+		err   error
+	}
 
 	tests := []struct {
 		name      string
@@ -57,13 +60,21 @@ func TestCartManager_ChangeCartProductCount(t *testing.T) {
 					int32(1),
 					uint32(1)).Return(nil)
 
+				cartRepositoryMock.EXPECT().GetCartProductCount(
+					gomock.Any(),
+					uint32(1),
+					uint32(1)).Return(uint32(11), nil)
+
 				return &CartManager{
 					cartRepository:     cartRepositoryMock,
 					productCountGetter: productCountGetterMock,
 					log:                logger,
 				}
 			},
-			want: nil,
+			want: struct {
+				count uint32
+				err   error
+			}{count: uint32(11), err: nil},
 		},
 		{
 			name:      "Не удалось получить продукт",
@@ -86,10 +97,13 @@ func TestCartManager_ChangeCartProductCount(t *testing.T) {
 					log:                logger,
 				}
 			},
-			want: dbTestError,
+			want: struct {
+				count uint32
+				err   error
+			}{count: uint32(0), err: dbTestError},
 		},
 		{
-			name:      "Продукта нет в корзине",
+			name:      "Продукта есть в корзине, но он удален",
 			productID: 1,
 			count:     1,
 			userID:    1,
@@ -116,7 +130,10 @@ func TestCartManager_ChangeCartProductCount(t *testing.T) {
 					log:                logger,
 				}
 			},
-			want: errs.ProductNotInCart,
+			want: struct {
+				count uint32
+				err   error
+			}{count: uint32(0), err: errs.ProductNotInCart},
 		},
 		{
 			name:      "Ошибка получения количества продукта",
@@ -150,7 +167,10 @@ func TestCartManager_ChangeCartProductCount(t *testing.T) {
 					log:                logger,
 				}
 			},
-			want: dbTestError,
+			want: struct {
+				count uint32
+				err   error
+			}{count: uint32(0), err: dbTestError},
 		},
 		{
 			name:      "Ошибка изменения количества продукта в корзине",
@@ -190,7 +210,10 @@ func TestCartManager_ChangeCartProductCount(t *testing.T) {
 					log:                logger,
 				}
 			},
-			want: dbTestError,
+			want: struct {
+				count uint32
+				err   error
+			}{count: uint32(0), err: dbTestError},
 		},
 		{
 			name:      "Количество товара в корзине слишком мало",
@@ -430,9 +453,10 @@ func TestCartManager_ChangeCartProductCount(t *testing.T) {
 
 			ctx := context.WithValue(context.Background(), testContextRequestIDKey, testContextRequestIDValue)
 
-			resp := tt.setupFunc(ctrl).ChangeCartProductCount(ctx, tt.productID, tt.count, tt.userID)
+			resp, err := tt.setupFunc(ctrl).ChangeCartProductCount(ctx, tt.productID, tt.count, tt.userID)
 
-			assert.Equal(t, tt.want, resp)
+			assert.Equal(t, tt.want.count, resp)
+			assert.Equal(t, tt.want.err, err)
 		})
 	}
 }

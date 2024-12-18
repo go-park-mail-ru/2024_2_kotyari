@@ -1,12 +1,14 @@
 package wish_list_link
 
-import "github.com/jackc/pgx/v5/pgxpool"
+import (
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/pool"
+)
 
 type WishListLinksRepo struct {
-	db *pgxpool.Pool
+	db pool.DBPool
 }
 
-func NewWishListLinkRepo(db *pgxpool.Pool) *WishListLinksRepo {
+func NewWishListLinkRepo(db pool.DBPool) *WishListLinksRepo {
 	return &WishListLinksRepo{
 		db: db,
 	}

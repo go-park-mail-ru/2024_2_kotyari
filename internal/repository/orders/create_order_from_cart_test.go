@@ -3,6 +3,7 @@ package rorders
 import (
 	"context"
 	"github.com/bxcodec/faker/v4"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"log/slog"
 	"testing"
 	"time"
@@ -53,7 +54,8 @@ func (suite *OrdersRepoSuite) SetupTest() {
 
 func (suite *OrdersRepoSuite) TestCreateOrderFromCart() {
 	ctx := context.Background()
-
+	requestID := uuid.New()
+	ctx = context.WithValue(context.Background(), utils.RequestIDName, requestID)
 	suite.mock.ExpectBegin()
 
 	suite.mock.ExpectQuery(`INSERT INTO orders\s*\(id, user_id, total_price, address, created_at, updated_at\)\s*VALUES\s*\(\$1, \$2, \$3, \$4, NOW\(\), NOW\(\)\)\s*RETURNING created_at;`).

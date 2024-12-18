@@ -27,7 +27,7 @@ func (ps *ProductsStore) GetProductByID(ctx context.Context, productID uint32) (
 
 	categories, err := ps.GetProductCategories(ctx, productID)
 	if err != nil {
-		ps.log.Info("[ ProductsStore.GetProductByID ] error getting product categories:", err)
+		ps.log.Info("[ ProductsStore.GetProductByID ] error getting product categories:", slog.Any("err", err))
 	}
 
 	card.Categories = categories
