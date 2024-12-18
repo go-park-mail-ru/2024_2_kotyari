@@ -1,13 +1,14 @@
 package wish_list
 
 import (
-	"encoding/json"
+	"log/slog"
+	"net/http"
+
 	wishlistgrpc "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/wish_list/gen"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
+	"github.com/mailru/easyjson"
 	"google.golang.org/grpc/status"
-	"log/slog"
-	"net/http"
 )
 
 func (wld *WishlistDelivery) DeleteWishlist(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +31,7 @@ func (wld *WishlistDelivery) DeleteWishlist(w http.ResponseWriter, r *http.Reque
 
 	var request deleteWishlistsRequest
 
-	if err = json.NewDecoder(r.Body).Decode(&request); err != nil {
+	if err = easyjson.UnmarshalFromReader(r.Body, &request); err != nil {
 		utils.WriteErrorJSON(w, http.StatusBadRequest, err)
 
 		return

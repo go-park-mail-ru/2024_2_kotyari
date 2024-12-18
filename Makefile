@@ -137,4 +137,16 @@ revert-migrations:
 back-refresh:
 	docker compose build --no-cache && docker compose up -d --force-recreate
 
-.PHONY: clean build
+
+DELIVERY_DIR=./internal/delivery
+
+easyjson:
+	@echo "Generating easyjson..."
+	@for dir in $(DELIVERY_DIR); do \
+		for file in $$(find $$dir -type f -name 'dto.go'); do \
+			easyjson $$file; \
+		done \
+	done
+	@echo "easyjson generation completed."
+
+.PHONY: clean build easyjson

@@ -1,13 +1,13 @@
 package profile
 
 import (
-	"encoding/json"
-	profile_grpc "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/profile/gen"
 	"log/slog"
 	"net/http"
 
+	profile_grpc "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/profile/gen"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
+	"github.com/mailru/easyjson"
 )
 
 func (pd *ProfilesDelivery) UpdateProfileData(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +29,7 @@ func (pd *ProfilesDelivery) UpdateProfileData(w http.ResponseWriter, r *http.Req
 	}
 	var req UpdateProfile
 
-	if err = json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err = easyjson.UnmarshalFromReader(r.Body, &req); err != nil {
 		pd.log.Error("[ ProfilesDelivery.UpdateProfileData ] Ошибка десериализации запроса",
 			slog.String("error", err.Error()),
 		)

@@ -34,6 +34,7 @@ func fromGrpcResponse(p *profilegrpc.GetProfileResponse, addr model.Address) Pro
 	}
 }
 
+//easyjson:json
 type UpdateProfile struct {
 	Email    string `json:"email"`
 	Username string `json:"username"`
@@ -44,6 +45,7 @@ type AvatarResponse struct {
 	AvatarUrl string `json:"avatar_url"`
 }
 
+//easyjson:json
 type UpdatePasswordRequest struct {
 	OldPassword    string `json:"old_password"`
 	NewPassword    string `json:"new_password"`

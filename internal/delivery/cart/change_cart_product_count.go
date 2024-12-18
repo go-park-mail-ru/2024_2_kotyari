@@ -1,13 +1,13 @@
 package cart
 
 import (
-	"encoding/json"
 	"log/slog"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"github.com/gorilla/mux"
+	"github.com/mailru/easyjson"
 )
 
 func (ch *CartHandler) ChangeCartProductQuantity(w http.ResponseWriter, r *http.Request) {
@@ -39,7 +39,7 @@ func (ch *CartHandler) ChangeCartProductQuantity(w http.ResponseWriter, r *http.
 		resp ChangeCartProductCountResponse
 	)
 
-	err = json.NewDecoder(r.Body).Decode(&req)
+	err = easyjson.UnmarshalFromReader(r.Body, &req)
 	if err != nil {
 		utils.WriteErrorJSON(w, http.StatusBadRequest, err)
 

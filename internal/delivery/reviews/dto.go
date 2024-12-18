@@ -21,6 +21,7 @@ type ReviewResponseDTO struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+//easyjson:json
 type AddReviewRequestDTO struct {
 	Rating    uint8  `json:"rating"`
 	Text      string `json:"text"`
@@ -35,6 +36,7 @@ func (r AddReviewRequestDTO) ToModel() model.Review {
 	}
 }
 
+//easyjson:json
 type UpdateReviewRequestDTO struct {
 	Rating    uint8  `json:"rating"`
 	Text      string `json:"text"`

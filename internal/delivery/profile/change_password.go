@@ -1,13 +1,13 @@
 package profile
 
 import (
-	"encoding/json"
 	"log/slog"
 	"net/http"
 
 	profilegrpc "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/profile/gen"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
+	"github.com/mailru/easyjson"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -32,7 +32,7 @@ func (pd *ProfilesDelivery) ChangePassword(w http.ResponseWriter, r *http.Reques
 
 	var req UpdatePasswordRequest
 
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err = easyjson.UnmarshalFromReader(r.Body, &req); err != nil {
 		pd.log.Error("[ ProfilesDelivery.UpdateProfileData ] Ошибка десериализации запроса",
 			slog.String("error", err.Error()),
 		)

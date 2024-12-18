@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
+//easyjson:json
 type CreateOrderRequest struct {
 	Address   string `json:"address"`
 	PromoCode string `json:"promocode"`
