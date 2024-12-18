@@ -1,6 +1,6 @@
 name: kotyari_deploy
 
-on:commanf
+on:
   push:
     branches: [ dev ]
 
