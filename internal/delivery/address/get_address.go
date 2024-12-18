@@ -1,6 +1,7 @@
 package address
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -22,12 +23,16 @@ func (h *AddressDelivery) GetAddress(w http.ResponseWriter, r *http.Request) {
 	userID, ok := utils.GetContextSessionUserID(r.Context())
 	if !ok {
 		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)
+
+		return
 	}
 
 	address, err := h.addressManager.GetAddressByProfileID(r.Context(), userID)
 
 	if err != nil {
 		h.log.Error("[ AddressDelivery.GetAddress ] Ошибка при получении адреса на уровне деливери", slog.String("error", err.Error()))
+
+		utils.WriteErrorJSON(w, http.StatusInternalServerError, errors.New("внутренняя ошибка сервера"))
 		return
 	}
 
