@@ -1,9 +1,8 @@
 package notifications
 
 import (
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/pool"
 	"log/slog"
-
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type OrderState string
@@ -16,11 +15,11 @@ const (
 )
 
 type NotificationsStore struct {
-	db  *pgxpool.Pool
+	db  pool.DBPool
 	log *slog.Logger
 }
 
-func NewNotificationsStore(pool *pgxpool.Pool, logger *slog.Logger) *NotificationsStore {
+func NewNotificationsStore(pool pool.DBPool, logger *slog.Logger) *NotificationsStore {
 	return &NotificationsStore{
 		db:  pool,
 		log: logger,

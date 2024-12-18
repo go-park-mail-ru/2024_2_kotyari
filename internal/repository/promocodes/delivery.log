@@ -1,0 +1,18 @@
+{"time":"2024-12-18T03:31:57.060348719+03:00","level":"ERROR","msg":"[PromoCodesStore.AddPromoCode] Error occurred inserting promo code","error":"query error"}
+{"time":"2024-12-18T03:33:16.130346189+03:00","level":"ERROR","msg":"[PromoCodesStore.RemovePromoCode] No rows were affected"}
+{"time":"2024-12-18T03:35:26.699910328+03:00","level":"ERROR","msg":"[PromoCodesStore.RemovePromoCode] No rows were affected"}
+{"time":"2024-12-18T03:37:37.317298286+03:00","level":"ERROR","msg":"[PromoCodesStore.GetPromoCode] Unexpected error","error":"no rows in result set"}
+{"time":"2024-12-18T03:38:21.578196447+03:00","level":"ERROR","msg":"[PromoCodesStore.GetPromoCode] Unexpected error","error":"Этого промокода нет"}
+{"time":"2024-12-18T03:39:12.569954199+03:00","level":"ERROR","msg":"[PromoCodesStore.GetPromoCode] Unexpected error","error":"Этого промокода нет"}
+{"time":"2024-12-18T03:39:20.534284381+03:00","level":"ERROR","msg":"[PromoCodesStore.AddPromoCode] Error occurred inserting promo code","error":"query error"}
+{"time":"2024-12-18T03:39:20.535191277+03:00","level":"ERROR","msg":"[PromoCodesStore.RemovePromoCode] No rows were affected"}
+{"time":"2024-12-18T03:39:20.535534432+03:00","level":"ERROR","msg":"[PromoCodesStore.GetPromoCode] Unexpected error","error":"Этого промокода нет"}
+{"time":"2024-12-18T05:02:33.188050605+03:00","level":"ERROR","msg":"[PromoCodesStore.AddPromoCode] Error occurred inserting promo code","error":"query error"}
+{"time":"2024-12-18T05:02:33.189063804+03:00","level":"ERROR","msg":"[PromoCodesStore.RemovePromoCode] No rows were affected"}
+{"time":"2024-12-18T05:02:33.190282648+03:00","level":"ERROR","msg":"[PromoCodesStore.GetPromoCode] Unexpected error","error":"Этого промокода нет"}
+{"time":"2024-12-18T05:18:32.935577994+03:00","level":"ERROR","msg":"[PromoCodesStore.AddPromoCode] Error occurred inserting promo code","error":"query error"}
+{"time":"2024-12-18T05:18:32.93730112+03:00","level":"ERROR","msg":"[PromoCodesStore.RemovePromoCode] No rows were affected"}
+{"time":"2024-12-18T05:18:32.937553884+03:00","level":"ERROR","msg":"[PromoCodesStore.GetPromoCode] Unexpected error","error":"Этого промокода нет"}
+{"time":"2024-12-18T05:19:55.303482579+03:00","level":"ERROR","msg":"[PromoCodesStore.AddPromoCode] Error occurred inserting promo code","error":"query error"}
+{"time":"2024-12-18T05:19:55.303886593+03:00","level":"ERROR","msg":"[PromoCodesStore.RemovePromoCode] No rows were affected"}
+{"time":"2024-12-18T05:19:55.30410521+03:00","level":"ERROR","msg":"[PromoCodesStore.GetPromoCode] Unexpected error","error":"Этого промокода нет"}

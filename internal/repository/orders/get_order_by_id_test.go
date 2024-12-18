@@ -39,13 +39,13 @@ func (suite *OrdersRepoGetOrderByIdSuite) TestGetOrderById_Success() {
 	deliveryDate := time.Now()
 
 	rows := pgxmock.NewRows([]string{
-		"id", "address", "status", "created_at", "username", "delivery_date", "product_id",
+		"id", "address", "status", "total_price", "created_at", "username", "delivery_date", "product_id",
 		"price", "count", "image_url", "weight", "title",
 	}).
-		AddRow(orderID, "123 Main St", "Delivered", deliveryDate.Add(-48*time.Hour), "john_doe", deliveryDate, uint32(1), uint32(1000), uint32(2), "image1.jpg", float32(2), "Product A").
-		AddRow(orderID, "123 Main St", "Delivered", deliveryDate.Add(-48*time.Hour), "john_doe", deliveryDate, uint32(2), uint32(500), uint32(1), "image2.jpg", float32(3), "Product B")
+		AddRow(orderID, "123 Main St", "Delivered", uint32(12000), deliveryDate.Add(-48*time.Hour), "john_doe", deliveryDate, uint32(1), uint32(1000), uint32(2), "image1.jpg", float32(2), "Product A").
+		AddRow(orderID, "123 Main St", "Delivered", uint32(12000), deliveryDate.Add(-48*time.Hour), "john_doe", deliveryDate, uint32(2), uint32(500), uint32(1), "image2.jpg", float32(3), "Product B")
 
-	expectedSQL := regexp.QuoteMeta("SELECT o.id, o.address, o.status, o.created_at, u.username, op.delivery_date, p.id, p.price, op.count, p.image_url, p.weight, p.title FROM orders o JOIN users u ON o.user_id = u.id JOIN product_orders op ON o.id = op.order_id JOIN products p ON op.product_id = p.id WHERE o.id = $1::uuid")
+	expectedSQL := regexp.QuoteMeta("SELECT o.id, o.address, o.status, o.total_price, o.created_at, u.username, op.delivery_date, p.id, p.price, op.count, p.image_url, p.weight, p.title FROM orders o JOIN users u ON o.user_id = u.id JOIN product_orders op ON o.id = op.order_id JOIN products p ON op.product_id = p.id WHERE o.id = $1::uuid")
 
 	suite.mock.ExpectQuery(expectedSQL).
 		WithArgs(orderID).
@@ -77,7 +77,7 @@ func (suite *OrdersRepoGetOrderByIdSuite) TestGetOrderById_QueryError() {
 	orderID := uuid.New()
 
 	expectedError := errors.New("database error")
-	expectedSQL := regexp.QuoteMeta("SELECT o.id, o.address, o.status, o.created_at, u.username, op.delivery_date, p.id, p.price, op.count, p.image_url, p.weight, p.title FROM orders o JOIN users u ON o.user_id = u.id JOIN product_orders op ON o.id = op.order_id JOIN products p ON op.product_id = p.id WHERE o.id = $1::uuid")
+	expectedSQL := regexp.QuoteMeta("SELECT o.id, o.address, o.status, o.total_price, o.created_at, u.username, op.delivery_date, p.id, p.price, op.count, p.image_url, p.weight, p.title FROM orders o JOIN users u ON o.user_id = u.id JOIN product_orders op ON o.id = op.order_id JOIN products p ON op.product_id = p.id WHERE o.id = $1::uuid")
 
 	suite.mock.ExpectQuery(expectedSQL).WithArgs(orderID).WillReturnError(errors.New("database error"))
 	order, err := suite.repo.GetOrderById(ctx, orderID, userID)

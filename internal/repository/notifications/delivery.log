@@ -1,0 +1,16 @@
+{"time":"2024-12-18T03:08:24.172053298+03:00","level":"ERROR","msg":"[NotificationsStore.ChangeOrdersStates] Failed to change orders statuses","error":"query error"}
+{"time":"2024-12-18T03:08:29.351666102+03:00","level":"ERROR","msg":"[NotificationsStore.GetUserOrdersStates] Failed to get request-id","error":"Не удалось получить request-id"}
+{"time":"2024-12-18T03:10:32.820369658+03:00","level":"ERROR","msg":"[NotificationsStore.GetUserOrdersStates] Failed to convert rows to struct","error":"Scanning value error for column 'id': Scan: unable to scan type uint32 into UUID"}
+{"time":"2024-12-18T03:13:21.179895268+03:00","level":"ERROR","msg":"[NotificationsStore.GetUserOrdersStates] Failed to get request-id","error":"Не удалось получить request-id"}
+{"time":"2024-12-18T03:13:47.660056522+03:00","level":"ERROR","msg":"[NotificationsStore.GetUserOrdersStates] Failed to get request-id","error":"Не удалось получить request-id"}
+{"time":"2024-12-18T03:13:57.101972152+03:00","level":"ERROR","msg":"[NotificationsStore.GetUserOrdersStates] Failed to get rows","error":"query error"}
+{"time":"2024-12-18T03:14:04.639323922+03:00","level":"ERROR","msg":"[NotificationsStore.ChangeOrdersStates] Failed to change orders statuses","error":"query error"}
+{"time":"2024-12-18T03:14:04.639786444+03:00","level":"ERROR","msg":"[NotificationsStore.GetUserOrdersStates] Failed to get rows","error":"query error"}
+{"time":"2024-12-18T03:14:17.361477302+03:00","level":"ERROR","msg":"[NotificationsStore.ChangeOrdersStates] Failed to change orders statuses","error":"query error"}
+{"time":"2024-12-18T03:14:17.36199304+03:00","level":"ERROR","msg":"[NotificationsStore.GetUserOrdersStates] Failed to get rows","error":"query error"}
+{"time":"2024-12-18T05:02:33.200829452+03:00","level":"ERROR","msg":"[NotificationsStore.ChangeOrdersStates] Failed to change orders statuses","error":"query error"}
+{"time":"2024-12-18T05:02:33.201706499+03:00","level":"ERROR","msg":"[NotificationsStore.GetUserOrdersStates] Failed to get rows","error":"query error"}
+{"time":"2024-12-18T05:18:31.007999285+03:00","level":"ERROR","msg":"[NotificationsStore.ChangeOrdersStates] Failed to change orders statuses","error":"query error"}
+{"time":"2024-12-18T05:18:31.009053878+03:00","level":"ERROR","msg":"[NotificationsStore.GetUserOrdersStates] Failed to get rows","error":"query error"}
+{"time":"2024-12-18T05:19:55.289221274+03:00","level":"ERROR","msg":"[NotificationsStore.ChangeOrdersStates] Failed to change orders statuses","error":"query error"}
+{"time":"2024-12-18T05:19:55.290119296+03:00","level":"ERROR","msg":"[NotificationsStore.GetUserOrdersStates] Failed to get rows","error":"query error"}

@@ -1,17 +1,16 @@
 package promocodes
 
 import (
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/pool"
 	"log/slog"
-
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type PromoCodesStore struct {
-	db  *pgxpool.Pool
+	db  pool.DBPool
 	log *slog.Logger
 }
 
-func NewPromoCodesStore(pool *pgxpool.Pool, logger *slog.Logger) *PromoCodesStore {
+func NewPromoCodesStore(pool pool.DBPool, logger *slog.Logger) *PromoCodesStore {
 	return &PromoCodesStore{
 		db:  pool,
 		log: logger,
