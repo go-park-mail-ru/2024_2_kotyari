@@ -10,6 +10,7 @@ type ChangeCartProductCountResponse struct {
 	Count uint32 `json:"count"`
 }
 
+//easyjson:json
 type ChangeCartProductCountRequest struct {
 	Count int32 `json:"count"`
 }
@@ -18,6 +19,7 @@ func (r ChangeCartProductCountRequest) ToModel() int32 {
 	return r.Count
 }
 
+//easyjson:json
 type ChangeCartProductSelectedStateRequest struct {
 	IsSelected bool `json:"is_selected"`
 }

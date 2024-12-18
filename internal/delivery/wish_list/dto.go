@@ -1,18 +1,22 @@
 package wish_list
 
+//easyjson:json
 type addProductToWishlistsRequest struct {
 	ProductId uint32   `json:"product_id"`
 	Links     []string `json:"links"`
 }
 
+//easyjson:json
 type copyWishlistsRequest struct {
 	Link string `json:"link"`
 }
 
+//easyjson:json
 type createWishlistRequest struct {
 	Name string `json:"name"`
 }
 
+//easyjson:json
 type deleteWishlistsRequest struct {
 	Link string `json:"link"`
 }
@@ -31,11 +35,13 @@ type item struct {
 	Price    uint32 `json:"price"`
 }
 
+//easyjson:json
 type removeFromWishlistRequest struct {
 	Links     []string `json:"links"`
 	ProductId uint32   `json:"product_id"`
 }
 
+//easyjson:json
 type renameWishlistRequest struct {
 	NewName string `json:"new_name"`
 	Link    string `json:"link"`

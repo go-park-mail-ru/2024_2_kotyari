@@ -1,12 +1,12 @@
 package user
 
 import (
-	"encoding/json"
 	"log/slog"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
+	"github.com/mailru/easyjson"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -24,7 +24,7 @@ func (u *UsersDelivery) LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	var req UsersLoginRequest
 
-	err = json.NewDecoder(r.Body).Decode(&req)
+	err = easyjson.UnmarshalFromReader(r.Body, &req)
 	if err != nil {
 		utils.WriteJSON(w, http.StatusBadRequest, errs.HTTPErrorResponse{
 			ErrorMessage: errs.InvalidJSONFormat.Error(),

@@ -8,6 +8,7 @@ type AddressResponse struct {
 	Address string `json:"address"`
 }
 
+//easyjson:json
 type UpdateAddressRequest struct {
 	Address string `json:"address"`
 }
