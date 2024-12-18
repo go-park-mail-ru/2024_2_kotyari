@@ -8,7 +8,6 @@ jobs:
   build:
     name: go-build
     runs-on: ubuntu-latest
-    environment: CICD
     steps:
       - name: Set up Go 1.23
         uses: actions/setup-go@v5
@@ -41,7 +40,7 @@ jobs:
     name: Deploy to VM
     needs: [build]
     runs-on: ubuntu-latest
-
+    environment: CICD
     steps:
       - name: Execute commands over ssh
         uses: appleboy/ssh-action@master
