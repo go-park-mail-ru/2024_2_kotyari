@@ -49,8 +49,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            sudo bash
             cd ./back_kotyari
-            git checkout dev
-            git pull
-            make back-refresh
+            sudo git checkout dev
+            sudo git pull
+            sudo make back-refresh
