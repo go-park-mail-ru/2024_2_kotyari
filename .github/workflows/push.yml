@@ -52,7 +52,9 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd ./back_kotyari
+            sudo git stash
             sudo git checkout dev
             sudo git pull
+            sudo git stash pop
             sudo make back-refresh
             sudo docker system prune -f
