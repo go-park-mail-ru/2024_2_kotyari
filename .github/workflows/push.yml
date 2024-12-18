@@ -8,6 +8,7 @@ jobs:
   build:
     name: go-build
     runs-on: ubuntu-latest
+    environment: CICD
     steps:
       - name: Set up Go 1.23
         uses: actions/setup-go@v5
