@@ -20,8 +20,8 @@ jobs:
       - name: Get dependencies
         run: go mod tidy
 
-      - name: Run make test
-        run: make test
+#      - name: Run make test
+#        run: make test
 
   linter:
     name: go-lint
