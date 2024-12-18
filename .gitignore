@@ -27,3 +27,5 @@ go.work.sum
 .idea
 
 qodana.yaml
+
+.vscode
