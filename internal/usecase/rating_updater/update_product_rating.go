@@ -18,7 +18,7 @@ func (r *RatingUpdaterService) UpdateProductRating(ctx context.Context, productI
 
 	r.log.Info("[RatingUpdaterService.UpdateProductRating] Started executing", slog.Any("request-id", requestID))
 
-	reviews, err := r.reviewsGetter.GetProductReviewsNoLogin(ctx, productID, utils.DefaultFieldParam, utils.DefaultOrderParam)
+	reviews, err := r.reviewsGetter.GetProductReviews(ctx, productID, utils.DefaultFieldParam, utils.DefaultOrderParam)
 	if err != nil {
 		if errors.Is(err, errs.NoReviewsForProduct) {
 			r.log.Error("[RatingUpdaterService.UpdateProductRating] No reviews for product, setting rating to 0",

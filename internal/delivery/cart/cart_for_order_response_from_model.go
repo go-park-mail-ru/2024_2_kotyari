@@ -18,7 +18,7 @@ func getPaymentIcon(method string) string {
 	}
 }
 
-func cartForOrderResponseFromModel(cart model.CartForOrder) orderData {
+func cartForOrderResponseFromModel(cart model.CartForOrder, promoStatus string) orderData {
 	deliveryDates := make([]deliveryDateInfo, 0, len(cart.DeliveryDates))
 
 	for _, deliveryDate := range cart.DeliveryDates {
@@ -49,13 +49,8 @@ func cartForOrderResponseFromModel(cart model.CartForOrder) orderData {
 		}
 	}
 
-	address := "г. Москва, 2-я Бауманская ул., 5" // Заглушка
-
-	if cart.Address.City != "" && cart.Address.Street != "" && cart.Address.House != "" {
-		address = "г. " + cart.Address.City + ", " + cart.Address.Street + ", " + cart.Address.House
-		if cart.Address.Flat != "" {
-			address += ", кв. " + cart.Address.Flat
-		}
+	if cart.Address.Text == "" {
+		cart.Address.Text = "г. Москва, 2-я Бауманская ул., 5"
 	}
 
 	return orderData{
@@ -65,9 +60,10 @@ func cartForOrderResponseFromModel(cart model.CartForOrder) orderData {
 		Currency:       currency,
 		PaymentMethods: paymentMethods,
 		Recipient: recipientInfo{
-			Address:       address,
+			Address:       cart.Address.Text,
 			RecipientName: cart.UserName,
 		},
 		DeliveryDates: deliveryDates,
+		PromoStatus:   promoStatus,
 	}
 }

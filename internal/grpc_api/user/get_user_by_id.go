@@ -17,8 +17,9 @@ func (um *UsersGrpc) GetUserById(ctx context.Context, in *proto.GetUserByIdReque
 		return &proto.UsersDefaultResponse{}, err
 	}
 	return &proto.UsersDefaultResponse{
-		UserId:   userModel.ID,
-		Username: userModel.Username,
-		City:     userModel.City,
+		UserId:    userModel.ID,
+		Username:  userModel.Username,
+		City:      userModel.City,
+		AvatarUrl: userModel.AvatarUrl,
 	}, nil
 }

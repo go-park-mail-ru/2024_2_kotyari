@@ -6,6 +6,11 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
+type ChangeCartProductCountResponse struct {
+	Count uint32 `json:"count"`
+}
+
+//easyjson:json
 type ChangeCartProductCountRequest struct {
 	Count int32 `json:"count"`
 }
@@ -14,6 +19,7 @@ func (r ChangeCartProductCountRequest) ToModel() int32 {
 	return r.Count
 }
 
+//easyjson:json
 type ChangeCartProductSelectedStateRequest struct {
 	IsSelected bool `json:"is_selected"`
 }
@@ -24,6 +30,7 @@ func (r ChangeCartProductSelectedStateRequest) ToModel() bool {
 
 type GetCartResponse struct {
 	ID           uint32               `json:"id"`
+	TotalWeight  float32              `json:"total_weight"`
 	DeliveryDate time.Time            `json:"delivery_date"`
 	Products     []GetProductResponse `json:"products"`
 }
@@ -46,6 +53,7 @@ func cartResponseFromModel(cart model.Cart, products []GetProductResponse) GetCa
 		ID:           cart.ID,
 		DeliveryDate: cart.DeliveryDate,
 		Products:     products,
+		TotalWeight:  cart.TotalWeight,
 	}
 }
 
@@ -72,6 +80,7 @@ type orderData struct {
 	PaymentMethods []paymentMethod    `json:"payment_methods"`
 	Recipient      recipientInfo      `json:"recipient"`
 	DeliveryDates  []deliveryDateInfo `json:"delivery_dates"`
+	PromoStatus    string             `json:"promo_status"`
 }
 
 type paymentMethod struct {

@@ -19,7 +19,7 @@ func (pd *ProductsDelivery) GetAllProducts(w http.ResponseWriter, r *http.Reques
 
 	pd.log.Info("[ProductsDelivery.GetAllProducts] Started executing", slog.Any("request-id", requestID))
 
-	products, err := pd.repo.GetAllProducts(r.Context())
+	products, err := pd.allProductsGetter.GetAllProducts(r.Context())
 	if err != nil {
 		pd.log.Error("[ ProductsDelivery.GetAllProducts ] no products ]",
 			slog.String("method", r.Method),
@@ -32,9 +32,9 @@ func (pd *ProductsDelivery) GetAllProducts(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	dtoProducts := make([]dtoProductCatalog, len(products))
+	dtoProducts := make([]DtoProductCatalog, len(products))
 	for i, product := range products {
-		dtoProducts[i] = newDTOProductCatalogFromModel(product)
+		dtoProducts[i] = NewDTOProductCatalogFromModel(product)
 	}
 
 	utils.WriteJSON(w, http.StatusOK, dtoProducts)

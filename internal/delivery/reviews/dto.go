@@ -9,7 +9,6 @@ import (
 type GetProductReviewsResponseDTO struct {
 	TotalReviewCount uint32              `json:"total_review_count"`
 	TotalRating      float32             `json:"total_review_rating"`
-	UserReview       ReviewResponseDTO   `json:"user_review"`
 	Reviews          []ReviewResponseDTO `json:"reviews"`
 }
 
@@ -22,6 +21,7 @@ type ReviewResponseDTO struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+//easyjson:json
 type AddReviewRequestDTO struct {
 	Rating    uint8  `json:"rating"`
 	Text      string `json:"text"`
@@ -36,6 +36,7 @@ func (r AddReviewRequestDTO) ToModel() model.Review {
 	}
 }
 
+//easyjson:json
 type UpdateReviewRequestDTO struct {
 	Rating    uint8  `json:"rating"`
 	Text      string `json:"text"`
@@ -64,7 +65,6 @@ func productReviewsFromModel(r model.Reviews, reviews []ReviewResponseDTO) GetPr
 	return GetProductReviewsResponseDTO{
 		TotalReviewCount: r.TotalReviewCount,
 		TotalRating:      r.TotalRating,
-		UserReview:       reviewResponseFromModel(r.UserReview),
 		Reviews:          reviews,
 	}
 }

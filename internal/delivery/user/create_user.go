@@ -1,12 +1,14 @@
 package user
 
 import (
-	"encoding/json"
 	"log/slog"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
+	"github.com/mailru/easyjson"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func (u *UsersDelivery) CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -22,7 +24,7 @@ func (u *UsersDelivery) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	var req UsersSignUpRequest
 
-	err = json.NewDecoder(r.Body).Decode(&req)
+	err = easyjson.UnmarshalFromReader(r.Body, &req)
 	if err != nil {
 		utils.WriteJSON(w, http.StatusBadRequest, errs.HTTPErrorResponse{
 			ErrorMessage: errs.InvalidJSONFormat.Error(),
@@ -48,13 +50,31 @@ func (u *UsersDelivery) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	usersDefaultResponse, err := u.userClientGrpc.CreateUser(newCtx, req.ToGrpcSignupRequest())
-	if err != nil {
-		err, code := u.errResolver.Get(err)
-		utils.WriteJSON(w, code, errs.HTTPErrorResponse{
-			ErrorMessage: err.Error(),
-		})
 
-		u.log.Error("[ UsersDelivery.CreateUser ] Ошибка при передаче на grpc", slog.String("error", err.Error()))
+	grpcErr, ok := status.FromError(err)
+	if err != nil {
+		if ok {
+			switch grpcErr.Code() {
+			case codes.InvalidArgument:
+				u.log.Error("[ UsersDelivery.CreateUser ] Пользователь уже существует", slog.Any("error", err.Error()))
+
+				utils.WriteErrorJSONByError(w, errs.UserAlreadyExists, u.errResolver)
+
+				return
+
+			default:
+				u.log.Error("[ UsersDelivery.CreateUser ] Неизвестная ошибка", slog.String("error", err.Error()))
+
+				utils.WriteErrorJSONByError(w, errs.InternalServerError, u.errResolver)
+
+				return
+			}
+		}
+
+		u.log.Error("[ UsersDelivery.CreateUser ] Не удалось получить код ошибки")
+
+		utils.WriteErrorJSONByError(w, errs.InternalServerError, u.errResolver)
+
 		return
 	}
 

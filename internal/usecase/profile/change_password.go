@@ -35,7 +35,7 @@ func (ps *ProfilesService) ChangePassword(ctx context.Context, userId uint32, ol
 	}
 
 	if !utils.VerifyPassword(user.Password, oldPassword) {
-		return errs.WrongCredentials
+		return errs.WrongPassword
 	}
 
 	salt, err := utils.GenerateSalt()

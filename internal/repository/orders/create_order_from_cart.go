@@ -29,9 +29,9 @@ func (r *OrdersRepo) CreateOrderFromCart(ctx context.Context, orderData *order.O
 
 	defer func() {
 		if p := recover(); p != nil || err != nil {
-			tx.Rollback(ctx)
+			_ = tx.Rollback(ctx)
 		} else {
-			tx.Commit(ctx)
+			_ = tx.Commit(ctx)
 		}
 	}()
 

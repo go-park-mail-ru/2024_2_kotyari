@@ -1,0 +1,1 @@
+alter table orders add column new_status order_status not null default 'awaiting_payment';

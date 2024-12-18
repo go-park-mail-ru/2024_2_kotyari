@@ -55,6 +55,7 @@ func (h *OrdersHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
 		Recipient:    order.Recipient,
 		Address:      order.Address,
 		Status:       order.Status,
+		TotalPrice:   order.TotalPrice,
 		OrderDate:    order.OrderDate,
 		DeliveryDate: order.DeliveryDate,
 		Products:     ConvertProductsToDTO(order.Products),

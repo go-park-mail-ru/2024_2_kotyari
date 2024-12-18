@@ -18,16 +18,17 @@ type getOrdersRow struct {
 }
 
 type getOrderByIdRow struct {
-	OrderID   uuid.UUID
-	OrderDate time.Time
-	Date      time.Time
-	ProductID uint32
-	Cost      uint32
-	Count     uint32
-	Weight    float32
-	Status    string
-	Address   string
-	Username  string
-	Title     string
-	ImageURL  string
+	OrderID    uuid.UUID
+	OrderDate  time.Time
+	Date       time.Time
+	TotalPrice uint32
+	ProductID  uint32
+	Cost       uint32
+	Count      uint32
+	Weight     float32
+	Status     string
+	Address    string
+	Username   string
+	Title      string
+	ImageURL   string
 }

@@ -26,7 +26,27 @@ help:
 	@echo 'apply-migrations - Apply all migrations from assets/migrations folder'
 	@echo 'revert-migrations - Revert all migrations from assets/migrations folder'
 	@echo 'For this tools to work you need to have migrate tool to be installed'
-	@echo 'You can install it by running this command: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest'
+	@echo 'You can install it by running this command: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest and export PATH=$PATH:$GOPATH/bin'
+
+
+run:
+	go run ./cmd/main.go
+
+clean:
+	go clean
+	rm ${BINARY_NAME}
+
+test:
+	go test ./...
+
+test-coverage:
+	go test ./... -coverprofile=coverage.out
+	# Exclude protobuf 'gen' directories, 'docs', 'internal/errs', and 'dto_easyjson.go' files
+	grep -vE '\/kafka_api\/|\/grpc_api\/|\/metrics\/|\/middlewares\/|\/configs\/|\/apps\/|\/cmd\/|\/mocks\/|\/gen\/|\/docs\/|\/internal\/errs\/|dto_easyjson\.go|init\.go' coverage.out > coverage_filtered.out
+	go tool cover -func=coverage_filtered.out
+	go tool cover -html=coverage_filtered.out
+
+
 
 PROTO_DIR := ./api/protos
 
@@ -35,9 +55,6 @@ GEN_DIR := gen
 PROTOC := protoc
 
 ENTITIES := $(shell find $(PROTO_DIR) -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
-
-proto-build: $(ENTITIES)
-
 
 # export PATH=$PATH:$(go env GOPATH)/bin
 
@@ -53,49 +70,10 @@ $(ENTITIES):
 		$(PROTO_DIR)/$@/proto/*.proto
 	@echo "Генерация для $@ завершена."
 
+#proto-build:
+#	@echo "Entities: $(ENTITIES)"
 
-run:
-	go run ./cmd/main.go
-
-clean:
-	go clean
-	rm ${BINARY_NAME}
-
-test:
-	go test ./...
-
-test-coverage:
-	go test ./... -coverprofile=coverage.out
-	go tool cover -func=coverage.out
-	go tool cover -html=coverage.out
-
-# Путь к папке с прототипами
-PROTO_DIR := ./api/protos
-
-# Путь к папке сгенерированных файлов
-GEN_DIR := gen
-
-# Команда protoc
-PROTOC := protoc
-
-# Список всех сущностей (названия подпапок в ./api/protos)
-ENTITIES := $(shell find $(PROTO_DIR) -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
-
-# Общая цель для генерации всех сущностей
 proto-build: $(ENTITIES)
-
-# Правило генерации для каждой сущности
-$(ENTITIES):
-	  @echo "Генерация кода для сущности $@..."
-	  @mkdir -p $(PROTO_DIR)/$@/$(GEN_DIR)
-	  @$(PROTOC) \
-		--proto_path=$(PROTO_DIR)/$@/proto \
-		--go_out=$(PROTO_DIR)/$@/$(GEN_DIR) \
-		--go_opt=paths=source_relative \
-		--go-grpc_out=$(PROTO_DIR)/$@/$(GEN_DIR) \
-		--go-grpc_opt=paths=source_relative \
-    	$(PROTO_DIR)/$@/proto/*.proto
-	  @echo "Генерация для $@ завершена."
 
 fmt:
 	go fmt ./...
@@ -118,8 +96,18 @@ user-refresh:
 profile-refresh:
 	docker stop profile_go && docker rm profile_go && docker rmi profile-go-image && docker compose up -d
 
+notifications-refresh:
+	docker stop notifications_go && docker rm notifications_go && docker rmi notifications-go-image && docker compose up -d
+
+promocodes-refresh:
+	docker compose build promocodes_go --no-cache && docker compose up promocodes_go -d --force-recreate
+
 prometheus-refresh:
 	docker stop prometheus && docker rm prometheus && docker compose up -d
+
+wishlists-refresh:
+	docker compose build wishlists_go --no-cache && docker compose up wishlists_go -d --force-recreate
+	#docker stop wishlists_go && docker rm wishlists_go && docker rmi wishlists-go-image && docker compose up -d
 
 grafana-refresh:
 	docker stop grafana && docker rm grafana && docker compose up -d
@@ -142,37 +130,27 @@ recreate-redis:
 all-delete:
 	docker compose down -v
 
-all-refresh: main-refresh pg-refresh redis-refresh
-
 apply-migrations:
-	@echo 'Applying migrations...'
+	@echo 'Applying migrations... $(MIGRATIONS_DIR)'
 	@migrate -path $(MIGRATIONS_DIR) -database $(DB_URL) up
 
 revert-migrations:
 	@echo 'Reverting migrations...'
 	@migrate -path $(MIGRATIONS_DIR) -database "$(DB_URL)" down
 
-
 back-refresh:
-	docker stop main_go && docker rm main_go && docker rmi main-go-image && \
-	docker stop rating_updater_go && docker rm rating_updater_go && docker rmi rating-updater-go-image && \
-	docker stop user_go && docker rm user_go && docker rmi user-go-image && \
-	docker stop profile_go && docker rm profile_go && docker rmi profile-go-image && \
-	docker compose up -d
-
-# Правило генерации для каждой сущности
-$(ENTITIES):
-	  @echo "Генерация кода для сущности $@..."
-	  @mkdir -p $(PROTO_DIR)/$@/$(GEN_DIR)
-	  @$(PROTOC) \
-		--proto_path=$(PROTO_DIR)/$@/proto \
-		--go_out=$(PROTO_DIR)/$@/$(GEN_DIR) \
-		--go_opt=paths=source_relative \
-		--go-grpc_out=$(PROTO_DIR)/$@/$(GEN_DIR) \
-		--go-grpc_opt=paths=source_relative \
-		$(PROTO_DIR)/$@/proto/*.proto
-	  @echo "Генерация для $@ завершена."
+	docker compose build --no-cache && docker compose up -d --force-recreate
 
 
+DELIVERY_DIR=./internal/delivery
 
-.PHONY: clean build
+easyjson:
+	@echo "Generating easyjson..."
+	@for dir in $(DELIVERY_DIR); do \
+		for file in $$(find $$dir -type f -name 'dto.go'); do \
+			easyjson $$file; \
+		done \
+	done
+	@echo "easyjson generation completed."
+
+.PHONY: clean build easyjson

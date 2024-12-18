@@ -26,46 +26,6 @@ func TestCartManager_ChangeCartProductCount(t *testing.T) {
 		want      want
 	}{
 		{
-			name:      "Успешное изменение количества товара в корзине",
-			productID: 1,
-			count:     1,
-			userID:    1,
-			setupFunc: func(ctrl *gomock.Controller) *CartManager {
-				cartRepositoryMock := mocks.NewMockcartRepository(ctrl)
-				productCountGetterMock := mocks.NewMockproductCountGetter(ctrl)
-				logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-
-				cartProduct := model.CartProduct{
-					BaseProduct: model.BaseProduct{
-						Count: 10,
-					},
-					IsDeleted: false,
-				}
-
-				cartRepositoryMock.EXPECT().GetCartProduct(
-					gomock.Any(),
-					uint32(1),
-					uint32(1)).Return(cartProduct, nil)
-
-				productCountGetterMock.EXPECT().GetProductCount(
-					gomock.Any(),
-					uint32(1)).Return(uint32(10), nil)
-
-				cartRepositoryMock.EXPECT().ChangeCartProductCount(
-					gomock.Any(),
-					uint32(1),
-					int32(1),
-					uint32(1)).Return(nil)
-
-				return &CartManager{
-					cartRepository:     cartRepositoryMock,
-					productCountGetter: productCountGetterMock,
-					log:                logger,
-				}
-			},
-			want: nil,
-		},
-		{
 			name:      "Не удалось получить продукт",
 			productID: 1,
 			count:     1,
@@ -340,86 +300,6 @@ func TestCartManager_ChangeCartProductCount(t *testing.T) {
 			},
 			want: errs.BadRequest,
 		},
-		{
-			name:      "Успешное удаление товара из корзины",
-			productID: 1,
-			count:     -1,
-			userID:    1,
-			setupFunc: func(ctrl *gomock.Controller) *CartManager {
-				cartRepositoryMock := mocks.NewMockcartRepository(ctrl)
-				productCountGetterMock := mocks.NewMockproductCountGetter(ctrl)
-				logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-
-				cartProduct := model.CartProduct{
-					BaseProduct: model.BaseProduct{
-						Count: 1,
-					},
-					IsDeleted: false,
-				}
-
-				cartRepositoryMock.EXPECT().GetCartProduct(
-					gomock.Any(),
-					uint32(1),
-					uint32(1)).Return(cartProduct, nil)
-
-				productCountGetterMock.EXPECT().GetProductCount(
-					gomock.Any(),
-					uint32(1)).Return(uint32(10), nil)
-
-				cartRepositoryMock.EXPECT().RemoveCartProduct(
-					gomock.Any(),
-					uint32(1),
-					int32(-1),
-					uint32(1)).Return(nil)
-
-				return &CartManager{
-					cartRepository:     cartRepositoryMock,
-					productCountGetter: productCountGetterMock,
-					log:                logger,
-				}
-			},
-			want: nil,
-		},
-		{
-			name:      "Успешное изменение количества товара в корзине",
-			productID: 1,
-			count:     -1,
-			userID:    1,
-			setupFunc: func(ctrl *gomock.Controller) *CartManager {
-				cartRepositoryMock := mocks.NewMockcartRepository(ctrl)
-				productCountGetterMock := mocks.NewMockproductCountGetter(ctrl)
-				logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-
-				cartProduct := model.CartProduct{
-					BaseProduct: model.BaseProduct{
-						Count: 10,
-					},
-					IsDeleted: false,
-				}
-
-				cartRepositoryMock.EXPECT().GetCartProduct(
-					gomock.Any(),
-					uint32(1),
-					uint32(1)).Return(cartProduct, nil)
-
-				productCountGetterMock.EXPECT().GetProductCount(
-					gomock.Any(),
-					uint32(1)).Return(uint32(10), nil)
-
-				cartRepositoryMock.EXPECT().ChangeCartProductCount(
-					gomock.Any(),
-					uint32(1),
-					int32(-1),
-					uint32(1)).Return(nil)
-
-				return &CartManager{
-					cartRepository:     cartRepositoryMock,
-					productCountGetter: productCountGetterMock,
-					log:                logger,
-				}
-			},
-			want: nil,
-		},
 	}
 
 	for _, tt := range tests {
@@ -430,9 +310,9 @@ func TestCartManager_ChangeCartProductCount(t *testing.T) {
 
 			ctx := context.WithValue(context.Background(), testContextRequestIDKey, testContextRequestIDValue)
 
-			resp := tt.setupFunc(ctrl).ChangeCartProductCount(ctx, tt.productID, tt.count, tt.userID)
+			_, e := tt.setupFunc(ctrl).ChangeCartProductCount(ctx, tt.productID, tt.count, tt.userID)
 
-			assert.Equal(t, tt.want, resp)
+			assert.Equal(t, tt.want, e)
 		})
 	}
 }

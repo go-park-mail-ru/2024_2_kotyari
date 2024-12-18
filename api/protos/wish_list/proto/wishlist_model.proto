@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package wishlist;
+option go_package = "https://github.com/go-park-mail-ru/2024_2_kotyari/wishlist/grpc_gen";
+
+import "google/protobuf/timestamp.proto";
+
+message WishlistItem {
+  uint32 product_id = 1;
+  google.protobuf.Timestamp added_at = 2;
+}
+
+message Wishlist {
+  string name = 1;
+  string link = 2;
+  repeated WishlistItem items = 3;
+}

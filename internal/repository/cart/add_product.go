@@ -44,7 +44,7 @@ func (cs *CartsStore) AddProduct(ctx context.Context, productID uint32, userID u
 		return err
 	}
 
-	err = cs.updateProductCount(ctx, productID, 1)
+	err = cs.updateProductCount(ctx, productID, int32(1))
 	if err != nil {
 		cs.log.Error("[CartStore.ChangeProductCount] Error occurred when changing cart product count", slog.String("error", err.Error()))
 

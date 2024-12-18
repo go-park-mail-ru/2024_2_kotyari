@@ -24,6 +24,6 @@ func NewCategoryApp(r *mux.Router, delivery categoriesDelivery) *CategoryApp {
 }
 
 func (ca *CategoryApp) InitCategoriesRoutes() {
-	ca.router.HandleFunc("/category/{link}", ca.delivery.GetProductsByCategoryLink).Methods("GET")
-	ca.router.HandleFunc("/categories", ca.delivery.GetAllCategories).Methods("GET")
+	ca.router.HandleFunc("/api/v1/category/{link}", ca.delivery.GetProductsByCategoryLink).Methods("GET")
+	ca.router.HandleFunc("/api/v1/categories", ca.delivery.GetAllCategories).Methods("GET")
 }

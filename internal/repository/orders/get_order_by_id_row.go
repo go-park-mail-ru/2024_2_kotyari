@@ -18,7 +18,7 @@ func (r *OrdersRepo) GetOrderByIdRows(ctx context.Context, id uuid.UUID, _ uint3
 	r.logger.Info("[OrdersRepo.GetOrderByIdRows] Started executing", slog.Any("request-id", requestID))
 
 	const query = `
-		SELECT o.id, o.address, o.status, o.created_at, u.username,
+		SELECT o.id, o.address, o.status, o.total_price, o.created_at, u.username,
        		op.delivery_date, p.id, p.price, op.count, p.image_url, p.weight, p.title
 		FROM orders o
          	JOIN users u ON o.user_id = u.id

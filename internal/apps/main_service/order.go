@@ -27,10 +27,10 @@ func NewOrderApp(r *mux.Router, delivery orderDelivery) OrderApp {
 
 func (o *OrderApp) InitOrderApp() *mux.Router {
 	sub := o.router.Methods(http.MethodGet, http.MethodPost).Subrouter()
-	sub.HandleFunc("/orders", o.delivery.GetOrders).Methods(http.MethodGet)
-	sub.HandleFunc("/order/{id}", o.delivery.GetOrderByID).Methods(http.MethodGet)
-	sub.HandleFunc("/orders", o.delivery.CreateOrderFromCart).Methods(http.MethodPost)
-	sub.HandleFunc("/orders/nearest", o.delivery.GetNearestDeliveryDate).Methods(http.MethodGet)
+	sub.HandleFunc("/api/v1/orders", o.delivery.GetOrders).Methods(http.MethodGet)
+	sub.HandleFunc("/api/v1/order/{id}", o.delivery.GetOrderByID).Methods(http.MethodGet)
+	sub.HandleFunc("/api/v1/orders", o.delivery.CreateOrderFromCart).Methods(http.MethodPost)
+	sub.HandleFunc("/api/v1/orders/nearest", o.delivery.GetNearestDeliveryDate).Methods(http.MethodGet)
 
 	return sub
 }

@@ -13,6 +13,7 @@ import (
 	grpc2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/metrics/grpc"
 	metrics2 "github.com/go-park-mail-ru/2024_2_kotyari/internal/middlewares/metrics"
 	profileRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/profile"
+	userRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/user"
 	profileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/profile"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/gorilla/mux"
@@ -43,9 +44,14 @@ type ProfilesApp struct {
 func NewProfilesApp(
 	conf map[string]any,
 ) (*ProfilesApp, error) {
-	cfg := configs.ParseServiceViperConfig(conf)
-
 	slogLog := logger.InitLogger()
+
+	cfg, err := configs.ParseServiceViperConfig(conf)
+	if err != nil {
+		slogLog.Error("[NewProfilesApp] Failed to parse cfg")
+
+		return nil, err
+	}
 
 	if cfg.Address == "" || cfg.Port == "" {
 		return nil, errors.New("[ ERROR ] пустая конфигурация сервиса Profile")
@@ -64,8 +70,10 @@ func NewProfilesApp(
 
 	interceptor := metrics2.NewGrpcMiddleware(*metrics, errorResolver)
 
+	userRepo := userRepoLib.NewUsersStore(dbPool, slogLog)
+
 	profileRepo := profileRepoLib.NewProfileRepo(dbPool, slogLog)
-	profileService := profileServiceLib.NewProfileService(profileRepo, slogLog)
+	profileService := profileServiceLib.NewProfileService(profileRepo, userRepo, slogLog)
 
 	delivery := profile.NewProfilesGrpc(profileRepo, profileService, slogLog)
 

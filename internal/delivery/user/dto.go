@@ -5,6 +5,7 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 )
 
+//easyjson:json
 type UsersSignUpRequest struct {
 	Email          string `json:"email"`
 	Username       string `json:"username"`
@@ -12,13 +13,14 @@ type UsersSignUpRequest struct {
 	RepeatPassword string `json:"repeat_password"`
 }
 
+//easyjson:json
 type UsersLoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
 type UsersDefaultResponse struct {
-	UserID   uint32 `json:"user_id"`
+	UserID    uint32 `json:"user_id"`
 	Username  string `json:"username"`
 	City      string `json:"city"`
 	AvatarUrl string `json:"avatar_url"`

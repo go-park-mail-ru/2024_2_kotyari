@@ -32,17 +32,17 @@ func NewCartApp(r *mux.Router, delivery cartDelivery) CartApp {
 
 func (c *CartApp) InitCartRoutes() *mux.Router {
 	sub := c.router.Methods(http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodDelete).Subrouter()
-	sub.HandleFunc("/cart", c.delivery.GetCart).Methods(http.MethodGet)
-	sub.HandleFunc("/cart/product/{id}", c.delivery.ChangeCartProductQuantity).Methods(http.MethodPatch)
-	sub.HandleFunc("/cart/product/{id}", c.delivery.AddProduct).Methods(http.MethodPost)
-	sub.HandleFunc("/cart/product/{id}", c.delivery.RemoveProduct).Methods(http.MethodDelete)
+	sub.HandleFunc("/api/v1/cart", c.delivery.GetCart).Methods(http.MethodGet)
+	sub.HandleFunc("/api/v1/cart/product/{id}", c.delivery.ChangeCartProductQuantity).Methods(http.MethodPatch)
+	sub.HandleFunc("/api/v1/cart/product/{id}", c.delivery.AddProduct).Methods(http.MethodPost)
+	sub.HandleFunc("/api/v1/cart/product/{id}", c.delivery.RemoveProduct).Methods(http.MethodDelete)
 
-	sub.HandleFunc("/cart/select/products", c.delivery.GetSelectedFromCart).Methods(http.MethodGet)
-	sub.HandleFunc("/cart/select/product/{id}", c.delivery.ChangeCartProductSelectedState).Methods(http.MethodPatch)
-	sub.HandleFunc("/cart/select/products", c.delivery.ChangeAllCartProductsState).Methods(http.MethodPatch)
-	sub.HandleFunc("/cart/select/products", c.delivery.ChangeAllCartProductsState).Methods(http.MethodDelete)
-	sub.HandleFunc("/cart/selected", c.delivery.RemoveSelected).Methods(http.MethodDelete)
+	sub.HandleFunc("/api/v1/cart/select/products", c.delivery.GetSelectedFromCart).Methods(http.MethodGet)
+	sub.HandleFunc("/api/v1/cart/select/product/{id}", c.delivery.ChangeCartProductSelectedState).Methods(http.MethodPatch)
+	sub.HandleFunc("/api/v1/cart/select/products", c.delivery.ChangeAllCartProductsState).Methods(http.MethodPatch)
+	sub.HandleFunc("/api/v1/cart/select/products", c.delivery.ChangeAllCartProductsState).Methods(http.MethodDelete)
+	sub.HandleFunc("/api/v1/cart/selected", c.delivery.RemoveSelected).Methods(http.MethodDelete)
 
-	sub.HandleFunc("/cart/pay-method", c.delivery.UpdatePaymentMethod).Methods(http.MethodPatch)
+	sub.HandleFunc("/api/v1/cart/pay-method", c.delivery.UpdatePaymentMethod).Methods(http.MethodPatch)
 	return sub
 }

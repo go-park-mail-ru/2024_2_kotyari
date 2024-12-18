@@ -3,9 +3,12 @@ package main_service
 import (
 	"context"
 	"fmt"
+	wishlistgrpc "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/wish_list/gen"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/wish_list"
 	"log/slog"
 	"net/http"
 
+	notificationsGRPC "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/notifications/gen"
 	profilegrpc "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/profile/gen"
 	usergrpc "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/user/gen"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/configs"
@@ -17,9 +20,12 @@ import (
 	categoryDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/category"
 	csrfDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/csrf"
 	fileDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/file"
+	notificationsDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/notifications"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/orders"
 	productDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/product"
 	profileDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/profile"
+	promocodesDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/promocodes"
+	recDeliverylib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/recommendations"
 	reviewsDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/reviews"
 	searchDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/search"
 	sessionsDeliveryLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/delivery/sessions"
@@ -35,6 +41,7 @@ import (
 	fileRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/file"
 	rorders "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/orders"
 	productRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/product"
+	recRepolib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/recommendations"
 	reviewsRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/reviews"
 	searchRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/search"
 	sessionsRepoLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/sessions"
@@ -44,6 +51,7 @@ import (
 	fileServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/file"
 	imageServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/image"
 	ordersServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/orders"
+	productServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/product"
 	reviewsServiceLib "github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/reviews"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/sessions"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
@@ -57,10 +65,17 @@ const (
 	ratingUpdaterService = "rating_updater"
 	profileService       = "profile_go"
 	userService          = "user_go"
+	notificationsService = "notifications_go"
+	promocodesService    = "promocodes_go"
+	wishlistsService     = "wishlists_go"
 )
 
 type categoryApp interface {
 	InitCategoriesRoutes()
+}
+
+type wishlistApp interface {
+	InitWishlistRoutes() *mux.Router
 }
 
 type filesDelivery interface {
@@ -80,6 +95,10 @@ type profilesDelivery interface {
 	ChangePassword(writer http.ResponseWriter, request *http.Request)
 }
 
+type promoCodesDelivery interface {
+	GetUserPromoCodes(w http.ResponseWriter, r *http.Request)
+}
+
 type addressesDelivery interface {
 	UpdateAddressData(writer http.ResponseWriter, request *http.Request)
 	GetAddress(writer http.ResponseWriter, request *http.Request)
@@ -94,22 +113,29 @@ type productsApp interface {
 	InitProductsRoutes() *mux.Router
 }
 
+type notificationsDelivery interface {
+	GetOrdersUpdates(w http.ResponseWriter, r *http.Request)
+}
+
 type Server struct {
-	r        *mux.Router
-	sessions SessionDelivery
-	auth     usersDelivery
-	product  productsApp
-	category categoryApp
-	profile  profilesDelivery
-	address  addressesDelivery
-	cfg      configs.ServiceViperConfig
-	log      *slog.Logger
-	files    filesDelivery
-	cart     CartApp
-	order    OrderApp
-	csrf     csrfDelivery
-	reviews  ReviewsApp
-	search   SearchApp
+	r             *mux.Router
+	sessions      SessionDelivery
+	auth          usersDelivery
+	product       productsApp
+	category      categoryApp
+	profile       profilesDelivery
+	address       addressesDelivery
+	cfg           configs.ServiceViperConfig
+	log           *slog.Logger
+	files         filesDelivery
+	cart          CartApp
+	order         OrderApp
+	csrf          csrfDelivery
+	reviews       ReviewsApp
+	search        SearchApp
+	notifications notificationsDelivery
+	promoCodes    promoCodesDelivery
+	wishlist      wishlistApp
 }
 
 type csrfDelivery interface {
@@ -160,7 +186,11 @@ func NewServer() (*Server, error) {
 	sessionsDelivery := sessionsDeliveryLib.NewSessionDelivery(sessionsRepo, errResolver)
 
 	userGRPCCfg := v.GetStringMap(userService)
-	userCfg := configs.ParseServiceViperConfig(userGRPCCfg)
+	userCfg, err := configs.ParseServiceViperConfig(userGRPCCfg)
+	if err != nil {
+		return nil, err
+	}
+
 	userConn, err := grpc.NewClient(fmt.Sprintf("%s:%s", userCfg.Domain, userCfg.Port),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
@@ -172,15 +202,16 @@ func NewServer() (*Server, error) {
 
 	userHandler := userDeliveryLib.NewUsersDelivery(userClient, inputValidator, sessionService, errResolver, log)
 
-	categoryRepo := categoryRepoLib.NewCategoriesStore(dbPool, log)
-	categoryDelivery := categoryDeliveryLib.NewCategoriesDelivery(categoryRepo, log, errResolver)
-
 	addressRepo := addressRepoLib.NewAddressRepo(dbPool, log)
 	addressService := addressServiceLib.NewAddressService(addressRepo, log)
 	addressHandler := addressDeliveryLib.NewAddressHandler(addressService, errResolver, log)
 
 	profileGRPCCfg := v.GetStringMap(profileService)
-	profileCfg := configs.ParseServiceViperConfig(profileGRPCCfg)
+	profileCfg, err := configs.ParseServiceViperConfig(profileGRPCCfg)
+	if err != nil {
+		return nil, err
+	}
+
 	profileConn, err := grpc.NewClient(fmt.Sprintf("%s:%s", profileCfg.Domain, profileCfg.Port),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
@@ -192,20 +223,33 @@ func NewServer() (*Server, error) {
 
 	profileHandler := profileDeliveryLib.NewProfilesHandler(profileClient, log, addressRepo, imageService, errResolver)
 	prodRepo := productRepoLib.NewProductsStore(dbPool, log)
+
+	categoryRepo := categoryRepoLib.NewCategoriesStore(dbPool, log, prodRepo)
+	categoryDelivery := categoryDeliveryLib.NewCategoriesDelivery(categoryRepo, log, errResolver)
+
 	ca := NewCategoryApp(router, categoryDelivery)
 
+	promoCodesGRPC, err := promocodesDeliveryLib.NewPromoCodesGRPC(v.GetStringMap(promocodesService), errResolver, log)
+	if err != nil {
+		return nil, err
+	}
+
+	recRepo := recRepolib.NewRecRepo(dbPool, log, prodRepo, categoryRepo)
+	recHandler := recDeliverylib.NewRecHandler(log, errResolver, recRepo)
+
 	cartRepo := cartRepoLib.NewCartsStore(dbPool, log)
-	cartService := cartServiceLib.NewCartManager(cartRepo, prodRepo, log)
+	cartService := cartServiceLib.NewCartManager(cartRepo, promoCodesGRPC, prodRepo, log)
 	cartHandler := cartDeliveryLib.NewCartHandler(cartService, cartRepo, errResolver, log)
 	cartApp := NewCartApp(router, cartHandler)
 
-	prodHandler := productDeliveryLib.NewProductHandler(errResolver, prodRepo, log, cartRepo)
-	pa := NewProductsApp(router, prodHandler)
+	productService := productServiceLib.NewProductService(cartRepo, prodRepo, log)
+	prodHandler := productDeliveryLib.NewProductHandler(errResolver, prodRepo, productService, log, cartRepo)
+	pa := NewProductsApp(router, prodHandler, recHandler)
 
 	fileDelivery := fileDeliveryLib.NewFilesDelivery(fileRepo)
 
 	ordersRepo := rorders.NewOrdersRepo(dbPool, log)
-	ordersManager := ordersServiceLib.NewOrdersManager(ordersRepo, log, cartRepo)
+	ordersManager := ordersServiceLib.NewOrdersManager(ordersRepo, promoCodesGRPC, log, cartRepo)
 	ordersHandler := orders.NewOrdersHandler(ordersManager, log, errResolver)
 	orderApp := NewOrderApp(router, ordersHandler)
 
@@ -231,24 +275,69 @@ func NewServer() (*Server, error) {
 	searchHandler := searchDeliveryLib.NewSearchDelivery(searchRepo, errResolver, log)
 	searchApp := NewSearchApp(router, searchHandler)
 
+	notificationsGRPCCfg := v.GetStringMap(notificationsService)
+	notificationsCfg, err := configs.ParseServiceViperConfig(notificationsGRPCCfg)
+	if err != nil {
+		return nil, err
+	}
+
+	notificationsConn, err := grpc.NewClient(fmt.Sprintf("%s:%s", notificationsCfg.Domain, notificationsCfg.Port),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	notificationsClient := notificationsGRPC.NewNotificationsClient(notificationsConn)
+
+	notifications := notificationsDeliveryLib.NewNotificationsDelivery(notificationsClient, errResolver, log)
+
+	wishlistsCfgService := v.GetStringMap(wishlistsService)
+	clientWishlists, err := configs.ParseServiceViperConfig(wishlistsCfgService)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Info("wish", "addr", fmt.Sprintf("%s:%s", clientWishlists.Domain, clientWishlists.Port))
+	wishlistConn, err := grpc.NewClient(fmt.Sprintf("%s:%s", clientWishlists.Domain, clientWishlists.Port),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	wishlistClient := wishlistgrpc.NewWishlistServiceClient(wishlistConn)
+
+	wishlistDeli := wish_list.NewWishlistDelivery(wishlistClient, prodRepo, log, errResolver)
+
+	wishApp := NewWishlistApp(router, wishlistDeli)
+
 	cfg := v.GetStringMap(mainService)
+	mainCfg, err := configs.ParseServiceViperConfig(cfg)
+	if err != nil {
+		return nil, err
+	}
 
 	return &Server{
-		r:        router,
-		auth:     userHandler,
-		product:  pa,
-		profile:  profileHandler,
-		address:  addressHandler,
-		category: ca,
-		cfg:      configs.ParseServiceViperConfig(cfg),
-		log:      log,
-		sessions: sessionsDelivery,
-		files:    fileDelivery,
-		cart:     cartApp,
-		order:    orderApp,
-		csrf:     csrfHandler,
-		reviews:  reviewsApp,
-		search:   searchApp,
+		r:             router,
+		auth:          userHandler,
+		product:       pa,
+		profile:       profileHandler,
+		address:       addressHandler,
+		category:      ca,
+		cfg:           mainCfg,
+		log:           log,
+		sessions:      sessionsDelivery,
+		files:         fileDelivery,
+		cart:          cartApp,
+		order:         orderApp,
+		csrf:          csrfHandler,
+		reviews:       reviewsApp,
+		search:        searchApp,
+		notifications: notifications,
+		promoCodes:    promoCodesGRPC,
+		wishlist:      wishApp,
 	}, nil
 }
 
@@ -273,26 +362,34 @@ func (s *Server) setupRoutes() {
 	subOrder.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 	subOrder.Use(csrfMiddleware)
 
-	s.r.HandleFunc("/login", s.auth.LoginUser).Methods(http.MethodPost)
-	s.r.HandleFunc("/logout", s.sessions.Delete).Methods(http.MethodPost)
-	s.r.HandleFunc("/signup", s.auth.CreateUser).Methods(http.MethodPost)
+	wishSub := s.wishlist.InitWishlistRoutes()
+	wishSub.Use(middlewares.RequestIDMiddleware)
+	wishSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
+	wishSub.Use(csrfMiddleware)
+
+	s.r.HandleFunc("/api/v1/login", s.auth.LoginUser).Methods(http.MethodPost)
+	s.r.HandleFunc("/api/v1/logout", s.sessions.Delete).Methods(http.MethodPost)
+	s.r.HandleFunc("/api/v1/signup", s.auth.CreateUser).Methods(http.MethodPost)
 
 	authSub := s.r.Methods(http.MethodGet, http.MethodPost, http.MethodPut).Subrouter()
-	authSub.HandleFunc("/csrf", s.csrf.GetCsrf).Methods(http.MethodGet)
-	authSub.HandleFunc("/", s.auth.GetUserById).Methods(http.MethodGet)
+	authSub.HandleFunc("/api/v1/csrf", s.csrf.GetCsrf).Methods(http.MethodGet)
+	authSub.HandleFunc("/api/v1/", s.auth.GetUserById).Methods(http.MethodGet)
+	authSub.HandleFunc("/api/v1/orders/updates", s.notifications.GetOrdersUpdates).Methods(http.MethodGet)
+
 	authSub.Use(middlewares.RequestIDMiddleware)
 	authSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
 
-	s.r.HandleFunc("/files/{name}", s.files.GetImage).Methods(http.MethodGet)
+	s.r.HandleFunc("/api/v1/files/{name}", s.files.GetImage).Methods(http.MethodGet)
 
 	csrfProtected := authSub.Methods(http.MethodGet, http.MethodPost, http.MethodPut).Subrouter()
 
-	csrfProtected.HandleFunc("/account", s.profile.GetProfile).Methods(http.MethodGet)
-	csrfProtected.HandleFunc("/account", s.profile.UpdateProfileData).Methods(http.MethodPut)
-	csrfProtected.HandleFunc("/change_password", s.profile.ChangePassword).Methods(http.MethodPut)
-	csrfProtected.HandleFunc("/account/avatar", s.profile.UpdateProfileAvatar).Methods(http.MethodPut)
-	csrfProtected.HandleFunc("/address", s.address.GetAddress).Methods(http.MethodGet)
-	csrfProtected.HandleFunc("/address", s.address.UpdateAddressData).Methods(http.MethodPut)
+	csrfProtected.HandleFunc("/api/v1/account", s.profile.GetProfile).Methods(http.MethodGet)
+	csrfProtected.HandleFunc("/api/v1/account", s.profile.UpdateProfileData).Methods(http.MethodPut)
+	csrfProtected.HandleFunc("/api/v1/change_password", s.profile.ChangePassword).Methods(http.MethodPut)
+	csrfProtected.HandleFunc("/api/v1/account/avatar", s.profile.UpdateProfileAvatar).Methods(http.MethodPut)
+	csrfProtected.HandleFunc("/api/v1/address", s.address.GetAddress).Methods(http.MethodGet)
+	csrfProtected.HandleFunc("/api/v1/address", s.address.UpdateAddressData).Methods(http.MethodPut)
+	csrfProtected.HandleFunc("/api/v1/promocodes", s.promoCodes.GetUserPromoCodes).Methods(http.MethodGet)
 	csrfProtected.Use(csrfMiddleware)
 	csrfProtected.Use(middlewares.RequestIDMiddleware)
 
@@ -302,7 +399,6 @@ func (s *Server) setupRoutes() {
 	reviewsSub := s.reviews.InitRoutes()
 	reviewsSub.Use(middlewares.RequestIDMiddleware)
 	reviewsSub.Use(middlewares.AuthMiddleware(s.sessions, errResolver))
-
 }
 
 func (s *Server) Run() error {

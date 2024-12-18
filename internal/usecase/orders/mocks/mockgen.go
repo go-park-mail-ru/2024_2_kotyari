@@ -19,6 +19,59 @@ import (
 	gomock "go.uber.org/mock/gomock"
 )
 
+// MockpromoCodesManager is a mock of promoCodesManager interface.
+type MockpromoCodesManager struct {
+	ctrl     *gomock.Controller
+	recorder *MockpromoCodesManagerMockRecorder
+	isgomock struct{}
+}
+
+// MockpromoCodesManagerMockRecorder is the mock recorder for MockpromoCodesManager.
+type MockpromoCodesManagerMockRecorder struct {
+	mock *MockpromoCodesManager
+}
+
+// NewMockpromoCodesManager creates a new mock instance.
+func NewMockpromoCodesManager(ctrl *gomock.Controller) *MockpromoCodesManager {
+	mock := &MockpromoCodesManager{ctrl: ctrl}
+	mock.recorder = &MockpromoCodesManagerMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockpromoCodesManager) EXPECT() *MockpromoCodesManagerMockRecorder {
+	return m.recorder
+}
+
+// DeletePromoCode mocks base method.
+func (m *MockpromoCodesManager) DeletePromoCode(ctx context.Context, userID, promoID uint32) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeletePromoCode", ctx, userID, promoID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeletePromoCode indicates an expected call of DeletePromoCode.
+func (mr *MockpromoCodesManagerMockRecorder) DeletePromoCode(ctx, userID, promoID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeletePromoCode", reflect.TypeOf((*MockpromoCodesManager)(nil).DeletePromoCode), ctx, userID, promoID)
+}
+
+// GetPromoCode mocks base method.
+func (m *MockpromoCodesManager) GetPromoCode(ctx context.Context, userID uint32, promoCodeName string) (model.PromoCode, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPromoCode", ctx, userID, promoCodeName)
+	ret0, _ := ret[0].(model.PromoCode)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPromoCode indicates an expected call of GetPromoCode.
+func (mr *MockpromoCodesManagerMockRecorder) GetPromoCode(ctx, userID, promoCodeName any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPromoCode", reflect.TypeOf((*MockpromoCodesManager)(nil).GetPromoCode), ctx, userID, promoCodeName)
+}
+
 // MockOrdersRepo is a mock of OrdersRepo interface.
 type MockOrdersRepo struct {
 	ctrl     *gomock.Controller
@@ -74,18 +127,18 @@ func (mr *MockOrdersRepoMockRecorder) GetNearestDeliveryDate(ctx, userID any) *g
 }
 
 // GetOrderById mocks base method.
-func (m *MockOrdersRepo) GetOrderById(ctx context.Context, id uuid.UUID, userID uint32, deliveryDate time.Time) (*model.Order, error) {
+func (m *MockOrdersRepo) GetOrderById(ctx context.Context, id uuid.UUID, userID uint32) (*model.Order, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetOrderById", ctx, id, userID, deliveryDate)
+	ret := m.ctrl.Call(m, "GetOrderById", ctx, id, userID)
 	ret0, _ := ret[0].(*model.Order)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetOrderById indicates an expected call of GetOrderById.
-func (mr *MockOrdersRepoMockRecorder) GetOrderById(ctx, id, userID, deliveryDate any) *gomock.Call {
+func (mr *MockOrdersRepoMockRecorder) GetOrderById(ctx, id, userID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderById", reflect.TypeOf((*MockOrdersRepo)(nil).GetOrderById), ctx, id, userID, deliveryDate)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderById", reflect.TypeOf((*MockOrdersRepo)(nil).GetOrderById), ctx, id, userID)
 }
 
 // GetOrders mocks base method.

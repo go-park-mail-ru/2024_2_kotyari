@@ -23,9 +23,10 @@ type ProfilesService struct {
 	log         *slog.Logger
 }
 
-func NewProfileService(profileRepository profileRepository, logger *slog.Logger) *ProfilesService {
+func NewProfileService(profileRepository profileRepository, userRepo userStore, logger *slog.Logger) *ProfilesService {
 	return &ProfilesService{
 		profileRepo: profileRepository,
+		userRepo:    userRepo,
 		log:         logger,
 	}
 }

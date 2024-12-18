@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package wishlist;
+option go_package = "https://github.com/go-park-mail-ru/2024_2_kotyari/wishlist/grpc_gen";
+
+message DeleteWishlistRequest {
+  uint32 user_id = 1;
+  string link = 2;
+}

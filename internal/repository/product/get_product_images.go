@@ -16,7 +16,7 @@ const queryGetImagesProduct = `
     WHERE product_id = $1;
 `
 
-func (ps *ProductsStore) getProductImages(ctx context.Context, productID uint64) ([]model.Image, error) {
+func (ps *ProductsStore) getProductImages(ctx context.Context, productID uint32) ([]model.Image, error) {
 	requestID, err := utils.GetContextRequestID(ctx)
 	if err != nil {
 		return nil, err

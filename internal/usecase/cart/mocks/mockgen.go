@@ -17,6 +17,45 @@ import (
 	gomock "go.uber.org/mock/gomock"
 )
 
+// MockpromoCodeGetter is a mock of promoCodeGetter interface.
+type MockpromoCodeGetter struct {
+	ctrl     *gomock.Controller
+	recorder *MockpromoCodeGetterMockRecorder
+	isgomock struct{}
+}
+
+// MockpromoCodeGetterMockRecorder is the mock recorder for MockpromoCodeGetter.
+type MockpromoCodeGetterMockRecorder struct {
+	mock *MockpromoCodeGetter
+}
+
+// NewMockpromoCodeGetter creates a new mock instance.
+func NewMockpromoCodeGetter(ctrl *gomock.Controller) *MockpromoCodeGetter {
+	mock := &MockpromoCodeGetter{ctrl: ctrl}
+	mock.recorder = &MockpromoCodeGetterMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockpromoCodeGetter) EXPECT() *MockpromoCodeGetterMockRecorder {
+	return m.recorder
+}
+
+// GetPromoCode mocks base method.
+func (m *MockpromoCodeGetter) GetPromoCode(ctx context.Context, userID uint32, promoCodeName string) (model.PromoCode, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPromoCode", ctx, userID, promoCodeName)
+	ret0, _ := ret[0].(model.PromoCode)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPromoCode indicates an expected call of GetPromoCode.
+func (mr *MockpromoCodeGetterMockRecorder) GetPromoCode(ctx, userID, promoCodeName any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPromoCode", reflect.TypeOf((*MockpromoCodeGetter)(nil).GetPromoCode), ctx, userID, promoCodeName)
+}
+
 // MockcartRepository is a mock of cartRepository interface.
 type MockcartRepository struct {
 	ctrl     *gomock.Controller
@@ -110,6 +149,21 @@ func (m *MockcartRepository) GetCartProduct(ctx context.Context, productID, user
 func (mr *MockcartRepositoryMockRecorder) GetCartProduct(ctx, productID, userID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCartProduct", reflect.TypeOf((*MockcartRepository)(nil).GetCartProduct), ctx, productID, userID)
+}
+
+// GetCartProductCount mocks base method.
+func (m *MockcartRepository) GetCartProductCount(ctx context.Context, userID, productID uint32) (uint32, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCartProductCount", ctx, userID, productID)
+	ret0, _ := ret[0].(uint32)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCartProductCount indicates an expected call of GetCartProductCount.
+func (mr *MockcartRepositoryMockRecorder) GetCartProductCount(ctx, userID, productID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCartProductCount", reflect.TypeOf((*MockcartRepository)(nil).GetCartProductCount), ctx, userID, productID)
 }
 
 // GetSelectedCartItems mocks base method.

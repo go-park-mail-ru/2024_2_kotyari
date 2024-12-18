@@ -3,6 +3,7 @@ package rorders
 import (
 	"context"
 	"errors"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
 	"log/slog"
 	"testing"
 	"time"
@@ -29,6 +30,8 @@ func (suite *OrdersRepoGetOrdersSuite) SetupTest() {
 
 func (suite *OrdersRepoGetOrdersSuite) TestGetOrders_Success() {
 	ctx := context.Background()
+	requestID := uuid.New()
+	ctx = context.WithValue(context.Background(), utils.RequestIDName, requestID)
 	userID := uint32(12345)
 
 	orderID := uuid.New()
@@ -36,10 +39,20 @@ func (suite *OrdersRepoGetOrdersSuite) TestGetOrders_Success() {
 	deliveryDate := time.Now().Add(24 * time.Hour)
 
 	rows := pgxmock.NewRows([]string{"id", "order_date", "delivery_date", "product_id", "image_url", "name", "total_price", "status"}).
-		AddRow(orderID, orderDate, deliveryDate, uint32(1), "image1.jpg", "Product 1", uint16(500), "Pending").
-		AddRow(orderID, orderDate, deliveryDate, uint32(2), "image2.jpg", "Product 2", uint16(500), "Pending")
+		AddRow(orderID, orderDate, deliveryDate, uint32(1), "image1.jpg", "Product 1", uint32(500), "Pending").
+		AddRow(orderID, orderDate, deliveryDate, uint32(2), "image2.jpg", "Product 2", uint32(500), "Pending")
 
-	suite.mock.ExpectQuery(`SELECT o.id::uuid, o.created_at AS order_date, po.delivery_date, p.id::bigint AS product_id, p.image_url, p.title AS name, o.total_price, o.status FROM orders o JOIN product_orders po ON o.id = po.order_id JOIN products p ON po.product_id = p.id WHERE o.user_id = \$1 ORDER BY po.delivery_date, o.created_at;`).
+	expectedSQL := `
+	SELECT o\.id::uuid, o\.created_at AS order_date, po\.delivery_date, 
+	       p\.id::bigint AS product_id, p\.image_url, p\.title AS name, 
+	       o\.total_price, o\.status
+	FROM orders o
+	JOIN product_orders po ON o\.id = po\.order_id
+	JOIN products p ON po\.product_id = p\.id
+	WHERE o\.user_id = \$1
+	ORDER BY po\.delivery_date DESC\s*,\s*o\.created_at DESC\s*;`
+
+	suite.mock.ExpectQuery(expectedSQL).
 		WithArgs(userID).
 		WillReturnRows(rows)
 
@@ -48,7 +61,7 @@ func (suite *OrdersRepoGetOrdersSuite) TestGetOrders_Success() {
 	require.Len(suite.T(), orders, 1)
 	require.Equal(suite.T(), orderID, orders[0].ID)
 	require.Equal(suite.T(), deliveryDate, orders[0].DeliveryDate)
-	require.Equal(suite.T(), uint16(500), orders[0].TotalPrice)
+	require.Equal(suite.T(), uint32(500), orders[0].TotalPrice)
 	require.Equal(suite.T(), "Pending", orders[0].Status)
 	require.Len(suite.T(), orders[0].Products, 2)
 	require.Equal(suite.T(), uint32(1), orders[0].Products[0].ProductID)
@@ -59,10 +72,22 @@ func (suite *OrdersRepoGetOrdersSuite) TestGetOrders_Success() {
 
 func (suite *OrdersRepoGetOrdersSuite) TestGetOrders_QueryError() {
 	ctx := context.Background()
+	requestID := uuid.New()
+	ctx = context.WithValue(context.Background(), utils.RequestIDName, requestID)
 	userID := uint32(12345)
 
+	expectedSQL := `
+	SELECT o.id::uuid, o.created_at AS order_date, po.delivery_date, 
+	       p.id::bigint AS product_id, p.image_url, p.title AS name, 
+	       o.total_price, o.status
+	FROM orders o
+	JOIN product_orders po ON o.id = po.order_id
+	JOIN products p ON po.product_id = p.id
+	WHERE o.user_id = \$1
+	ORDER BY po.delivery_date DESC\s*,\s*o.created_at DESC\s*;`
+
 	expectedError := errors.New("database error")
-	suite.mock.ExpectQuery(`SELECT o.id::uuid, o.created_at AS order_date, po.delivery_date, p.id::bigint AS product_id, p.image_url, p.title AS name, o.total_price, o.status FROM orders o JOIN product_orders po ON o.id = po.order_id JOIN products p ON po.product_id = p.id WHERE o.user_id = \$1 ORDER BY po.delivery_date, o.created_at;`).
+	suite.mock.ExpectQuery(expectedSQL).
 		WithArgs(userID).
 		WillReturnError(expectedError)
 

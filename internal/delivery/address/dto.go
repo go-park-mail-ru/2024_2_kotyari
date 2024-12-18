@@ -5,33 +5,22 @@ import (
 )
 
 type AddressResponse struct {
-	City   string `json:"city"`
-	Street string `json:"street"`
-	House  string `json:"house"`
-	Flat   string `json:"flat"`
+	Address string `json:"address"`
 }
 
+//easyjson:json
 type UpdateAddressRequest struct {
-	City   string `json:"city"`
-	Street string `json:"street"`
-	House  string `json:"house"`
-	Flat   string `json:"flat"`
+	Address string `json:"address"`
 }
 
 func (a *UpdateAddressRequest) ToModel() model.Address {
 	return model.Address{
-		City:   a.City,
-		Street: a.Street,
-		House:  a.House,
-		Flat:   a.Flat,
+		Text: a.Address,
 	}
 }
 
 func FromModel(address model.Address) AddressResponse {
 	return AddressResponse{
-		City:   address.City,
-		Street: address.Street,
-		House:  address.House,
-		Flat:   address.Flat,
+		Address: address.Text,
 	}
 }

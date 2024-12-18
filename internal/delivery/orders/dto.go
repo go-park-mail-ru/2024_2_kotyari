@@ -7,8 +7,10 @@ import (
 	"github.com/google/uuid"
 )
 
+//easyjson:json
 type CreateOrderRequest struct {
-	Address string `json:"address"`
+	Address   string `json:"address"`
+	PromoCode string `json:"promocode"`
 }
 
 type OrdersResponse struct {
@@ -29,7 +31,7 @@ type OrderMaxResponse struct {
 	ID           uuid.UUID    `json:"id"`
 	OrderDate    time.Time    `json:"order_date"`
 	DeliveryDate time.Time    `json:"delivery_date"`
-	TotalPrice   uint16       `json:"total_price,omitempty"`
+	TotalPrice   uint32       `json:"total_price"`
 	Address      string       `json:"address"`
 	Status       string       `json:"status,omitempty"`
 	Recipient    string       `json:"recipient"`

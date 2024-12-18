@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package wishlist;
+option go_package = "https://github.com/go-park-mail-ru/2024_2_kotyari/wishlist/grpc_gen";
+
+import "google/protobuf/empty.proto";
+
+import "add_product_to_wishlist.proto";
+import "copywishlist.proto";
+import "create_wishlist.proto";
+import "delete_wishlist.proto";
+import "get_all_user_wishlists.proto";
+import "get_wishlist_by_link.proto";
+import "remove_from_wishlist.proto";
+import "rename_wishlist.proto";
+
+
+service WishlistService {
+  rpc AddProductToWishlists(AddProductRequest) returns (google.protobuf.Empty);
+
+  rpc CopyWishlist(CopyWishlistRequest) returns (CopyWishlistResponse);
+
+  rpc CreateWishlist(CreateWishlistRequest) returns (google.protobuf.Empty);
+
+  rpc DeleteWishlist(DeleteWishlistRequest) returns (google.protobuf.Empty);
+
+  rpc GetAllUserWishlists(GetAllWishlistsRequest) returns (GetAllWishlistsResponse);
+
+  rpc GetWishlistByLink(GetWishlistByLinkRequest) returns (GetWishlistByLinkResponse);
+
+  rpc RemoveFromWishlists(RemoveFromWishlistsRequest) returns (google.protobuf.Empty);
+
+  rpc RenameWishlist(RenameWishlistRequest) returns (google.protobuf.Empty);
+}

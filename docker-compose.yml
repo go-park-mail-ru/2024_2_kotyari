@@ -70,6 +70,84 @@ services:
       - redis_service
       - main_go
 
+  wishlists_go:
+    build:
+      context: .
+      dockerfile: ./cmd/wish_list/Dockerfile
+    ports:
+      - "8007:8007"
+      - "8087:8087"
+    image: wishlists-go-image
+    container_name: wishlists_go
+    restart: unless-stopped
+    networks:
+      - app-network
+    depends_on:
+      - pg_db
+      - mongo_db
+      - main_go
+
+  notifications_go:
+    build:
+      context: .
+      dockerfile: ./cmd/notifications/Dockerfile
+    ports:
+      - "8006:8006"
+    image: notifications-go-image
+    container_name: notifications_go
+    restart: unless-stopped
+    networks:
+      - app-network
+    depends_on:
+      - pg_db
+      - redis_service
+      - main_go
+
+  promocodes_go:
+    build:
+      context: .
+      dockerfile: ./cmd/promocodes/Dockerfile
+    ports:
+      - "8005:8005"
+#      - "8083:8083"
+    image: promocodes-go-image
+    container_name: promocodes_go
+    restart: unless-stopped
+    networks:
+      - app-network
+    depends_on:
+      - pg_db
+      - redis_service
+      - main_go
+      - kafka
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - app-network
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - app-network
+    depends_on:
+      - zookeeper
+
   pg_db:
     image: postgres:16.4
     ports:
@@ -133,6 +211,20 @@ services:
     networks:
       - app-network
 
+  mongo_db:
+    image: mongo
+    container_name: mongo_db
+    volumes:
+      - mongo_data:/data/db
+    environment:
+#      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+#      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+    ports:
+      - '27017:27017'
+    networks:
+      - app-network
+
 volumes:
   pg_data:
   redis_data:
@@ -141,7 +233,7 @@ volumes:
   grafana:
   prometheus_data:
   grafana_data:
-
+  mongo_data:
 
 
 networks:

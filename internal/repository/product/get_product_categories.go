@@ -10,19 +10,19 @@ import (
 
 const queryGetProductCategories = `
     SELECT 
-        c.id, c.name,c.picture
+        c.id, c.name,c.picture, c.link_to
     FROM product_categories pc
         JOIN categories c ON pc.category_id = c.id
     WHERE pc.product_id = $1 AND pc.active = true;
 	`
 
-func (ps *ProductsStore) getProductCategories(ctx context.Context, productID uint64) ([]model.Category, error) {
+func (ps *ProductsStore) GetProductCategories(ctx context.Context, productID uint32) ([]model.Category, error) {
 	requestID, err := utils.GetContextRequestID(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	ps.log.Info("[ProductsStore.getProductCategories] Started executing", slog.Any("request-id", requestID))
+	ps.log.Info("[ProductsStore.GetProductCategories] Started executing", slog.Any("request-id", requestID))
 
 	rowsCategories, err := ps.db.Query(ctx, queryGetProductCategories, productID)
 	if err != nil {
@@ -37,7 +37,7 @@ func (ps *ProductsStore) getProductCategories(ctx context.Context, productID uin
 	for rowsCategories.Next() {
 		var category model.Category
 		err = rowsCategories.Scan(
-			&category.ID, &category.Name, &category.Picture,
+			&category.ID, &category.Name, &category.Picture, &category.LinkTo,
 		)
 		if err != nil {
 			ps.log.Error("[ ProductsStore.GetProductCardByID ] Error scanning category", slog.String("error", err.Error()))
@@ -45,6 +45,8 @@ func (ps *ProductsStore) getProductCategories(ctx context.Context, productID uin
 		}
 		categories = append(categories, category)
 	}
+
+	ps.log.Info("[ProductsStore.GetProductCategories] Вывод полученных категорий", slog.Any("categories", categories))
 
 	if rowsCategories.Err() != nil {
 		ps.log.Error("[ ProductsStore.GetProductCardByID ] Error iterating over categories rows", slog.String("error", rowsCategories.Err().Error()))

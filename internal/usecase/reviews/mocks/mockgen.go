@@ -69,34 +69,19 @@ func (mr *MockreviewsRepoMockRecorder) DeleteReview(ctx, productID, userID any) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteReview", reflect.TypeOf((*MockreviewsRepo)(nil).DeleteReview), ctx, productID, userID)
 }
 
-// GetProductReviewsNoLogin mocks base method.
-func (m *MockreviewsRepo) GetProductReviewsNoLogin(ctx context.Context, productID uint32, sortField, sortOrder string) (model.Reviews, error) {
+// GetProductReviews mocks base method.
+func (m *MockreviewsRepo) GetProductReviews(ctx context.Context, productID uint32, sortField, sortOrder string) (model.Reviews, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetProductReviewsNoLogin", ctx, productID, sortField, sortOrder)
+	ret := m.ctrl.Call(m, "GetProductReviews", ctx, productID, sortField, sortOrder)
 	ret0, _ := ret[0].(model.Reviews)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetProductReviewsNoLogin indicates an expected call of GetProductReviewsNoLogin.
-func (mr *MockreviewsRepoMockRecorder) GetProductReviewsNoLogin(ctx, productID, sortField, sortOrder any) *gomock.Call {
+// GetProductReviews indicates an expected call of GetProductReviews.
+func (mr *MockreviewsRepoMockRecorder) GetProductReviews(ctx, productID, sortField, sortOrder any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProductReviewsNoLogin", reflect.TypeOf((*MockreviewsRepo)(nil).GetProductReviewsNoLogin), ctx, productID, sortField, sortOrder)
-}
-
-// GetProductReviewsWithLogin mocks base method.
-func (m *MockreviewsRepo) GetProductReviewsWithLogin(ctx context.Context, productID, userID uint32, sortField, sortOrder string) (model.Reviews, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetProductReviewsWithLogin", ctx, productID, userID, sortField, sortOrder)
-	ret0, _ := ret[0].(model.Reviews)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetProductReviewsWithLogin indicates an expected call of GetProductReviewsWithLogin.
-func (mr *MockreviewsRepoMockRecorder) GetProductReviewsWithLogin(ctx, productID, userID, sortField, sortOrder any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProductReviewsWithLogin", reflect.TypeOf((*MockreviewsRepo)(nil).GetProductReviewsWithLogin), ctx, productID, userID, sortField, sortOrder)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProductReviews", reflect.TypeOf((*MockreviewsRepo)(nil).GetProductReviews), ctx, productID, sortField, sortOrder)
 }
 
 // GetReview mocks base method.

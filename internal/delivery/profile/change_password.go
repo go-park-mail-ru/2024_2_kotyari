@@ -1,13 +1,15 @@
 package profile
 
 import (
-	"encoding/json"
 	"log/slog"
 	"net/http"
 
 	profilegrpc "github.com/go-park-mail-ru/2024_2_kotyari/api/protos/profile/gen"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
+	"github.com/mailru/easyjson"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func (pd *ProfilesDelivery) ChangePassword(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +32,7 @@ func (pd *ProfilesDelivery) ChangePassword(w http.ResponseWriter, r *http.Reques
 
 	var req UpdatePasswordRequest
 
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err = easyjson.UnmarshalFromReader(r.Body, &req); err != nil {
 		pd.log.Error("[ ProfilesDelivery.UpdateProfileData ] Ошибка десериализации запроса",
 			slog.String("error", err.Error()),
 		)
@@ -53,9 +55,37 @@ func (pd *ProfilesDelivery) ChangePassword(w http.ResponseWriter, r *http.Reques
 		OldPassword:    req.OldPassword,
 		NewPassword:    req.NewPassword,
 		RepeatPassword: req.RepeatPassword})
+
+	grpcErr, ok := status.FromError(err)
 	if err != nil {
-		err, i := pd.errResolver.Get(err)
-		utils.WriteErrorJSON(w, i, err)
+		if ok {
+			switch grpcErr.Code() {
+			case codes.InvalidArgument:
+				pd.log.Error("[ ProfilesDelivery.ChangePassword ] Неправильный пароль", slog.String("error", grpcErr.String()))
+
+				utils.WriteErrorJSONByError(w, errs.WrongPassword, pd.errResolver)
+
+				return
+
+			case codes.Unauthenticated:
+				pd.log.Error("[ ProfilesDelivery.ChangePassword ] Пользователь уже существует", slog.String("error", grpcErr.String()))
+
+				utils.WriteErrorJSONByError(w, errs.PasswordsDoNotMatch, pd.errResolver)
+
+				return
+
+			default:
+				pd.log.Error("[ ProfilesDelivery.ChangePassword ] Неизвестная ошибка", slog.String("error", err.Error()))
+
+				utils.WriteErrorJSONByError(w, errs.InternalServerError, pd.errResolver)
+
+				return
+			}
+		}
+
+		pd.log.Error("[ UsersDelivery.CreateUser ] Не удалось получить код ошибки")
+
+		utils.WriteErrorJSONByError(w, errs.InternalServerError, pd.errResolver)
 
 		return
 	}

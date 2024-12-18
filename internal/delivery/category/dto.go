@@ -9,15 +9,6 @@ type dtoCategory struct {
 	LinkTo  string `json:"link_to"`
 }
 
-func toDtoCategory(category model.Category) dtoCategory {
-	return dtoCategory{
-		ID:      category.ID,
-		Name:    category.Name,
-		Picture: category.Picture,
-		LinkTo:  category.LinkTo,
-	}
-}
-
 type dtoProductCatalog struct {
 	dtoProduct
 	ImageURL string `json:"image_url"`

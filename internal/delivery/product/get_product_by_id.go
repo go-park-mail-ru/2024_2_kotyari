@@ -3,7 +3,6 @@ package product
 import (
 	"log/slog"
 	"net/http"
-	"strconv"
 
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/errs"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
@@ -22,31 +21,23 @@ func (pd *ProductsDelivery) GetProductById(w http.ResponseWriter, r *http.Reques
 	pd.log.Info("[ProductsDelivery.GetProductById] Started executing", slog.Any("request-id", requestID))
 
 	vars := mux.Vars(r)
-	id, err := strconv.ParseUint(vars["id"], 10, 32)
+	id, err := utils.StrToUint32(vars["id"])
 	if err != nil {
 		utils.WriteErrorJSON(w, http.StatusInternalServerError, errs.InternalServerError)
 
 		return
 	}
 
-	byID, err := pd.repo.GetProductByID(r.Context(), id)
+	userID, _ := utils.GetContextSessionUserID(r.Context())
+
+	byID, err := pd.productByIdGetter.GetProductByID(r.Context(), userID, id)
 	if err != nil {
-		err, code := pd.errResolver.Get(err)
-		utils.WriteErrorJSON(w, code, err)
+		utils.WriteErrorJSONByError(w, err, pd.errResolver)
 
 		return
 	}
 
-	dtoProductByid := newDTOProductCardFromModel(byID)
-	userId, ok := utils.GetContextSessionUserID(r.Context())
-	if ok {
-		flag, err := pd.checker.ProductInCart(r.Context(), userId, uint32(id))
-		if err != nil {
-			return
-		}
+	dtoProductByID := newDTOProductCardFromModel(byID)
 
-		dtoProductByid.InCart = flag
-	}
-
-	utils.WriteJSON(w, http.StatusOK, dtoProductByid)
+	utils.WriteJSON(w, http.StatusOK, dtoProductByID)
 }
