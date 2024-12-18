@@ -1,6 +1,6 @@
 package orders
 
-import (
+/*import (
 	"context"
 	"log/slog"
 
@@ -31,3 +31,4 @@ func (m *OrdersManager) GetOrderById(ctx context.Context, id uuid.UUID, userID u
 	m.logger.Info("[OrdersManager.GetOrderByID] GetOrderByID completed successfully", slog.String("order_id", id.String()))
 	return orderById, nil
 }
+*/

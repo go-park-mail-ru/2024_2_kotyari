@@ -3,7 +3,7 @@ package cart
 import (
 	"context"
 	"errors"
-	"github.com/golang/mock/gomock"
+	"go.uber.org/mock/gomock"
 	"io"
 	"log/slog"
 	"testing"

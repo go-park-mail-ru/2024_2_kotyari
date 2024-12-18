@@ -7,9 +7,9 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/rating_updater/mocks"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/utils"
-	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 	"io"
 	"log/slog"
 	"testing"
@@ -39,8 +39,7 @@ func TestRatingUpdaterService_UpdateProductRating(t *testing.T) {
 			setupFunc: func(ctrl *gomock.Controller) *RatingUpdaterService {
 				repository := mocks.NewMockRatingUpdaterRepository(ctrl)
 				reviewsGetter := mocks.NewMockReviewsGetter(ctrl)
-
-				reviewsGetter.EXPECT().GetProductReviewsNoLogin(gomock.Any(), uint32(1), utils.DefaultFieldParam, utils.DefaultOrderParam).Return(model.Reviews{
+				reviewsGetter.EXPECT().GetProductReviews(gomock.Any(), uint32(1), utils.DefaultFieldParam, utils.DefaultOrderParam).Return(model.Reviews{
 					Reviews: []model.Review{
 						{Rating: 5},
 						{Rating: 4},
@@ -67,7 +66,7 @@ func TestRatingUpdaterService_UpdateProductRating(t *testing.T) {
 				repository := mocks.NewMockRatingUpdaterRepository(ctrl)
 				reviewsGetter := mocks.NewMockReviewsGetter(ctrl)
 
-				reviewsGetter.EXPECT().GetProductReviewsNoLogin(gomock.Any(), uint32(1), utils.DefaultFieldParam, utils.DefaultOrderParam).Return(model.Reviews{
+				reviewsGetter.EXPECT().GetProductReviews(gomock.Any(), uint32(1), utils.DefaultFieldParam, utils.DefaultOrderParam).Return(model.Reviews{
 					Reviews: []model.Review{
 						{Rating: 5},
 						{Rating: 4},
@@ -94,7 +93,7 @@ func TestRatingUpdaterService_UpdateProductRating(t *testing.T) {
 				repository := mocks.NewMockRatingUpdaterRepository(ctrl)
 				reviewsGetter := mocks.NewMockReviewsGetter(ctrl)
 
-				reviewsGetter.EXPECT().GetProductReviewsNoLogin(gomock.Any(), uint32(1), utils.DefaultFieldParam, utils.DefaultOrderParam).Return(model.Reviews{}, errs.NoReviewsForProduct)
+				reviewsGetter.EXPECT().GetProductReviews(gomock.Any(), uint32(1), utils.DefaultFieldParam, utils.DefaultOrderParam).Return(model.Reviews{}, errs.NoReviewsForProduct)
 
 				repository.EXPECT().UpdateProductRating(gomock.Any(), uint32(1), float32(0)).Return(nil)
 

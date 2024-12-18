@@ -3,8 +3,8 @@ package wish_list
 import (
 	"context"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/wish_list/mocks"
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 	"io"
 	"log/slog"
 	"testing"

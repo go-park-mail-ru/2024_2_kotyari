@@ -2,7 +2,7 @@ package cart
 
 import (
 	"context"
-	"github.com/golang/mock/gomock"
+	"go.uber.org/mock/gomock"
 	"io"
 	"log/slog"
 	"testing"

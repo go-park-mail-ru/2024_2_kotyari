@@ -73,7 +73,7 @@ func NewApp(config map[string]any) (*RatingUpdaterApp, error) {
 
 	cfg, err := configs.ParseServiceViperConfig(config)
 	if err != nil {
-		log.Error("RatingUpdaterApp [NewApp] Failed to parse viper config")
+		slogLogger.Error("RatingUpdaterApp [NewApp] Failed to parse viper config")
 
 		return nil, err
 	}
