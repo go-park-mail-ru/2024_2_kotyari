@@ -1,6 +1,6 @@
 name: kotyari_deploy
 
-on:
+on:commanf
   push:
     branches: [ dev ]
 
@@ -41,6 +41,7 @@ jobs:
     needs: [build]
     runs-on: ubuntu-latest
     environment: CICD
+    timeout-minutes: 40
     steps:
       - name: Execute commands over ssh
         uses: appleboy/ssh-action@master
@@ -53,3 +54,4 @@ jobs:
             sudo git checkout dev
             sudo git pull
             sudo make back-refresh
+            sudo docker system prune -f
