@@ -9,13 +9,12 @@ import (
 type GetProductReviewsResponseDTO struct {
 	TotalReviewCount uint32              `json:"total_review_count"`
 	TotalRating      float32             `json:"total_review_rating"`
-	UserReview       ReviewResponseDTO   `json:"user_review"`
 	Reviews          []ReviewResponseDTO `json:"reviews"`
 }
 
 type ReviewResponseDTO struct {
-	Username  string    `json:"username,omitempty"`
-	AvatarURL string    `json:"avatar_url,omitempty"`
+	Username  string    `json:"username"`
+	AvatarURL string    `json:"avatar_url"`
 	Text      string    `json:"text"`
 	Rating    uint8     `json:"rating"`
 	IsPrivate bool      `json:"is_private"`
@@ -64,7 +63,6 @@ func productReviewsFromModel(r model.Reviews, reviews []ReviewResponseDTO) GetPr
 	return GetProductReviewsResponseDTO{
 		TotalReviewCount: r.TotalReviewCount,
 		TotalRating:      r.TotalRating,
-		UserReview:       reviewResponseFromModel(r.UserReview),
 		Reviews:          reviews,
 	}
 }
