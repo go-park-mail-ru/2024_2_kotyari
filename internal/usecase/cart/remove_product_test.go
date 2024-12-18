@@ -2,6 +2,7 @@ package cart
 
 import (
 	"context"
+	"github.com/golang/mock/gomock"
 	"io"
 	"log/slog"
 	"testing"
@@ -9,7 +10,6 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/cart/mocks"
 	"github.com/stretchr/testify/assert"
-	"go.uber.org/mock/gomock"
 )
 
 func TestCartManager_RemoveProduct(t *testing.T) {

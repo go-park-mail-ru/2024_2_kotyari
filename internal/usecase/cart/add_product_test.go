@@ -3,6 +3,7 @@ package cart
 import (
 	"context"
 	"errors"
+	"github.com/golang/mock/gomock"
 	"io"
 	"log/slog"
 	"testing"
@@ -12,7 +13,6 @@ import (
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/cart/mocks"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
-	"go.uber.org/mock/gomock"
 )
 
 var (
