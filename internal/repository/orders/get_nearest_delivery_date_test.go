@@ -30,9 +30,8 @@ func (suite *OrdersRepoGetNearestDeliveryDateSuite) SetupTest() {
 }
 
 func (suite *OrdersRepoGetNearestDeliveryDateSuite) TestGetNearestDeliveryDate_Success() {
-	ctx := context.Background()
 	requestID := uuid.New()
-	ctx = context.WithValue(context.Background(), utils.RequestIDName, requestID)
+	ctx := context.WithValue(context.Background(), utils.RequestIDName, requestID)
 	var userID uint32 = 12345
 
 	expectedDate := time.Now().Add(24 * time.Hour)
@@ -46,9 +45,8 @@ func (suite *OrdersRepoGetNearestDeliveryDateSuite) TestGetNearestDeliveryDate_S
 }
 
 func (suite *OrdersRepoGetNearestDeliveryDateSuite) TestGetNearestDeliveryDate_NoRows() {
-	ctx := context.Background()
 	requestID := uuid.New()
-	ctx = context.WithValue(context.Background(), utils.RequestIDName, requestID)
+	ctx := context.WithValue(context.Background(), utils.RequestIDName, requestID)
 	var userID uint32 = 12345
 
 	suite.mock.ExpectQuery(`SELECT MIN\(po.delivery_date\) FROM orders o JOIN product_orders po ON o.id = po.order_id WHERE o.user_id = \$1 AND po.delivery_date > NOW\(\);`).

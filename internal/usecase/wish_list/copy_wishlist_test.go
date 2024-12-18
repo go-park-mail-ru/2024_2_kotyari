@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"github.com/go-park-mail-ru/2024_2_kotyari/internal/usecase/wish_list/mocks"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 	"io"
@@ -13,8 +12,7 @@ import (
 )
 
 var (
-	returnsUUID = uuid.NewString()
-	e           = errors.New("ошибка")
+	e = errors.New("ошибка")
 )
 
 func TestWishListUsecase_CopyWishList(t *testing.T) {

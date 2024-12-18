@@ -31,14 +31,14 @@ func (suite *OrdersRepoSuite) SetupTest() {
 
 	orderID := uuid.New()
 	var userID uint32
-	faker.FakeData(&userID)
+	_ = faker.FakeData(&userID)
 
 	var id1, id2 uint32
-	faker.FakeData(&id1)
-	faker.FakeData(&id2)
+	_ = faker.FakeData(&id1)
+	_ = faker.FakeData(&id2)
 
 	var optionID uint32
-	faker.FakeData(&optionID)
+	_ = faker.FakeData(&optionID)
 	suite.order = &model.OrderFromCart{
 		OrderID:      orderID,
 		UserID:       userID,
@@ -53,9 +53,8 @@ func (suite *OrdersRepoSuite) SetupTest() {
 }
 
 func (suite *OrdersRepoSuite) TestCreateOrderFromCart() {
-	ctx := context.Background()
 	requestID := uuid.New()
-	ctx = context.WithValue(context.Background(), utils.RequestIDName, requestID)
+	ctx := context.WithValue(context.Background(), utils.RequestIDName, requestID)
 	suite.mock.ExpectBegin()
 
 	suite.mock.ExpectQuery(`INSERT INTO orders\s*\(id, user_id, total_price, address, created_at, updated_at\)\s*VALUES\s*\(\$1, \$2, \$3, \$4, NOW\(\), NOW\(\)\)\s*RETURNING created_at;`).
