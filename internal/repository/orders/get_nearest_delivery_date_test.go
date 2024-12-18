@@ -59,9 +59,8 @@ func (suite *OrdersRepoGetNearestDeliveryDateSuite) TestGetNearestDeliveryDate_N
 }
 
 func (suite *OrdersRepoGetNearestDeliveryDateSuite) TestGetNearestDeliveryDate_QueryError() {
-	ctx := context.Background()
 	requestID := uuid.New()
-	ctx = context.WithValue(context.Background(), utils.RequestIDName, requestID)
+	ctx := context.WithValue(context.Background(), utils.RequestIDName, requestID)
 	var userID uint32 = 12345
 
 	expectedError := errors.New("database error")

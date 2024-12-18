@@ -15,7 +15,6 @@ import (
 
 var (
 	testContextRequestIDValue = uuid.New()
-	dbTestError               = errors.New("ошибка базы данных")
 )
 
 const testContextRequestIDKey = "request-id"

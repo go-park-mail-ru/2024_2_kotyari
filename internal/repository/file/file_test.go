@@ -3,7 +3,6 @@ package file
 import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -26,7 +25,7 @@ func TestGetFile(t *testing.T) {
 			filename: "test-file.txt",
 			setup: func() string {
 				filePath := filepath.Join(baseDir, "test-file.txt")
-				err := ioutil.WriteFile(filePath, []byte("content"), 0644)
+				err := os.WriteFile(filePath, []byte("content"), 0644)
 				if err != nil {
 					t.Fatalf("Ошибка при создании файла для теста: %v", err)
 				}
@@ -82,7 +81,7 @@ func TestSaveFile(t *testing.T) {
 			name:     "Success",
 			filename: "new-file.txt",
 			setup: func() (*os.File, string) {
-				tempFile, _ := ioutil.TempFile("", "temp-file")
+				tempFile, _ := os.CreateTemp("", "temp-file")
 				_, _ = tempFile.WriteString("test content")
 				return tempFile, filepath.Join(baseDir, "new-file.txt")
 			},
@@ -93,7 +92,7 @@ func TestSaveFile(t *testing.T) {
 			filename: "existing-file.txt",
 			setup: func() (*os.File, string) {
 				filePath := filepath.Join(baseDir, "existing-file.txt")
-				err := ioutil.WriteFile(filePath, []byte("existing content"), 0644)
+				err := os.WriteFile(filePath, []byte("existing content"), 0644)
 				assert.NoError(t, err)
 				return nil, filePath
 			},
@@ -103,7 +102,7 @@ func TestSaveFile(t *testing.T) {
 			name:     "Error Creating File",
 			filename: "invalid-path/invalid-file.txt",
 			setup: func() (*os.File, string) {
-				tempFile, _ := ioutil.TempFile("", "temp-file")
+				tempFile, _ := os.CreateTemp("", "temp-file")
 				_, _ = tempFile.WriteString("test content")
 				return tempFile, ""
 			},

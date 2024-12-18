@@ -29,9 +29,8 @@ func (suite *OrdersRepoGetOrdersSuite) SetupTest() {
 }
 
 func (suite *OrdersRepoGetOrdersSuite) TestGetOrders_Success() {
-	ctx := context.Background()
 	requestID := uuid.New()
-	ctx = context.WithValue(context.Background(), utils.RequestIDName, requestID)
+	ctx := context.WithValue(context.Background(), utils.RequestIDName, requestID)
 	userID := uint32(12345)
 
 	orderID := uuid.New()
@@ -71,9 +70,8 @@ func (suite *OrdersRepoGetOrdersSuite) TestGetOrders_Success() {
 }
 
 func (suite *OrdersRepoGetOrdersSuite) TestGetOrders_QueryError() {
-	ctx := context.Background()
 	requestID := uuid.New()
-	ctx = context.WithValue(context.Background(), utils.RequestIDName, requestID)
+	ctx := context.WithValue(context.Background(), utils.RequestIDName, requestID)
 	userID := uint32(12345)
 
 	expectedSQL := `

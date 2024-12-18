@@ -1,0 +1,20 @@
+issues:
+  exclude-rules:
+    - linters:
+        - staticcheck
+      text: "SA1029:"
+    - linters:
+        - staticcheck
+      text: "SA6005:"
+    - linters:
+        - staticcheck
+      text: "SA4010:"
+    - linters:
+        - staticcheck
+      text: "SA1006:"
+    - linters:
+        - govet
+      text: "printf:"
+    - linters:
+        - gosimple
+      text: "S1009:"

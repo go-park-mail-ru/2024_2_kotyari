@@ -20,22 +20,14 @@ func (cs *CategoriesStore) GetRelatedProductsByProductID(ctx context.Context, pr
 	cs.log.Info("[CategoriesStore.GetRelatedProductsByProductID] Started executing",
 		slog.Any("request-id", requestID))
 
-	categories, err := cs.categoriesGetter.GetProductCategories(ctx, productID)
-	if err != nil {
-	}
-	//cs.log.Info("[CategoriesStore.GetRelatedProductsByProductID] Вывод полученных категорий", slog.Any("categories", categories))
-	if len(categories) == 0 {
-	}
+	categories, _ := cs.categoriesGetter.GetProductCategories(ctx, productID)
 
 	var allProducts []model.ProductCatalog
 	seenProducts := make(map[uint32]bool)
 
 	for _, category := range categories {
 
-		products, err := cs.GetProductsByCategoryLink(ctx, category.LinkTo, sortField, sortOrder)
-		if err != nil {
-
-		}
+		products, _ := cs.GetProductsByCategoryLink(ctx, category.LinkTo, sortField, sortOrder)
 
 		for _, product := range products {
 			if !seenProducts[product.ID] {
@@ -43,10 +35,6 @@ func (cs *CategoriesStore) GetRelatedProductsByProductID(ctx context.Context, pr
 				seenProducts[product.ID] = true
 			}
 		}
-	}
-
-	if len(allProducts) == 0 {
-
 	}
 
 	return allProducts, nil

@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    name: go-build
+    name: go-build and test
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go 1.23
@@ -20,8 +20,8 @@ jobs:
       - name: Get dependencies
         run: go mod tidy
 
-#      - name: Run make test
-#        run: make test
+      - name: Run make test
+        run: go test ./...
 
   linter:
     name: go-lint
@@ -38,14 +38,15 @@ jobs:
 
   deploy:
     name: Deploy to VM
-    needs: [build]
+    needs: [build, linter]
     runs-on: ubuntu-latest
     environment: CICD
-    timeout-minutes: 40
+    timeout-minutes: 50
     steps:
       - name: Execute commands over ssh
         uses: appleboy/ssh-action@master
         with:
+          command_timeout: '50m'
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}

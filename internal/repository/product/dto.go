@@ -33,32 +33,3 @@ func (dto *dtoOptionBlock) ToModel() model.OptionsBlock {
 		Options: options,
 	}
 }
-
-func optionToDTO(option model.Option) dtoOption {
-	return dtoOption{
-		Link:  option.Link,
-		Value: option.Value,
-	}
-}
-
-func optionsBlockToDTO(optionsBlock model.OptionsBlock) dtoOptionBlock {
-	options := make([]dtoOption, len(optionsBlock.Options))
-	for i, option := range optionsBlock.Options {
-		options[i] = optionToDTO(option)
-	}
-	return dtoOptionBlock{
-		Title:   optionsBlock.Title,
-		Type:    optionsBlock.Type,
-		Options: options,
-	}
-}
-
-func optionsToDto(opts model.Options) []dtoOptionBlock {
-	res := make([]dtoOptionBlock, len(opts.Values))
-
-	for i, option := range opts.Values {
-		res[i] = optionsBlockToDTO(option)
-	}
-
-	return res
-}
