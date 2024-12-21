@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"log/slog"
-	"strconv"
 	"time"
 
 	order "github.com/go-park-mail-ru/2024_2_kotyari/internal/model"
@@ -32,7 +31,7 @@ func (m *OrdersManager) CreateOrderFromCart(ctx context.Context, address string,
 
 	if len(cartItems) == 0 {
 		m.logger.Error("[OrdersManager.CreateOrderFromCart] cart is empty for user: ", slog.Uint64("user_id", uint64(userID)))
-		return nil, errors.New("cart is empty for user: " + strconv.Itoa(int(userID)))
+		return nil, errors.New("корзина пуста")
 	}
 
 	var totalPrice uint32
