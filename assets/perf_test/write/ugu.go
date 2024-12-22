@@ -43,13 +43,27 @@ type User struct {
 	RepeatPassword string `json:"repeat_password"`
 }
 
-// Attacker представляет отдельного пользователя
 type Attacker struct {
 	userID string // Уникальный идентификатор пользователя
 	client *http.Client
 	viper  *viper.Viper
 	url    string
 	creds  Credentials
+}
+
+type Metrics struct {
+	TotalRequests   int64
+	SuccessRequests int64
+	FailedRequests  int64
+	TotalBytesIn    int64
+	TotalBytesOut   int64
+	StatusCodes     map[int]int64
+	LatencySum      time.Duration
+	LatencyCount    int64
+	LatencyMin      time.Duration
+	LatencyMax      time.Duration
+	ErrorSet        map[string]struct{}
+	mutex           sync.Mutex
 }
 
 // NewAttacker создает нового Attacker с уникальным userID
@@ -68,102 +82,77 @@ func NewAttacker(url string, v *viper.Viper, userID string) *Attacker {
 	}
 }
 
-// Metrics собирает и хранит метрики нагрузки
-type Metrics struct {
-	TotalRequests   int64
-	SuccessRequests int64
-	FailedRequests  int64
-	TotalBytesIn    int64
-	TotalBytesOut   int64
-	StatusCodes     map[int]int64
-	LatencySum      time.Duration
-	LatencyCount    int64
-	LatencyMin      time.Duration
-	LatencyMax      time.Duration
-	ErrorSet        map[string]struct{}
-	mutex           sync.Mutex
+// newUser генерирует нового пользователя с уникальными данными
+func (a *Attacker) newUser() User {
+	u := a.viper.GetStringMapString("user")
+
+	user := User{
+		Username: fmt.Sprintf("%s_%s", u["username"], a.userID),          // Генерация уникального имени пользователя
+		Email:    fmt.Sprintf("%s_%s@example.com", u["email"], a.userID), // Генерация уникального email
+		Password: u["password"],
+	}
+
+	user.RepeatPassword = user.Password
+
+	//("username: %s, email %s password: %s\n", user.Username, user.Email, user.Password)
+
+	return user
 }
 
-// NewMetrics инициализирует новую структуру Metrics
-func NewMetrics() *Metrics {
-	return &Metrics{
-		StatusCodes: make(map[int]int64),
-		ErrorSet:    make(map[string]struct{}),
-		LatencyMin:  time.Hour, // Инициализируем большим значением
-	}
-}
-
-// RecordRequest записывает данные о запросе в метрики
-func (m *Metrics) RecordRequest(statusCode int, bytesIn, bytesOut int64, latency time.Duration, err error) {
-	atomic.AddInt64(&m.TotalRequests, 1)
-	atomic.AddInt64(&m.TotalBytesIn, bytesIn)
-	atomic.AddInt64(&m.TotalBytesOut, bytesOut)
-
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-
-	m.StatusCodes[statusCode]++
-	m.LatencySum += latency
-	m.LatencyCount++
-	if latency < m.LatencyMin {
-		m.LatencyMin = latency
-	}
-	if latency > m.LatencyMax {
-		m.LatencyMax = latency
-	}
-
+// getCreds получает учетные данные пользователя, регистрируя его при необходимости
+func (a *Attacker) getCreds(metrics *Metrics) error {
+	creds, err := a.getAuthToken(metrics)
 	if err != nil {
-		atomic.AddInt64(&m.FailedRequests, 1)
-		m.ErrorSet[err.Error()] = struct{}{}
-	} else {
-		atomic.AddInt64(&m.SuccessRequests, 1)
+		//("Username %s failed: %v. Attempting to register.", a.userID, err)
+		creds, err = a.registerUser(metrics)
+		if err != nil {
+			return fmt.Errorf("registration failed for %s: %v", a.userID, err)
+		}
 	}
-}
 
-// PrintReport выводит отчет по собранным метрикам
-func (m *Metrics) PrintReport(duration time.Duration) {
-	fmt.Println("----- Load Test Report -----")
-	fmt.Printf("Requests\t[total, rate, throughput]\t%d, %.2f, %.2f\n",
-		m.TotalRequests,
-		float64(m.TotalRequests)/duration.Seconds(),
-		float64(m.SuccessRequests)/duration.Seconds(),
-	)
-	fmt.Printf("Duration\t[total, attack]\t%s, %s\n",
-		duration.String(),
-		duration.String(),
-	)
-	meanLatency := time.Duration(0)
-	if m.LatencyCount > 0 {
-		meanLatency = m.LatencySum / time.Duration(m.LatencyCount)
+	handle := a.viper.GetStringMapString(handlers)
+
+	start := time.Now()
+	req, err := http.NewRequest(http.MethodGet, a.url+handle[getCsrf], nil)
+	if err != nil {
+		metrics.RecordRequest(0, 0, 0, 0, err)
+		return err
 	}
-	fmt.Printf("Latencies\t[mean, min, max]\t%s, %s, %s\n",
-		meanLatency,
-		m.LatencyMin,
-		m.LatencyMax,
-	)
-	fmt.Printf("Bytes In\t[total, mean]\t%d, %.2f\n",
-		m.TotalBytesIn,
-		float64(m.TotalBytesIn)/float64(m.TotalRequests),
-	)
-	fmt.Printf("Bytes Out\t[total, mean]\t%d, %.2f\n",
-		m.TotalBytesOut,
-		float64(m.TotalBytesOut)/float64(m.TotalRequests),
-	)
-	successRatio := 0.0
-	if m.TotalRequests > 0 {
-		successRatio = (float64(m.SuccessRequests) / float64(m.TotalRequests)) * 100
+
+	req.AddCookie(&http.Cookie{
+		Name:     sessionId,
+		Value:    creds.AuthToken,
+		Domain:   a.url,
+		Path:     "/",
+		SameSite: http.SameSiteNoneMode,
+		Secure:   true,
+		HttpOnly: true,
+	})
+
+	resp, err := a.client.Do(req)
+	latency := time.Since(start)
+	if err != nil {
+		metrics.RecordRequest(0, 0, 0, latency, err)
+		return err
 	}
-	fmt.Printf("Success\t[ratio]\t%.2f%%\n", successRatio)
-	fmt.Printf("Status Codes\t[code:count]\t")
-	for code, count := range m.StatusCodes {
-		fmt.Printf("%d:%d ", code, count)
+	defer resp.Body.Close()
+
+	csrf := resp.Header.Get(csrfToken)
+	bytesIn := int64(len(csrf))
+	bytesOut := int64(0)
+
+	if csrf == "" {
+		err = errors.New("no CSRF token found")
+		metrics.RecordRequest(resp.StatusCode, bytesIn, bytesOut, latency, err)
+		return err
 	}
-	fmt.Println()
-	fmt.Printf("Error Set:\n")
-	for err := range m.ErrorSet {
-		fmt.Printf("\t%s\n", err)
-	}
-	fmt.Println("----------------------------")
+
+	creds.CSRFToken = csrf
+
+	a.creds = creds
+
+	metrics.RecordRequest(resp.StatusCode, bytesIn, bytesOut, latency, nil)
+	return nil
 }
 
 // getAuthToken выполняет попытку входа пользователя и получает Auth токен
@@ -272,77 +261,86 @@ func (a *Attacker) registerUser(metrics *Metrics) (Credentials, error) {
 	return creds, nil
 }
 
-// getCreds получает учетные данные пользователя, регистрируя его при необходимости
-func (a *Attacker) getCreds(metrics *Metrics) error {
-	creds, err := a.getAuthToken(metrics)
-	if err != nil {
-		//("Username %s failed: %v. Attempting to register.", a.userID, err)
-		creds, err = a.registerUser(metrics)
-		if err != nil {
-			return fmt.Errorf("registration failed for %s: %v", a.userID, err)
-		}
+// NewMetrics инициализирует новую структуру Metrics
+func NewMetrics() *Metrics {
+	return &Metrics{
+		StatusCodes: make(map[int]int64),
+		ErrorSet:    make(map[string]struct{}),
+		LatencyMin:  time.Hour, // Инициализируем большим значением
 	}
-
-	handle := a.viper.GetStringMapString(handlers)
-
-	start := time.Now()
-	req, err := http.NewRequest(http.MethodGet, a.url+handle[getCsrf], nil)
-	if err != nil {
-		metrics.RecordRequest(0, 0, 0, 0, err)
-		return err
-	}
-
-	req.AddCookie(&http.Cookie{
-		Name:     sessionId,
-		Value:    creds.AuthToken,
-		Domain:   a.url,
-		Path:     "/",
-		SameSite: http.SameSiteNoneMode,
-		Secure:   true,
-		HttpOnly: true,
-	})
-
-	resp, err := a.client.Do(req)
-	latency := time.Since(start)
-	if err != nil {
-		metrics.RecordRequest(0, 0, 0, latency, err)
-		return err
-	}
-	defer resp.Body.Close()
-
-	csrf := resp.Header.Get(csrfToken)
-	bytesIn := int64(len(csrf))
-	bytesOut := int64(0)
-
-	if csrf == "" {
-		err = errors.New("no CSRF token found")
-		metrics.RecordRequest(resp.StatusCode, bytesIn, bytesOut, latency, err)
-		return err
-	}
-
-	creds.CSRFToken = csrf
-
-	a.creds = creds
-
-	metrics.RecordRequest(resp.StatusCode, bytesIn, bytesOut, latency, nil)
-	return nil
 }
 
-// newUser генерирует нового пользователя с уникальными данными
-func (a *Attacker) newUser() User {
-	u := a.viper.GetStringMapString("user")
+// RecordRequest записывает данные о запросе в метрики
+func (m *Metrics) RecordRequest(statusCode int, bytesIn, bytesOut int64, latency time.Duration, err error) {
+	atomic.AddInt64(&m.TotalRequests, 1)
+	atomic.AddInt64(&m.TotalBytesIn, bytesIn)
+	atomic.AddInt64(&m.TotalBytesOut, bytesOut)
 
-	user := User{
-		Username: fmt.Sprintf("%s_%s", u["username"], a.userID),          // Генерация уникального имени пользователя
-		Email:    fmt.Sprintf("%s_%s@example.com", u["email"], a.userID), // Генерация уникального email
-		Password: u["password"],
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+
+	m.StatusCodes[statusCode]++
+	m.LatencySum += latency
+	m.LatencyCount++
+	if latency < m.LatencyMin {
+		m.LatencyMin = latency
+	}
+	if latency > m.LatencyMax {
+		m.LatencyMax = latency
 	}
 
-	user.RepeatPassword = user.Password
+	if err != nil {
+		atomic.AddInt64(&m.FailedRequests, 1)
+		m.ErrorSet[err.Error()] = struct{}{}
+	} else {
+		atomic.AddInt64(&m.SuccessRequests, 1)
+	}
+}
 
-	//("username: %s, email %s password: %s\n", user.Username, user.Email, user.Password)
-
-	return user
+// PrintReport выводит отчет по собранным метрикам
+func (m *Metrics) PrintReport(duration time.Duration) {
+	fmt.Println("----- Load Test Report -----")
+	fmt.Printf("Requests\t[total, rate, throughput]\t%d, %.2f, %.2f\n",
+		m.TotalRequests,
+		float64(m.TotalRequests)/duration.Seconds(),
+		float64(m.SuccessRequests)/duration.Seconds(),
+	)
+	fmt.Printf("Duration\t[total, attack]\t%s, %s\n",
+		duration.String(),
+		duration.String(),
+	)
+	meanLatency := time.Duration(0)
+	if m.LatencyCount > 0 {
+		meanLatency = m.LatencySum / time.Duration(m.LatencyCount)
+	}
+	fmt.Printf("Latencies\t[mean, min, max]\t%s, %s, %s\n",
+		meanLatency,
+		m.LatencyMin,
+		m.LatencyMax,
+	)
+	fmt.Printf("Bytes In\t[total, mean]\t%d, %.2f\n",
+		m.TotalBytesIn,
+		float64(m.TotalBytesIn)/float64(m.TotalRequests),
+	)
+	fmt.Printf("Bytes Out\t[total, mean]\t%d, %.2f\n",
+		m.TotalBytesOut,
+		float64(m.TotalBytesOut)/float64(m.TotalRequests),
+	)
+	successRatio := 0.0
+	if m.TotalRequests > 0 {
+		successRatio = (float64(m.SuccessRequests) / float64(m.TotalRequests)) * 100
+	}
+	fmt.Printf("Success\t[ratio]\t%.2f%%\n", successRatio)
+	fmt.Printf("Status Codes\t[code:count]\t")
+	for code, count := range m.StatusCodes {
+		fmt.Printf("%d:%d ", code, count)
+	}
+	fmt.Println()
+	fmt.Printf("Error Set:\n")
+	for err := range m.ErrorSet {
+		fmt.Printf("\t%s\n", err)
+	}
+	fmt.Println("----------------------------")
 }
 
 // addToCart добавляет продукт в корзину пользователя

@@ -16,6 +16,7 @@ handlers:
   login: "/api/v1/login"
   sign_up: "/api/v1/signup"
   get_csrf: "/api/v1/csrf"
+  get_orders: "/api/v1/orders"
 
 products: [1, 2, 3, 4, 5, 6, 7,
           8, 9, 10, 11, 12, 13,

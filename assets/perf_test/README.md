@@ -17,7 +17,7 @@
 Для возможности воссоздать тест, и повторить нужно получить session-id и csrf-token
 
 
-# Начало тестирования
+# Начало тестирования нагрузки на запись
 ___
 
 
@@ -130,9 +130,7 @@ Error Set:
 Сервер выдал 1700rps, что существенно ниже чем в прошлых вариантах.
 
 
-### Оптимизация -- итерация 1
-
-
+### Оптимизация записи -- итерация 1
 
 Заметим, что каждый продукт вставляется:
 - Отдельно, что нагружает соединения 
@@ -269,5 +267,26 @@ Error Set:
 ----------------------------
 ```
 
-Функция с улучшенным запросом находится [тут](../../internal/repository/orders/create_order_from_cart.go).
+Функция с улучшенным 
+запросом находится [тут](../../internal/repository/orders/create_order_from_cart.go).
+
+
+# Тестирование нагрузки на чтение
+
+## Тестирование чтения -- итерация 1
+
+``` 
+ Starting Load Read Test with 100 users, 200 concurrency, 10 iterations and 10000 RPS
+----- Load Test Report -----
+Requests        [total, rate, throughput]       16200, 4750.24, 4750.24
+Duration        [total, attack] 3.410356386s, 3.410356386s
+Latencies       [mean, min, max]        53.309983ms, 752.974µs, 3.597343738s
+Bytes In        [total, mean]   594532, 36.70
+Bytes Out       [total, mean]   13784, 0.85
+Success [ratio] 100.00%
+Status Codes    [code:count]    200:16200 
+Error Set:
+----------------------------
+```
+
 
