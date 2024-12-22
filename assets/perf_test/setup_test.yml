@@ -33,7 +33,7 @@ products: [1, 2, 3, 4, 5, 6, 7,
           ]
 
 load_test:
-  concurrency: 100
-  iterations: 5
-  rps: 1000
+  concurrency: 10
+  iterations: 10
+  rps: 100
   users: 10

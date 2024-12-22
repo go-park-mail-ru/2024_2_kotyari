@@ -58,7 +58,7 @@ func NewAttacker(url string, v *viper.Viper, userID string) *Attacker {
 		Timeout: 30 * time.Second,
 	}
 
-	fmt.Println(v.GetStringMap(handlers))
+	//fmt.Println(v.GetStringMap(handlers))
 
 	return &Attacker{
 		userID: userID, // Инициализация userID
