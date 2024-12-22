@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	defaultMaxConnections            = 90
+	defaultMaxConnections            = 300
 	defaultMinConnections            = 0
 	defaultMaxConnectionLifeTime     = time.Hour * 2
 	defaultMinConnectionIdleLifeTime = time.Minute * 30
