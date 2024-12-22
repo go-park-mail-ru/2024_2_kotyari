@@ -323,3 +323,68 @@ Status Codes    [code:count]    200:16200
 Error Set:
 ----------------------------
 ```
+
+Таблицы:
+```sql
+-- Таблица продуктов, хранящая информацию о товаре (цена, описание, скидка, изображения, характеристики и др.)
+CREATE TABLE IF NOT EXISTS "products" (
+    "id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
+    "seller_id" bigint NOT NULL,
+    "count" integer NOT NULL DEFAULT '1' CHECK (count >= 0),
+    "price" integer NOT NULL CHECK (price > 0),  -- Новая цена
+    "original_price" integer CHECK (original_price > 0),  -- Оригинальная цена
+    "discount" smallint CHECK (discount >= 0 AND discount < 100),  -- Скидка
+    "title" text NOT NULL,
+    "description" text NOT NULL ,
+    "rating" real DEFAULT 0 NOT NULL CHECK (rating >= 0 AND rating <= 5),
+    "image_url" text NOT NULL,
+    "active" boolean NOT NULL DEFAULT true,
+    "created_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "characteristics" jsonb,  -- Характеристики продукта в формате JSON
+    --     например:
+    --     {"size": "123", "color": "red"}
+    PRIMARY KEY ("id"),
+    FOREIGN KEY ("seller_id") REFERENCES "sellers"("id") ON DELETE CASCADE
+);
+
+-- Таблица заказов, связанная с пользователями и складскими адресами
+CREATE TABLE IF NOT EXISTS "orders" (
+    "id" UUID,
+    "user_id" bigint NOT NULL,
+    "address" text NOT NULL DEFAULT '',  -- Адрес доставки (если не используется стоковый адрес)
+    "stock_address_id" bigint,  -- Ссылка на таблицу стоковых адресов
+    "total_price" integer NOT NULL CHECK ("total_price" > 0),
+    "status" order_status DEFAULT 'awaiting_payment',
+    "created_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY ("id"),
+    FOREIGN KEY ("user_id") REFERENCES "users"("id"),
+    FOREIGN KEY ("stock_address_id") REFERENCES "stock_address"("id")  -- Внешний ключ для стоковых адресов
+);
+
+
+-- Таблица связывает продукты с заказами, хранит количество и дату доставки продукта в заказе
+CREATE TABLE IF NOT EXISTS "product_orders" (
+    "id" UUID,
+    "order_id" UUID NOT NULL,
+    "product_id" bigint NOT NULL,
+    "option_id" bigint default 0,  -- Ссылка на опцию
+    "count" integer NOT NULL DEFAULT 1,
+    "delivery_date" timestamp with time zone NOT NULL,  -- Дата доставки продукта
+    PRIMARY KEY ("id"),
+    FOREIGN KEY ("order_id") REFERENCES "orders"("id"),
+    FOREIGN KEY ("product_id") REFERENCES "products"("id")
+);
+```
+
+При денормализации, например вместо хранения id продукта в `product_orders`  
+тогда в будущем, при добавлении функционала продавца, будет сложнее
+как-то взаимодействовать с продуктом, так как при изменениях в одном месте
+нужно будет обходить все записи для проверки
+
+При денормализации таблицы `orders`, т.е при хранении `product_orders` внутри `orders`, 
+как массива, будет сложнее отслеживать статусы доставки, так как 
+каждый товар может приехать в разное время.
+
+Делаем вывод, что денормализация здесь не нужна
