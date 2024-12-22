@@ -22,7 +22,11 @@ func (cm *CartManager) AddProduct(ctx context.Context, productID uint32, userID 
 		if errors.Is(err, errs.ProductNotInCart) {
 			err = cm.cartRepository.AddProduct(ctx, productID, userID)
 			if err != nil {
-				cm.log.Error("[CartManager.AddProduct] Error adding product", slog.String("error", err.Error()))
+				cm.log.Error("[CartManager.AddProduct] Error adding product",
+					slog.String("error", err.Error()),
+					slog.Any("request-id", requestID),
+					slog.Uint64("productID", uint64(productID)),
+					slog.Any("userID", userID))
 
 				return err
 			}

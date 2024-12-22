@@ -9,12 +9,10 @@ import (
 )
 
 func (cs *CartsStore) GetSelectedCartItems(ctx context.Context, userID uint32) ([]order.ProductOrder, error) {
-	requestID, err := utils.GetContextRequestID(ctx)
+	_, err := utils.GetContextRequestID(ctx)
 	if err != nil {
 		return nil, err
 	}
-
-	cs.log.Info("[CartsStore.GetSelectedCartItems] Started executing", slog.Any("request-id", requestID))
 
 	const query = `
 		SELECT p.id, p.title, p.image_url, p.price, c.count, p.weight

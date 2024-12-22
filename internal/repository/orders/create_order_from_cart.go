@@ -19,10 +19,7 @@ func (r *OrdersRepo) CreateOrderFromCart(ctx context.Context, orderData *order.O
 		return nil, err
 	}
 
-	tx, err := r.db.BeginTx(ctx, pgx.TxOptions{
-		IsoLevel:   pgx.RepeatableRead, // Уровень изоляции
-		AccessMode: "read write",       // Транзакция на запись
-	})
+	tx, err := r.db.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +33,7 @@ func (r *OrdersRepo) CreateOrderFromCart(ctx context.Context, orderData *order.O
 	`
 
 	var createdAt time.Time
-	err = r.db.QueryRow(ctx, createOrderQuery, orderData.OrderID, orderData.UserID, orderData.TotalPrice, orderData.Address).Scan(&orderData.CreatedAt)
+	err = tx.QueryRow(ctx, createOrderQuery, orderData.OrderID, orderData.UserID, orderData.TotalPrice, orderData.Address).Scan(&orderData.CreatedAt)
 	if err != nil {
 		r.logger.Error("[OrdersRepo.CreateOrderFromCart] failed to insert order", slog.String("error", err.Error()), slog.Uint64("user_id", uint64(orderData.UserID)))
 		return nil, err
@@ -54,15 +51,15 @@ func (r *OrdersRepo) CreateOrderFromCart(ctx context.Context, orderData *order.O
 		batch.Queue(insertProductQuery, productOrderID, orderData.OrderID, p.ID, p.OptionID, p.Count, orderData.DeliveryDate)
 	}
 
-	// Выполнение батча с вставками продуктов
 	br := tx.SendBatch(ctx, batch)
 	defer br.Close()
 
-	// Проверка выполнения всех запросов в батче
 	for range orderData.Products {
-		_, err := br.Exec()
+		_, err = br.Exec()
 		if err != nil {
-			r.logger.Error("[OrdersRepo.CreateOrderFromCart] failed to insert product in order", slog.String("error", err.Error()), slog.Uint64("user_id", uint64(orderData.UserID)))
+			r.logger.Error("[OrdersRepo.CreateOrderFromCart] failed to insert product in order",
+				slog.String("error", err.Error()),
+				slog.Uint64("user_id", uint64(orderData.UserID)))
 			return nil, err
 		}
 	}
@@ -73,9 +70,11 @@ func (r *OrdersRepo) CreateOrderFromCart(ctx context.Context, orderData *order.O
 		WHERE user_id = $1 AND is_selected = true AND is_deleted = false;
 	`
 
-	_, err = r.db.Exec(ctx, removeCartItemsQuery, orderData.UserID)
+	_, err = tx.Exec(ctx, removeCartItemsQuery, orderData.UserID)
 	if err != nil {
-		r.logger.Error("[OrdersRepo.CreateOrderFromCart] failed to remove selected cart items", slog.String("error", err.Error()), slog.Uint64("user_id", uint64(orderData.UserID)))
+		r.logger.Error("[OrdersRepo.CreateOrderFromCart] failed to remove selected cart items",
+			slog.String("error", err.Error()),
+			slog.Uint64("user_id", uint64(orderData.UserID)))
 		return nil, err
 	}
 
