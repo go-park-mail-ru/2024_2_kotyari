@@ -276,7 +276,7 @@ func (a *Attacker) registerUser(metrics *Metrics) (Credentials, error) {
 func (a *Attacker) getCreds(metrics *Metrics) error {
 	creds, err := a.getAuthToken(metrics)
 	if err != nil {
-		log.Printf("Username %s failed: %v. Attempting to register.", a.userID, err)
+		//("Username %s failed: %v. Attempting to register.", a.userID, err)
 		creds, err = a.registerUser(metrics)
 		if err != nil {
 			return fmt.Errorf("registration failed for %s: %v", a.userID, err)
@@ -340,7 +340,7 @@ func (a *Attacker) newUser() User {
 
 	user.RepeatPassword = user.Password
 
-	log.Printf("username: %s, email %s password: %s\n", user.Username, user.Email, user.Password)
+	//("username: %s, email %s password: %s\n", user.Username, user.Email, user.Password)
 
 	return user
 }
@@ -476,7 +476,7 @@ func runLoadTest(attackers []*Attacker, products []int, concurrency int, iterati
 
 				// Перед запуском горутины проверяем ограничитель скорости
 				if err := limiter.Wait(context.Background()); err != nil {
-					log.Printf("Limiter error: %v", err)
+					//("Limiter error: %v", err)
 					<-sem
 					wg.Done()
 					continue
@@ -489,19 +489,19 @@ func runLoadTest(attackers []*Attacker, products []int, concurrency int, iterati
 					// Добавить в корзину
 					if err := a.addToCart(product, metrics); err != nil {
 						// Можно раскомментировать для детального логирования ошибок
-						log.Printf("Iteration %d: Error adding product %d to cart for user %s: %v", iteration+1, product, a.userID, err)
+						//("Iteration %d: Error adding product %d to cart for user %s: %v", iteration+1, product, a.userID, err)
 						return
 					}
 
 					// Создать заказ
 					if err := a.makeOrder(product, metrics); err != nil {
 						// Можно раскомментировать для детального логирования ошибок
-						log.Printf("Iteration %d: Error creating order for product %d for user %s: %v", iteration+1, product, a.userID, err)
+						//log.Printf("Iteration %d: Error creating order for product %d for user %s: %v", iteration+1, product, a.userID, err)
 						return
 					}
 
 					// Можно добавить логирование успешных операций
-					log.Printf("Iteration %d: Successfully created order for product %d for user %s", iteration, product, a.userID)
+					//log.Printf("Iteration %d: Successfully created order for product %d for user %s", iteration, product, a.userID)
 				}(attacker, product, i)
 			}
 		}
@@ -546,12 +546,12 @@ func main() {
 		go func(a *Attacker) {
 			defer wg.Done()
 			if err := a.getCreds(metrics); err != nil {
-				log.Printf("Error getting credentials for %s: %v", a.userID, err)
+				//log.Printf("Error getting credentials for %s: %v", a.userID, err)
 			}
 		}(attacker)
 	}
 	wg.Wait()
-	// XDD
+
 	products := v.GetIntSlice(values)
 	if len(products) == 0 {
 		log.Fatalf("No products found in configuration")

@@ -24,7 +24,11 @@ func (r *OrdersRepo) CreateOrderFromCart(ctx context.Context, orderData *order.O
 		return nil, err
 	}
 
-	defer tx.Rollback(ctx)
+	defer func() {
+		if err != nil {
+			defer tx.Rollback(ctx)
+		}
+	}()
 
 	const createOrderQuery = `
 		INSERT INTO orders (id, user_id, total_price, address, created_at, updated_at)
@@ -52,7 +56,6 @@ func (r *OrdersRepo) CreateOrderFromCart(ctx context.Context, orderData *order.O
 	}
 
 	br := tx.SendBatch(ctx, batch)
-	defer br.Close()
 
 	for range orderData.Products {
 		_, err = br.Exec()
@@ -62,6 +65,13 @@ func (r *OrdersRepo) CreateOrderFromCart(ctx context.Context, orderData *order.O
 				slog.Uint64("user_id", uint64(orderData.UserID)))
 			return nil, err
 		}
+	}
+
+	if err := br.Close(); err != nil {
+		r.logger.Error("[OrdersRepo.CreateOrderFromCart] failed to close batch result",
+			slog.String("error", err.Error()),
+			slog.Uint64("user_id", uint64(orderData.UserID)))
+		return nil, err
 	}
 
 	const removeCartItemsQuery = `
