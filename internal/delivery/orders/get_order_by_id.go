@@ -26,6 +26,8 @@ func (h *OrdersHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
 	userID, ok := utils.GetContextSessionUserID(r.Context())
 	if !ok {
 		utils.WriteErrorJSON(w, http.StatusUnauthorized, errs.UserNotAuthorized)
+
+		return
 	}
 
 	vars := mux.Vars(r)
@@ -35,6 +37,7 @@ func (h *OrdersHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.logger.Error("[delivery.GetOrderById] Invalid order ID format", slog.String("orderID", idStr))
 		utils.WriteErrorJSONByError(w, errs.ErrInvalidOrderIDFormat, h.errResolver)
+
 		return
 	}
 
