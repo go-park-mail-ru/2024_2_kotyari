@@ -551,7 +551,7 @@ func main() {
 		}(attacker)
 	}
 	wg.Wait()
-
+	// XDD
 	products := v.GetIntSlice(values)
 	if len(products) == 0 {
 		log.Fatalf("No products found in configuration")
