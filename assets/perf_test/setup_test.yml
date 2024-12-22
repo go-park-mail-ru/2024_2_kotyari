@@ -1,5 +1,5 @@
 user:
-  email: "test_user_hw3@mail.com"
+  email: "test_user_hw3"
   username: "i_am_test_user"
   password: "Password123@"
 
@@ -32,6 +32,7 @@ products: [1, 2, 3, 4, 5, 6, 7,
           ]
 
 load_test:
-  concurrency: 5
+  concurrency: 10
   iterations: 10
   rps: 100
+  users: 10
