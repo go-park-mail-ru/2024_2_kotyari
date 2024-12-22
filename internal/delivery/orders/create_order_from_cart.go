@@ -43,7 +43,7 @@ func (h *OrdersHandler) CreateOrderFromCart(w http.ResponseWriter, r *http.Reque
 		}
 
 		h.logger.Error("[delivery.CreateOrderFromCart] Failed to create order from cart", slog.String("error", err.Error()))
-		utils.WriteErrorJSONByError(w, errs.InternalServerError, h.errResolver)
+		utils.WriteErrorJSONByError(w, err, h.errResolver)
 		return
 	}
 
