@@ -17,20 +17,23 @@ func (m *OrdersManager) CreateOrderFromCart(ctx context.Context, address string,
 		return nil, err
 	}
 
-	m.logger.Info("[OrdersManager.CreateOrderFromCart] Started executing", slog.Any("request-id", requestID))
-
 	orderID := uuid.New()
 	orderDate := time.Now()
 	deliveryDate := orderDate.Add(72 * time.Hour)
 
 	cartItems, err := m.cart.GetSelectedCartItems(ctx, userID)
 	if err != nil {
-		m.logger.Error("[OrdersManager.CreateOrderFromCart] failed to fetch selected cart items", slog.String("error", err.Error()), slog.Uint64("user_id", uint64(userID)))
+		m.logger.Error("[OrdersManager.CreateOrderFromCart] failed to fetch selected cart items",
+			slog.String("error", err.Error()),
+			slog.Uint64("user_id", uint64(userID)),
+			slog.Any("request-id", requestID))
 		return nil, err
 	}
 
 	if len(cartItems) == 0 {
-		m.logger.Error("[OrdersManager.CreateOrderFromCart] cart is empty for user: ", slog.Uint64("user_id", uint64(userID)))
+		m.logger.Error("[OrdersManager.CreateOrderFromCart] cart is empty for user: ",
+			slog.Uint64("user_id", uint64(userID)),
+			slog.Any("request-id", requestID))
 		return nil, errs.EmptyCart
 	}
 
@@ -45,7 +48,9 @@ func (m *OrdersManager) CreateOrderFromCart(ctx context.Context, address string,
 	if promoName != "" {
 		promoCode, err := m.promoCodesManager.GetPromoCode(ctx, userID, promoName)
 		if err != nil {
-			m.logger.Error("[OrdersManager.CreateOrderFromCart] Error getting promo code ", slog.Uint64("user_id", uint64(userID)))
+			m.logger.Error("[OrdersManager.CreateOrderFromCart] Error getting promo code ",
+				slog.Uint64("user_id", uint64(userID)),
+				slog.Any("request-id", requestID))
 
 			return nil, err
 		}
@@ -55,7 +60,8 @@ func (m *OrdersManager) CreateOrderFromCart(ctx context.Context, address string,
 		err = m.promoCodesManager.DeletePromoCode(ctx, userID, promoCode.ID)
 		if err != nil {
 			m.logger.Error("[OrdersManager.CreateOrderFromCart] Error deleting promo",
-				slog.String("error", err.Error()))
+				slog.String("error", err.Error()),
+				slog.Any("request-id", requestID))
 
 			return nil, err
 		}
@@ -72,10 +78,9 @@ func (m *OrdersManager) CreateOrderFromCart(ctx context.Context, address string,
 
 	orderFromCart, err := m.repo.CreateOrderFromCart(ctx, orderData)
 	if err != nil {
-		m.logger.Error("failed to create orderFromCart in repo", slog.String("error", err.Error()), slog.Uint64("user_id", uint64(userID)))
+		m.logger.Error("failed to create orderFromCart in repo", slog.String("error", err.Error()), slog.Uint64("user_id", uint64(userID)), slog.Any("request-id", requestID))
 		return nil, err
 	}
 
-	m.logger.Info("CreateOrderFromCart completed successfully", slog.String("order_id", orderID.String()), slog.Uint64("user_id", uint64(userID)))
 	return orderFromCart, nil
 }
