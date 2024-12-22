@@ -2,6 +2,7 @@ package rorders
 
 import (
 	"context"
+	"github.com/go-park-mail-ru/2024_2_kotyari/internal/repository/pool"
 	"github.com/jackc/pgx/v5"
 	"log/slog"
 )
@@ -13,11 +14,11 @@ type DBConn interface {
 }
 
 type OrdersRepo struct {
-	db     DBConn
+	db     pool.DBPool
 	logger *slog.Logger
 }
 
-func NewOrdersRepo(db DBConn, logger *slog.Logger) *OrdersRepo {
+func NewOrdersRepo(db pool.DBPool, logger *slog.Logger) *OrdersRepo {
 	return &OrdersRepo{
 		db:     db,
 		logger: logger,
