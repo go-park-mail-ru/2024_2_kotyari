@@ -14,7 +14,9 @@ import (
 const defaultStatus = "awaiting_payment"
 
 func (r *OrdersRepo) CreateOrderFromCart(ctx context.Context, orderData *order.OrderFromCart) (*order.Order, error) {
-	tx, err := r.db.BeginTx(ctx, pgx.TxOptions{})
+	tx, err := r.db.BeginTx(ctx, pgx.TxOptions{
+		IsoLevel: pgx.Serializable,
+	})
 	if err != nil {
 		r.logger.Error("[OrdersRepo.CreateOrderFromCart] Failed to start transaction", slog.String("error", err.Error()))
 		return nil, err
