@@ -51,7 +51,7 @@ func (r *OrdersRepo) CreateOrderFromCart(ctx context.Context, orderData *order.O
 	const insertProductQuery = `
 		INSERT INTO product_orders (id, order_id, product_id, option_id, count, delivery_date)
 		VALUES ($1, $2, $3, $4, $5, $6)
-  		ON CONFLICT (count) DO NOTHING;
+  		ON CONFLICT DO NOTHING;
 	`
 
 	for _, p := range orderData.Products {
