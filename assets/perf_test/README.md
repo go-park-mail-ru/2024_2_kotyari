@@ -290,3 +290,36 @@ Error Set:
 ```
 
 
+Запрос выглядит так:
+
+```sql
+SELECT o.id::uuid, o.created_at AS order_date, po.delivery_date, 
+       p.id::bigint AS product_id, p.image_url, p.title AS name, 
+       o.total_price, o.status
+FROM orders o
+JOIN product_orders po ON o.id = po.order_id
+JOIN products p ON po.product_id = p.id
+WHERE o.user_id = $1
+ORDER BY po.delivery_date DESC , o.created_at DESC;
+```
+
+
+```sql
+CREATE INDEX idx_orders_user_id ON orders(user_id);
+CREATE INDEX idx_product_orders_delivery_date ON product_orders(delivery_date);
+```
+
+Ускорили запрос, также уменьшился латенси 
+``` 
+Starting Load Read Test with 100 users, 200 concurrency, 10 iterations and 10000 RPS
+----- Load Test Report -----
+Requests        [total, rate, throughput]       16200, 4857.58, 4857.58
+Duration        [total, attack] 3.33499127s, 3.33499127s
+Latencies       [mean, min, max]        48.914797ms, 756.008µs, 2.159116286s
+Bytes In        [total, mean]   594532, 36.70
+Bytes Out       [total, mean]   13784, 0.85
+Success [ratio] 100.00%
+Status Codes    [code:count]    200:16200 
+Error Set:
+----------------------------
+```
