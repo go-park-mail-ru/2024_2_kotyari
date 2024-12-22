@@ -132,7 +132,7 @@ Error Set:
 
 ### Оптимизация -- итерация 1
 
-Функция с запросом находится [тут](../../internal/repository/orders/create_order_from_cart.go).
+
 
 Заметим, что каждый продукт вставляется:
 - Отдельно, что нагружает соединения 
@@ -213,6 +213,46 @@ func (r *OrdersRepo) CreateOrderFromCart(ctx context.Context, orderData *order.O
 ```
 
 
+Также, после анализа, были замечены ненужные индексы, нужно их удалить для ускроения поиска
+
+```sql
+DROP INDEX IF EXISTS idx_product_seller;
+DROP INDEX IF EXISTS idx_product_option_product;
+DROP INDEX IF EXISTS idx_product_created_at;
+DROP INDEX IF EXISTS idx_product_price;
+DROP INDEX IF EXISTS idx_product_characteristics;
+```
+
+Также для ускорения добавления в корзину и оформления заказа нужно добавить новые индексы
+```sql
+-- Индексы для таблицы carts
+CREATE INDEX idx_carts_user_selected_deleted 
+ON carts(user_id, is_selected, is_deleted);
+
+CREATE INDEX idx_carts_user_id 
+ON carts(user_id);
+
+-- Индексы для таблицы orders
+CREATE INDEX idx_orders_user_id 
+ON orders(user_id);
+
+CREATE INDEX idx_orders_stock_address_id 
+ON orders(stock_address_id);
+
+-- Индексы для таблицы product_orders
+CREATE INDEX idx_product_orders_order_id 
+ON product_orders(order_id);
+
+CREATE INDEX idx_product_orders_product_id 
+ON product_orders(product_id);
+
+CREATE INDEX idx_product_orders_option_id 
+ON product_orders(option_id);
+
+```
+
+После изменений, заметно улучшился latency.
+
 ``` 
 Starting Load Test with 100 users, 200 concurrency, 10 iterations and 10000 RPS
 ----- Load Test Report -----
@@ -229,8 +269,5 @@ Error Set:
 ----------------------------
 ```
 
+Функция с улучшенным запросом находится [тут](../../internal/repository/orders/create_order_from_cart.go).
 
-
-``` 
-
-```
