@@ -79,6 +79,7 @@ func (e *ErrorStore) Get(err error) (error, int) {
 	errCode, present := e.errorCodes[err]
 	if !present {
 		log.Println(fmt.Errorf("unexpected error occured: %w", err))
+
 		return InternalServerError, http.StatusInternalServerError
 	}
 

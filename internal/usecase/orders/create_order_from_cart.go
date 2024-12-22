@@ -78,7 +78,10 @@ func (m *OrdersManager) CreateOrderFromCart(ctx context.Context, address string,
 
 	orderFromCart, err := m.repo.CreateOrderFromCart(ctx, orderData)
 	if err != nil {
-		m.logger.Error("failed to create orderFromCart in repo", slog.String("error", err.Error()), slog.Uint64("user_id", uint64(userID)), slog.Any("request-id", requestID))
+		m.logger.Error("failed to create orderFromCart in repo",
+			slog.String("error", err.Error()),
+			slog.Uint64("user_id", uint64(userID)),
+			slog.Any("request-id", requestID))
 		return nil, err
 	}
 
